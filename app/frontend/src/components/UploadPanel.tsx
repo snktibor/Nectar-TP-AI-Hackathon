@@ -1,14 +1,15 @@
 import { useRef, useState } from 'react'
 import { FileText, CheckCircle, Loader2 } from 'lucide-react'
-import type { DocumentType, DocumentUploadResponse } from '../types/api'
+import type { ApiResponse, DocumentType, DocumentUploadResponse } from '../types/api'
+import { phantomDesign } from '../design-system/phantomDesign'
 
 export type SlotKey = 'master_file' | 'local_file' | 'contract' | 'benchmark' | 'invoice'
 
 interface SlotConfig {
-  key: SlotKey
-  label: string
-  documentType: DocumentType
-  required: boolean
+  readonly key: SlotKey
+  readonly label: string
+  readonly documentType: DocumentType
+  readonly required: boolean
 }
 
 const SLOT_CONFIGS: SlotConfig[] = [
@@ -22,14 +23,14 @@ const SLOT_CONFIGS: SlotConfig[] = [
 const REQUIRED_SLOTS: SlotKey[] = ['master_file', 'local_file', 'contract']
 
 interface UploadPanelProps {
-  sessionId: string
-  uploadedDocs: Partial<Record<SlotKey, DocumentUploadResponse>>
-  onUploaded: (slot: SlotKey, doc: DocumentUploadResponse) => void
-  onStartAudit: () => void
-  isDisabled: boolean
+  readonly sessionId: string
+  readonly uploadedDocs: Partial<Record<SlotKey, DocumentUploadResponse>>
+  readonly onUploaded: (slot: SlotKey, doc: DocumentUploadResponse) => void
+  readonly onStartAudit: () => void
+  readonly isDisabled: boolean
 }
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL as string
+const API_BASE = import.meta.env.VITE_API_BASE_URL
 
 export default function UploadPanel({
   sessionId,
@@ -83,7 +84,7 @@ export default function UploadPanel({
         throw new Error(`HTTP ${response.status}: ${response.statusText}`)
       }
 
-      const json = await response.json() as { success: boolean; data: DocumentUploadResponse | null; error: { message: string } | null }
+      const json = (await response.json()) as ApiResponse<DocumentUploadResponse>
 
       if (!json.success || !json.data) {
         throw new Error(json.error?.message ?? 'Upload failed')
@@ -99,17 +100,33 @@ export default function UploadPanel({
   }
 
   return (
-    <div className="rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-100">
-      <h2 className="mb-1 text-base font-semibold text-gray-900">Document Upload</h2>
-      <p className="mb-5 text-sm text-gray-500">
+    <div className={phantomDesign.components.panel}>
+      <div className={phantomDesign.components.panelHeader}>
+        <h2 className={phantomDesign.components.panelTitle}>Document Upload</h2>
+        <p className={phantomDesign.components.panelDescription}>
         Upload transfer pricing documents to begin the audit.
-      </p>
+        </p>
+      </div>
 
       <div className="space-y-3">
         {SLOT_CONFIGS.map((slot, index) => {
           const uploaded = uploadedDocs[slot.key]
           const loading = loadingSlots[slot.key] ?? false
           const error = slotErrors[slot.key]
+          let slotIcon = <FileText className="h-5 w-5 text-phantom-subtle" />
+          let slotStatus = <span className="text-xs text-phantom-subtle">Click to select file</span>
+
+          if (loading) {
+            slotIcon = <Loader2 className="h-5 w-5 animate-spin text-phantom-accent" />
+            slotStatus = <span className="text-xs text-phantom-accent">Uploading...</span>
+          } else if (uploaded) {
+            slotIcon = <CheckCircle className="h-5 w-5 text-phantom-success-text" />
+            slotStatus = (
+              <span className="block truncate text-xs text-phantom-muted" title={uploaded.filename}>
+                {uploaded.filename}
+              </span>
+            )
+          }
 
           return (
             <div key={slot.key}>
@@ -117,47 +134,30 @@ export default function UploadPanel({
                 type="button"
                 onClick={() => handleSlotClick(index)}
                 disabled={isDisabled || loading}
+                aria-disabled={isDisabled || loading}
                 className={[
-                  'flex w-full items-center gap-3 rounded-lg border-2 border-dashed px-4 py-3 text-left transition-colors',
-                  uploaded
-                    ? 'border-green-300 bg-green-50'
-                    : 'border-gray-200 bg-gray-50 hover:border-orange-300 hover:bg-orange-50',
+                  phantomDesign.components.uploadSlotBase,
+                  uploaded ? phantomDesign.components.uploadSlotUploaded : phantomDesign.components.uploadSlotIdle,
                   isDisabled || loading ? 'cursor-not-allowed opacity-60' : 'cursor-pointer',
                 ].join(' ')}
               >
-                <div className="shrink-0">
-                  {loading ? (
-                    <Loader2 className="h-5 w-5 animate-spin text-orange-500" />
-                  ) : uploaded ? (
-                    <CheckCircle className="h-5 w-5 text-green-500" />
-                  ) : (
-                    <FileText className="h-5 w-5 text-gray-400" />
-                  )}
-                </div>
+                <div className="shrink-0">{slotIcon}</div>
 
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-gray-700">{slot.label}</span>
+                  <div className="flex min-w-0 flex-wrap items-center gap-2">
+                    <span className="truncate text-sm font-medium text-phantom-ink">{slot.label}</span>
                     {slot.required && (
-                      <span className="rounded-full bg-orange-100 px-1.5 py-0.5 text-xs font-medium text-orange-600">
+                      <span className="rounded-full bg-phantom-accent-soft px-1.5 py-0.5 text-xs font-medium text-phantom-accent ring-1 ring-phantom-accent/20">
                         Required
                       </span>
                     )}
                   </div>
-                  {uploaded ? (
-                    <span className="block truncate text-xs text-gray-500">
-                      {uploaded.filename}
-                    </span>
-                  ) : loading ? (
-                    <span className="text-xs text-orange-500">Uploading…</span>
-                  ) : (
-                    <span className="text-xs text-gray-400">Click to select file</span>
-                  )}
+                  {slotStatus}
                 </div>
               </button>
 
               {error && (
-                <p className="mt-1 text-xs text-red-600">{error}</p>
+                <p className="mt-1 break-words text-xs text-phantom-danger-text">{error}</p>
               )}
 
               <input
@@ -175,8 +175,8 @@ export default function UploadPanel({
       </div>
 
       <div className="mt-5 flex items-center justify-between">
-        <span className="text-xs text-gray-500">
-          <span className={requiredUploaded === REQUIRED_SLOTS.length ? 'text-green-600 font-medium' : 'text-gray-500'}>
+        <span className="text-xs text-phantom-muted">
+          <span className={requiredUploaded === REQUIRED_SLOTS.length ? 'font-medium text-phantom-success-text' : 'text-phantom-muted'}>
             {requiredUploaded} / {REQUIRED_SLOTS.length}
           </span>{' '}
           required documents uploaded
@@ -187,11 +187,11 @@ export default function UploadPanel({
         type="button"
         onClick={onStartAudit}
         disabled={!canStartAudit}
+        aria-disabled={!canStartAudit}
         className={[
-          'mt-4 w-full rounded-lg px-4 py-3 text-sm font-semibold tracking-wide transition-colors',
-          canStartAudit
-            ? 'bg-orange-500 text-white hover:bg-orange-600 active:bg-orange-700'
-            : 'cursor-not-allowed bg-gray-100 text-gray-400',
+          phantomDesign.components.buttonBase,
+          phantomDesign.components.buttonPrimary,
+          'mt-4',
         ].join(' ')}
       >
         START AUDIT
