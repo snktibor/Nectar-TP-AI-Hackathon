@@ -3,7 +3,45 @@ export type DocumentType =
   | 'LOCAL_FILE'
   | 'CONTRACT'
   | 'BENCHMARK_STUDY'
+  | 'INVOICE'
   | 'OTHER'
+
+export type AgentRunStatus = 'ok' | 'timeout' | 'error'
+
+export interface EvidenceChunk {
+  filename: string
+  page: number
+  chunk_index: number
+  quote?: string | null
+}
+
+export interface FindingAttribution {
+  agent_id: string
+  doc_type_scope: DocumentType
+  confidence: number
+  evidence_chunks: EvidenceChunk[]
+  rule_id?: string | null
+  prompt_version?: string | null
+}
+
+export interface AgentRunResult {
+  agent_id: string
+  doc_type_scope: DocumentType
+  prompt_version: string
+  model: string
+  started_at: string
+  finished_at: string
+  tool_calls: number
+  input_tokens: number
+  output_tokens: number
+  cache_read_tokens: number
+  cache_creation_tokens: number
+  consistency_errors: ConsistencyError[]
+  benchmark_risks: BenchmarkRisk[]
+  missing_elements: MissingElement[]
+  status: AgentRunStatus
+  error: ErrorDetail | null
+}
 
 export type AuditStatus = 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'FAILED'
 
@@ -80,6 +118,7 @@ export interface AuditStatusResponse {
   started_at: string
   updated_at: string
   error: ErrorDetail | null
+  agent_progress?: Record<string, string> | null
 }
 
 export interface ConsistencyError {
@@ -88,6 +127,7 @@ export interface ConsistencyError {
   severity: RiskSeverity
   source_documents: string[]
   evidence: string | null
+  attribution?: FindingAttribution | null
 }
 
 export interface BenchmarkRisk {
@@ -97,6 +137,7 @@ export interface BenchmarkRisk {
   benchmark_range: [number, number]
   severity: RiskSeverity
   rationale: string
+  attribution?: FindingAttribution | null
 }
 
 export interface MissingElement {
@@ -104,6 +145,7 @@ export interface MissingElement {
   name: string
   required_by: string
   severity: RiskSeverity
+  attribution?: FindingAttribution | null
 }
 
 export interface AuditReport {
@@ -115,4 +157,5 @@ export interface AuditReport {
   missing_elements: MissingElement[]
   overall_risk: RiskSeverity
   summary: string
+  agent_runs?: AgentRunResult[]
 }

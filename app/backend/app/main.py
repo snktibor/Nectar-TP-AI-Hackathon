@@ -18,13 +18,12 @@ from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.api.v1.endpoints import audits, documents
+from app.core.logging import configure_logging
+from app.core.settings import get_settings
 from app.models.schemas import ApiResponse, ErrorDetail, ResponseMeta
 
 logger = logging.getLogger(__name__)
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s %(levelname)s %(name)s :: %(message)s",
-)
+configure_logging(get_settings())
 
 
 # ---------------------------------------------------------------------------

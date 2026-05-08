@@ -21,7 +21,7 @@ from app.models.schemas import (
     AuditStatus,
     AuditStatusResponse,
 )
-from app.services.mock_agent_service import mock_agent_service
+from app.services.agent_orchestrator import get_audit_service
 
 logger = logging.getLogger(__name__)
 
@@ -39,12 +39,13 @@ async def start_audit(
     background_tasks: BackgroundTasks,
 ) -> ApiResponse[AuditStartResponse]:
     """Register a new task and schedule the background pipeline."""
-    task_id = await mock_agent_service.register_task(payload.session_id)
+    audit_service = get_audit_service()
+    task_id = await audit_service.register_task(payload.session_id)
 
     # BackgroundTasks runs after the response is sent — perfect for
     # fire-and-forget LLM pipelines. For multi-worker deployments this should be
     # replaced by a real queue (Celery, Arq, RQ).
-    background_tasks.add_task(mock_agent_service.run_pipeline, task_id)
+    background_tasks.add_task(audit_service.run_pipeline, task_id)
 
     logger.info(
         "audit accepted session_id=%s audit_task_id=%s", payload.session_id, task_id
@@ -66,7 +67,8 @@ async def start_audit(
     summary="Poll the current status and progress of an audit task.",
 )
 async def get_audit_status(audit_task_id: UUID) -> ApiResponse[AuditStatusResponse]:
-    state = await mock_agent_service.get_task(audit_task_id)
+    audit_service = get_audit_service()
+    state = await audit_service.get_task(audit_task_id)
     if state is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -75,6 +77,13 @@ async def get_audit_status(audit_task_id: UUID) -> ApiResponse[AuditStatusRespon
                 "message": f"No audit task with id={audit_task_id}.",
             },
         )
+
+    # `agent_progress` exists only on the real orchestrator state; the legacy
+    # mock state does not carry it. Read defensively to keep both paths working.
+    raw_progress = getattr(state, "agent_progress", None)
+    agent_progress: dict[str, str] | None = (
+        dict(raw_progress) if isinstance(raw_progress, dict) and raw_progress else None
+    )
 
     return ApiResponse[AuditStatusResponse](
         success=True,
@@ -87,6 +96,7 @@ async def get_audit_status(audit_task_id: UUID) -> ApiResponse[AuditStatusRespon
             started_at=state.started_at,
             updated_at=state.updated_at,
             error=state.error,
+            agent_progress=agent_progress,
         ),
     )
 
@@ -97,7 +107,8 @@ async def get_audit_status(audit_task_id: UUID) -> ApiResponse[AuditStatusRespon
     summary="Fetch the final structured audit report.",
 )
 async def get_audit_results(audit_task_id: UUID) -> ApiResponse[AuditReport]:
-    state = await mock_agent_service.get_task(audit_task_id)
+    audit_service = get_audit_service()
+    state = await audit_service.get_task(audit_task_id)
     if state is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Any, Generic, Optional, TypeVar
+from typing import Any, Generic, Literal, Optional, TypeVar
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -26,6 +26,7 @@ class DocumentType(str, Enum):
     LOCAL_FILE = "local_file"
     CONTRACT = "contract"
     BENCHMARK_STUDY = "benchmark_study"
+    INVOICE = "invoice"
     OTHER = "other"
 
 
@@ -225,6 +226,47 @@ class AuditStatusResponse(BaseModel):
     started_at: datetime
     updated_at: datetime
     error: ErrorDetail | None = None
+    agent_progress: dict[str, str] | None = Field(
+        default=None,
+        description=(
+            "Per-agent progress map keyed by agent_id (e.g. 'master_file_agent'). "
+            "Values are Literal['pending','running','ok','timeout','error']. "
+            "Optional so the legacy mock pipeline can leave it null."
+        ),
+    )
+
+
+# --- Finding attribution (Phase 2 deltas) --------------------------------------
+
+
+class EvidenceChunk(BaseModel):
+    """A single retrieved chunk used to support a finding.
+
+    Citation contract: every emitted finding must reference at least one
+    chunk that was actually returned by the agent's RAG calls during the run.
+    The dispatcher rejects any citation not present in the per-run `seen_chunks`
+    set.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    filename: str = Field(..., min_length=1)
+    page: int = Field(..., ge=0)
+    chunk_index: int = Field(..., ge=0)
+    quote: str | None = Field(default=None, max_length=500)
+
+
+class FindingAttribution(BaseModel):
+    """Per-finding provenance: which agent emitted it, with what confidence."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    agent_id: str = Field(..., min_length=1)
+    doc_type_scope: DocumentType
+    confidence: float = Field(..., ge=0.0, le=1.0)
+    evidence_chunks: list[EvidenceChunk] = Field(..., min_length=1)
+    rule_id: str | None = None
+    prompt_version: str | None = None
 
 
 # --- Final report sub-structures ------------------------------------------------
@@ -255,6 +297,7 @@ class ConsistencyError(BaseModel):
         description="Source locations involved in the contradiction (one per compared document).",
     )
     evidence: str | None = None
+    attribution: FindingAttribution | None = None
 
 
 class BenchmarkRisk(BaseModel):
@@ -272,6 +315,7 @@ class BenchmarkRisk(BaseModel):
         default_factory=list,
         description="Contract or invoice files that contain the deviating pricing data.",
     )
+    attribution: FindingAttribution | None = None
 
 
 class MissingElement(BaseModel):
@@ -284,6 +328,41 @@ class MissingElement(BaseModel):
     expected_in: str = Field(..., description="Document where the element should appear (e.g. 'local_file.pdf').")
     required_by: str = Field(..., description="Regulation or guideline reference.")
     severity: RiskSeverity
+    attribution: FindingAttribution | None = None
+
+
+# --- Per-agent run record ------------------------------------------------------
+
+
+AgentRunStatus = Literal["ok", "timeout", "error"]
+
+
+class AgentRunResult(BaseModel):
+    """Telemetry + findings for a single specialist agent run.
+
+    Aggregated into `AuditReport.agent_runs` so the UI/operator can see which
+    agents succeeded, how much they spent, and which ones failed without taking
+    the audit down.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    agent_id: str
+    doc_type_scope: DocumentType
+    prompt_version: str
+    model: str
+    started_at: datetime
+    finished_at: datetime
+    tool_calls: int = Field(default=0, ge=0)
+    input_tokens: int = Field(default=0, ge=0)
+    output_tokens: int = Field(default=0, ge=0)
+    cache_read_tokens: int = Field(default=0, ge=0)
+    cache_creation_tokens: int = Field(default=0, ge=0)
+    consistency_errors: list[ConsistencyError] = Field(default_factory=list)
+    benchmark_risks: list[BenchmarkRisk] = Field(default_factory=list)
+    missing_elements: list[MissingElement] = Field(default_factory=list)
+    status: AgentRunStatus
+    error: ErrorDetail | None = None
 
 
 class AuditReport(BaseModel):
@@ -299,3 +378,4 @@ class AuditReport(BaseModel):
     missing_elements: list[MissingElement]
     overall_risk: RiskSeverity
     summary: str
+    agent_runs: list[AgentRunResult] = Field(default_factory=list)
