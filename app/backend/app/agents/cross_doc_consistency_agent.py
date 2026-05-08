@@ -59,6 +59,7 @@ class CrossDocConsistencyAgent(DocumentTypeAgent):
         session_id: UUID,
         tool_input: dict[str, object],
         seen: set[ChunkKey],
+        seen_lookup: dict[ChunkKey, "EvidenceChunk"],
     ) -> tuple[str, bool]:
         query_raw = tool_input.get("query")
         if not isinstance(query_raw, str) or not query_raw.strip():
@@ -82,5 +83,7 @@ class CrossDocConsistencyAgent(DocumentTypeAgent):
             n_results=n_results,
         )
         for chunk in chunks:
-            seen.add((chunk.filename, chunk.page, chunk.chunk_index))
+            key = (chunk.filename, chunk.page, chunk.chunk_index)
+            seen.add(key)
+            seen_lookup[key] = chunk
         return (_format_chunks(chunks), False)

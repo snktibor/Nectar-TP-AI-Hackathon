@@ -32,13 +32,23 @@ LEGAL_COLLECTION = "legal_knowledge"
 
 @dataclass(frozen=True)
 class RagChunk:
-    """A single retrieved text chunk with full provenance."""
+    """A single retrieved text chunk with full provenance.
+
+    `char_start` / `char_end` are pulled from ChromaDB metadata when present
+    (the ingest pipeline writes them via `ChunkMetadata`). They let the UI
+    highlight the precise span when the user clicks a finding.
+    `source_kind` distinguishes legal-corpus chunks from uploaded-document
+    chunks so the frontend routes the click-through to the right viewer.
+    """
 
     text: str
     source: str
     page: int
     chunk_index: int
     score: float
+    char_start: int | None = None
+    char_end: int | None = None
+    source_kind: str = "document"
 
 
 # ---------------------------------------------------------------------------
@@ -65,7 +75,7 @@ class RagService:
         except Exception:
             return []
         results = collection.query(query_texts=[query], n_results=n_results)
-        return self._parse_results(results)
+        return self._parse_results(results, source_kind="legal")
 
     def query_document(
         self, document_id: UUID, query: str, n_results: int = 5
@@ -141,6 +151,9 @@ class RagService:
                 page=c.page,
                 chunk_index=c.chunk_index,
                 quote=c.text[:500] if c.text else None,
+                char_start=c.char_start,
+                char_end=c.char_end,
+                source_kind="legal" if c.source_kind == "legal" else "document",
             )
             for c in merged[:n_results]
         ]
@@ -181,6 +194,9 @@ class RagService:
                 page=c.page,
                 chunk_index=c.chunk_index,
                 quote=c.text[:500] if c.text else None,
+                char_start=c.char_start,
+                char_end=c.char_end,
+                source_kind="legal" if c.source_kind == "legal" else "document",
             )
             for c in merged[:n_results]
         ]
@@ -235,7 +251,9 @@ class RagService:
     # -- Internal --------------------------------------------------------------
 
     @staticmethod
-    def _parse_results(results: dict[str, Any]) -> list[RagChunk]:
+    def _parse_results(
+        results: dict[str, Any], *, source_kind: str = "document"
+    ) -> list[RagChunk]:
         docs = (results.get("documents") or [[]])[0]
         metas = (results.get("metadatas") or [[]])[0]
         distances = (results.get("distances") or [[]])[0]
@@ -243,6 +261,12 @@ class RagService:
         for doc, meta, dist in zip(docs, metas, distances):
             page_raw = str(meta.get("chapter_or_page") or meta.get("page") or "0")
             page_num = int("".join(ch for ch in page_raw if ch.isdigit()) or 0)
+
+            cs_raw = meta.get("char_start")
+            ce_raw = meta.get("char_end")
+            char_start = int(cs_raw) if isinstance(cs_raw, (int, float)) else None
+            char_end = int(ce_raw) if isinstance(ce_raw, (int, float)) else None
+
             parsed.append(
                 RagChunk(
                     text=doc,
@@ -250,6 +274,9 @@ class RagService:
                     page=page_num,
                     chunk_index=int(meta.get("chunk_index", 0)),
                     score=round(1.0 - float(dist), 4),
+                    char_start=char_start,
+                    char_end=char_end,
+                    source_kind=source_kind,
                 )
             )
         return parsed

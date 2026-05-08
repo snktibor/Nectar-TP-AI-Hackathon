@@ -89,6 +89,11 @@ async def test_happy_path_records_finding(scripted_factory) -> None:
                             }
                         ],
                         "confidence": 0.85,
+                        "reasoning": (
+                            "Master File claims R&D is centralized, while the local "
+                            "function description shows local R&D activity — direct "
+                            "internal contradiction."
+                        ),
                     },
                 )
             ],
@@ -154,6 +159,7 @@ async def test_hallucinated_citation_is_rejected(scripted_factory) -> None:
                             {"filename": "fake.pdf", "page": 99, "chunk_index": 99}
                         ],
                         "confidence": 0.5,
+                        "reasoning": "made up to test rejection",
                     },
                 )
             ],
@@ -178,6 +184,7 @@ async def test_hallucinated_citation_is_rejected(scripted_factory) -> None:
                             {"filename": "master_file.pdf", "page": 1, "chunk_index": 0}
                         ],
                         "confidence": 0.7,
+                        "reasoning": "Functional analysis is mandatory under OECD TPG Ch.V; absent in the retrieved evidence.",
                     },
                 )
             ],
@@ -253,6 +260,7 @@ async def test_invalid_payload_schema_rejected(scripted_factory) -> None:
                             {"filename": chunk.filename, "page": chunk.page, "chunk_index": chunk.chunk_index}
                         ],
                         "confidence": 0.5,
+                        "reasoning": "invalid severity test",
                     },
                 )
             ],
