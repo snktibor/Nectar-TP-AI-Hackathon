@@ -4,32 +4,33 @@
 
 @layer base {
 	:root {
-		--phantom-color-canvas: #f3ebed;
-		--phantom-color-surface: #faf5f6;
-		--phantom-color-surface-muted: #f4eaec;
+		--phantom-color-canvas: #f4f3ee;
+		--phantom-color-surface: #faf9f6;
+		--phantom-color-surface-muted: #eeeee9;
 		--phantom-color-surface-raised: #ffffff;
-		--phantom-color-ink: #2d1e21;
-		--phantom-color-muted: #6d5055;
-		--phantom-color-subtle: #9c7d83;
-		--phantom-color-line: #e3d2d5;
-		--phantom-color-line-strong: #d2bbc0;
-		--phantom-color-accent: #c6636f;
-		--phantom-color-accent-hover: #b4535f;
-		--phantom-color-accent-pressed: #a1444f;
-		--phantom-color-accent-soft: #f5e3e6;
-		--phantom-color-focus: #c6636f;
-		--phantom-color-disabled: #efe4e6;
+		--phantom-color-ink: #111812;
+		--phantom-color-muted: #3a4a3c;
+		--phantom-color-subtle: #6b7b6d;
+		--phantom-color-line: #ddddd7;
+		--phantom-color-line-strong: #c8c8c1;
+		--phantom-color-accent-ch: 255 123 71;
+		--phantom-color-accent: rgb(var(--phantom-color-accent-ch));
+		--phantom-color-accent-hover: #f06535;
+		--phantom-color-accent-pressed: #d95425;
+		--phantom-color-accent-soft: #fff0eb;
+		--phantom-color-focus: #ff7b47;
+		--phantom-color-disabled: #e8e8e2;
 		--phantom-color-success-soft: #edf7f0;
 		--phantom-color-success-text: #2f6f2d;
 		--phantom-color-success-border: #c7e2cc;
-		--phantom-color-danger-soft: #f9ecec;
+		--phantom-color-danger-soft: #fef0f0;
 		--phantom-color-danger-text: #a33a3a;
-		--phantom-color-danger-border: #efc0c0;
+		--phantom-color-danger-border: #f0c0c0;
 		--phantom-radius-card: 1rem;
 		--phantom-radius-control: 0.875rem;
-		--phantom-shadow-soft: 0 1px 2px rgb(56 30 34 / 0.04), 0 10px 26px rgb(56 30 34 / 0.08);
-		--phantom-shadow-lift: 0 10px 26px rgb(56 30 34 / 0.12), 0 22px 56px rgb(56 30 34 / 0.12);
-		--phantom-shadow-button: 0 8px 18px rgb(198 99 111 / 0.28);
+		--phantom-shadow-soft: 0 1px 2px rgb(17 24 18 / 0.04), 0 10px 26px rgb(17 24 18 / 0.08);
+		--phantom-shadow-lift: 0 10px 26px rgb(17 24 18 / 0.12), 0 22px 56px rgb(17 24 18 / 0.12);
+		--phantom-shadow-button: 0 8px 18px rgb(255 123 71 / 0.28);
 	}
 
 	* {
@@ -50,11 +51,11 @@
 		overflow-x: hidden;
 		background:
 			radial-gradient(circle at top center, rgb(255 255 255 / 0.75), transparent 32rem),
-			linear-gradient(180deg, #f9eef0 0%, var(--phantom-color-canvas) 52%, #efe3e6 100%);
+			linear-gradient(180deg, #f7f6f1 0%, var(--phantom-color-canvas) 52%, #eceae5 100%);
 	}
 
 	::selection {
-		background: rgb(198 99 111 / 0.25);
+		background: rgb(255 123 71 / 0.25);
 	}
 
 	button,

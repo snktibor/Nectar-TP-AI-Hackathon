@@ -80,7 +80,7 @@ export const phantomDesign = {
     buttonBase:
       'min-h-11 w-full rounded-phantom-control px-4 py-3 text-sm font-semibold transition-phantom duration-phantom-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus focus-visible:ring-offset-2 focus-visible:ring-offset-phantom-surface disabled:cursor-not-allowed',
     buttonPrimary:
-      'bg-phantom-accent text-phantom-ink shadow-phantom-button hover:-translate-y-px hover:bg-phantom-accent-hover hover:shadow-phantom-lift active:translate-y-0 active:bg-phantom-accent-pressed disabled:bg-phantom-disabled disabled:text-phantom-subtle disabled:shadow-none disabled:hover:translate-y-0',
+      'bg-phantom-accent text-phantom-canvas shadow-phantom-button hover:-translate-y-px hover:bg-phantom-accent-hover hover:shadow-phantom-lift active:translate-y-0 active:bg-phantom-accent-pressed disabled:bg-phantom-disabled disabled:text-phantom-subtle disabled:shadow-none disabled:hover:translate-y-0',
     uploadSlotBase:
       'flex min-h-16 w-full min-w-0 items-center gap-3 rounded-phantom-card border border-dashed px-3 py-3 text-left transition-phantom duration-phantom-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus focus-visible:ring-offset-2 focus-visible:ring-offset-phantom-surface sm:px-4',
     uploadSlotIdle:
