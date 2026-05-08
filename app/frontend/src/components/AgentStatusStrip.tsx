@@ -90,20 +90,20 @@ export default function AgentStatusStrip(props: AgentStatusStripProps): JSX.Elem
       : resolveCompletedStatuses(props.agentRuns)
 
   return (
-    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
+    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6">
       {ALL_AGENT_IDS.map((id) => {
         const { status, toolCalls } = statuses[id]
         return (
           <div
             key={id}
             className={[
-              'rounded-phantom-card border p-2.5 transition-phantom',
+              'min-w-0 overflow-hidden rounded-phantom-card border p-2.5 transition-phantom',
               cellClasses(status),
             ].join(' ')}
           >
-            <div className="flex items-center gap-1.5">
+            <div className="flex min-w-0 items-center gap-1.5">
               <StatusIcon status={status} />
-              <span className="text-[11px] font-semibold uppercase tracking-[0.05em]">
+              <span className="min-w-0 truncate text-[11px] font-semibold uppercase tracking-[0.05em]">
                 {statusText(status)}
               </span>
             </div>
@@ -111,7 +111,7 @@ export default function AgentStatusStrip(props: AgentStatusStripProps): JSX.Elem
               {AGENT_LABELS[id]}
             </p>
             {toolCalls !== undefined && (
-              <p className="mt-0.5 text-[10px] opacity-60">
+              <p className="mt-0.5 truncate text-[10px] opacity-60">
                 Eszközhívás: {toolCalls}
               </p>
             )}

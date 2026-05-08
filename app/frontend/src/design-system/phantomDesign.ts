@@ -2,22 +2,22 @@ import type { RiskSeverity } from '../types/api'
 
 export const phantomDesign = {
   colors: {
-    canvas: '#F3EBED',
-    surface: '#FAF5F6',
-    surfaceMuted: '#F4EAEC',
+    canvas: '#F4F3EE',
+    surface: '#FFFFFF',
+    surfaceMuted: '#EEEDE6',
     surfaceRaised: '#FFFFFF',
-    ink: '#2D1E21',
-    inkMuted: '#6D5055',
-    inkSubtle: '#9C7D83',
-    line: '#E3D2D5',
-    lineStrong: '#D2BBC0',
-    accent: '#C6636F',
-    accentHover: '#B4535F',
-    accentSoft: '#F5E3E6',
-    mint: '#F6EDEF',
-    sky: '#F9EFF1',
-    lavender: '#F4E8EB',
-    amber: '#F8EDE8',
+    ink: '#111812',
+    inkMuted: '#2F362F',
+    inkSubtle: '#5C655B',
+    line: '#D9D8CF',
+    lineStrong: '#C7C6BD',
+    accent: '#FF7B47',
+    accentHover: '#EF6E3A',
+    accentSoft: '#FFE9DF',
+    mint: '#FFF4ED',
+    sky: '#F7F6F1',
+    lavender: '#F0EFE8',
+    amber: '#FFEFE4',
   },
   severity: {
     CRITICAL: {
@@ -80,7 +80,7 @@ export const phantomDesign = {
     buttonBase:
       'min-h-11 w-full rounded-phantom-control px-4 py-3 text-sm font-semibold transition-phantom duration-phantom-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus focus-visible:ring-offset-2 focus-visible:ring-offset-phantom-surface disabled:cursor-not-allowed',
     buttonPrimary:
-      'bg-phantom-accent text-white shadow-phantom-button hover:-translate-y-px hover:bg-phantom-accent-hover hover:shadow-phantom-lift active:translate-y-0 active:bg-phantom-accent-pressed disabled:bg-phantom-disabled disabled:text-phantom-subtle disabled:shadow-none disabled:hover:translate-y-0',
+      'bg-phantom-accent text-phantom-ink shadow-phantom-button hover:-translate-y-px hover:bg-phantom-accent-hover hover:shadow-phantom-lift active:translate-y-0 active:bg-phantom-accent-pressed disabled:bg-phantom-disabled disabled:text-phantom-subtle disabled:shadow-none disabled:hover:translate-y-0',
     uploadSlotBase:
       'flex min-h-16 w-full min-w-0 items-center gap-3 rounded-phantom-card border border-dashed px-3 py-3 text-left transition-phantom duration-phantom-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus focus-visible:ring-offset-2 focus-visible:ring-offset-phantom-surface sm:px-4',
     uploadSlotIdle:

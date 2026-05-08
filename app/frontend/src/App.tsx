@@ -16,6 +16,43 @@ import type { ApiResponse, IngestedDocument } from './types/api'
 const API_BASE = import.meta.env.VITE_API_BASE_URL
 const SESSION_ID = crypto.randomUUID()
 
+type RequiredDocumentType =
+  | 'master_file'
+  | 'local_file'
+  | 'contract'
+  | 'benchmark_study'
+  | 'invoice'
+
+const REQUIRED_AUDIT_TYPES = new Set<RequiredDocumentType>([
+  'master_file',
+  'local_file',
+  'contract',
+  'benchmark_study',
+  'invoice',
+])
+
+function isRequiredAuditType(value: string): value is RequiredDocumentType {
+  return REQUIRED_AUDIT_TYPES.has(value as RequiredDocumentType)
+}
+
+function hasCompleteRequiredCoverage(documents: IngestedDocument[]): boolean {
+  const successful = documents.filter((document) => document.status === 'success')
+  if (successful.length !== REQUIRED_AUDIT_TYPES.size) {
+    return false
+  }
+
+  const coveredTypes = new Set<RequiredDocumentType>()
+  for (const document of successful) {
+    if (!isRequiredAuditType(document.detected_type)) {
+      return false
+    }
+
+    coveredTypes.add(document.detected_type)
+  }
+
+  return coveredTypes.size === REQUIRED_AUDIT_TYPES.size
+}
+
 export default function App(): JSX.Element {
   const [ingestedDocuments, setIngestedDocuments] = useState<IngestedDocument[]>([])
   const [workspacePhase, setWorkspacePhase] = useState<WorkspacePhase>('empty')
@@ -26,15 +63,20 @@ export default function App(): JSX.Element {
   const [activeCitation, setActiveCitation] = useState<CitationTarget | null>(null)
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
-  const successfulDocumentCount = ingestedDocuments.filter(
-    (document) => document.status === 'success',
-  ).length
+  const hasReadyAuditCoverage = hasCompleteRequiredCoverage(ingestedDocuments)
 
   function clearPolling(): void {
     if (pollingRef.current !== null) {
       clearInterval(pollingRef.current)
       pollingRef.current = null
     }
+  }
+
+  function clearAuditState(): void {
+    setAuditTaskId(null)
+    setAuditStatus(null)
+    setAuditReport(null)
+    setAuditError(null)
   }
 
   async function fetchAuditResults(taskId: string): Promise<void> {
@@ -116,14 +158,11 @@ export default function App(): JSX.Element {
   }, [])
 
   async function handleAnalyze(): Promise<void> {
-    if (successfulDocumentCount === 0) return
+    if (!hasReadyAuditCoverage) return
 
     clearPolling()
     setWorkspacePhase('starting')
-    setAuditTaskId(null)
-    setAuditStatus(null)
-    setAuditReport(null)
-    setAuditError(null)
+    clearAuditState()
 
     try {
       const response = await fetch(`${API_BASE}/api/v1/audits/start`, {
@@ -153,13 +192,36 @@ export default function App(): JSX.Element {
   function handleIngestComplete(documents: IngestedDocument[]): void {
     clearPolling()
     setIngestedDocuments(documents)
-    setAuditTaskId(null)
-    setAuditStatus(null)
-    setAuditReport(null)
-    setAuditError(null)
+    clearAuditState()
+    setActiveCitation(null)
 
-    const successfulCount = documents.filter((document) => document.status === 'success').length
-    setWorkspacePhase(successfulCount > 0 ? 'ready' : 'empty')
+    if (hasCompleteRequiredCoverage(documents)) {
+      setWorkspacePhase('ready')
+      return
+    }
+
+    setWorkspacePhase(documents.length > 0 ? 'blocked' : 'empty')
+  }
+
+  function handleCloseReport(): void {
+    clearPolling()
+    clearAuditState()
+    setActiveCitation(null)
+
+    if (hasReadyAuditCoverage) {
+      setWorkspacePhase('ready')
+      return
+    }
+
+    setWorkspacePhase(ingestedDocuments.length > 0 ? 'blocked' : 'empty')
+  }
+
+  function handleResetWorkspaceFromLeft(): void {
+    clearPolling()
+    clearAuditState()
+    setActiveCitation(null)
+    setIngestedDocuments([])
+    setWorkspacePhase('empty')
   }
 
   return (
@@ -170,12 +232,13 @@ export default function App(): JSX.Element {
             activeCitation !== null ? (
               <DocumentViewer
                 citation={activeCitation}
-                onClose={() => setActiveCitation(null)}
+                onClose={handleCloseReport}
               />
             ) : (
               <DocumentIngestor
                 sessionId={SESSION_ID}
                 onIngestComplete={handleIngestComplete}
+                onResetWorkspace={handleResetWorkspaceFromLeft}
               />
             )
           }
@@ -189,6 +252,7 @@ export default function App(): JSX.Element {
               onAnalyze={() => void handleAnalyze()}
               sessionId={SESSION_ID}
               onCitationClick={setActiveCitation}
+              onCloseReport={handleCloseReport}
             />
           )}
         />

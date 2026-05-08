@@ -25,6 +25,7 @@ export type BackendDocTypeScope =
 
 export type WorkspacePhase =
   | 'empty'
+  | 'blocked'
   | 'ready'
   | 'starting'
   | 'polling'

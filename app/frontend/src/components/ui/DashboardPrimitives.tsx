@@ -108,13 +108,13 @@ export function MetricCard({
   tone = 'neutral',
 }: MetricCardProps): JSX.Element {
   return (
-    <div className="rounded-phantom-card border border-phantom-line bg-phantom-surface p-4 shadow-sm">
-      <div className="flex items-start justify-between gap-3">
+    <div className="min-w-0 rounded-phantom-card border border-phantom-line bg-phantom-surface p-4 shadow-sm">
+      <div className="flex min-w-0 items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-xs font-semibold uppercase tracking-[0.08em] text-phantom-subtle">
+          <p className="break-words text-xs font-semibold uppercase tracking-[0.08em] text-phantom-subtle">
             {label}
           </p>
-          <p className="mt-2 text-2xl font-semibold leading-8 text-phantom-ink">{value}</p>
+          <p className="mt-2 break-words text-xl font-semibold leading-7 text-phantom-ink sm:text-2xl sm:leading-8">{value}</p>
         </div>
         <div
           className={[
@@ -125,7 +125,7 @@ export function MetricCard({
           <Icon className="h-4 w-4" />
         </div>
       </div>
-      {detail ? <p className="mt-3 text-sm leading-5 text-phantom-muted">{detail}</p> : null}
+      {detail ? <p className="mt-3 break-words text-sm leading-5 text-phantom-muted">{detail}</p> : null}
     </div>
   )
 }

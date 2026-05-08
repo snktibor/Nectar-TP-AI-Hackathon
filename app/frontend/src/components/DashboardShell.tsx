@@ -69,7 +69,7 @@ function SidebarProfileCard(): JSX.Element {
         <img
           src="/favicon.ico"
           alt="Profilkep"
-          className="h-10 w-10 rounded-full object-cover ring-1 ring-phantom-line"
+          className="h-8 w-8 object-contain"
           loading="lazy"
         />
         <div className="min-w-0">

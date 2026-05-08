@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { AlertCircle, BarChart2, ClipboardList, Cpu, DatabaseZap, SearchCheck, Sparkles, Wrench } from 'lucide-react'
+import { AlertCircle, BarChart2, ClipboardList, Cpu, DatabaseZap, SearchCheck, Sparkles, Wrench, X } from 'lucide-react'
 import { phantomDesign } from '../design-system/phantomDesign'
 import {
   ALL_AGENT_IDS,
@@ -37,12 +37,14 @@ interface AnalysisWorkspaceProps {
   readonly onAnalyze: () => void
   readonly sessionId: string
   readonly onCitationClick: (target: CitationTarget) => void
+  readonly onCloseReport: () => void
 }
 
 function resolvePhasePill(phase: WorkspacePhase): { label: string; tone: StatusPillTone } {
   if (phase === 'completed') return { label: 'Riport kész', tone: 'success' }
   if (phase === 'polling' || phase === 'starting') return { label: 'Audit fut', tone: 'accent' }
   if (phase === 'ready') return { label: 'Indítható', tone: 'info' }
+  if (phase === 'blocked') return { label: 'Hiányos feltöltés', tone: 'warning' }
   if (phase === 'failed') return { label: 'Hiba', tone: 'danger' }
   return { label: 'Feltöltésre vár', tone: 'neutral' }
 }
@@ -336,17 +338,17 @@ function AgentRunsView({ report }: Readonly<{ report: BackendAuditReport }>): JS
             key={run.agent_id}
             className="rounded-phantom-card border border-phantom-line bg-phantom-surface p-4"
           >
-            <div className="flex flex-wrap items-start justify-between gap-2">
-              <p className="text-sm font-semibold text-phantom-ink">
+            <div className="flex min-w-0 flex-wrap items-start justify-between gap-2">
+              <p className="min-w-0 truncate text-sm font-semibold text-phantom-ink">
                 {AGENT_LABELS[run.agent_id]}
               </p>
               <StatusPill tone={statusTone}>{statusText}</StatusPill>
             </div>
 
             <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-phantom-muted sm:grid-cols-3">
-              <span>Modell: {run.model}</span>
-              <span>Prompt: {run.prompt_version}</span>
-              <span>Időtartam: {formatDurationMs(run.started_at, run.finished_at)}</span>
+              <span className="min-w-0 truncate">Modell: {run.model}</span>
+              <span className="min-w-0 truncate">Prompt: {run.prompt_version}</span>
+              <span className="min-w-0 truncate">Időtartam: {formatDurationMs(run.started_at, run.finished_at)}</span>
             </div>
 
             <div className="mt-2 flex flex-wrap gap-3 text-xs text-phantom-ink">
@@ -396,7 +398,7 @@ function TelemetryView({ report }: Readonly<{ report: BackendAuditReport }>): JS
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4">
         <MetricCard icon={Cpu} label="Bemenet (token)" value={formatTokenCount(totals.input)} />
         <MetricCard icon={Cpu} label="Kimenet (token)" value={formatTokenCount(totals.output)} />
         <MetricCard icon={DatabaseZap} label="Cache olvasás" value={formatTokenCount(totals.cacheRead)} />
@@ -490,10 +492,12 @@ export default function AnalysisWorkspace({
   onAnalyze,
   sessionId,
   onCitationClick,
+  onCloseReport,
 }: AnalysisWorkspaceProps): JSX.Element {
   const [activeTab, setActiveTab] = useState<TabId>('findings')
   const successfulDocuments = documents.filter((document) => document.status === 'success')
   const status = resolvePhasePill(phase)
+  const canCloseReport = phase === 'failed'
 
   const tabs: { id: TabId; label: string }[] = [
     { id: 'findings', label: 'Megállapítások' },
@@ -502,11 +506,24 @@ export default function AnalysisWorkspace({
   ]
 
   return (
-    <section className={[phantomDesign.components.panel, 'h-full'].join(' ')}>
+    <section className={[phantomDesign.components.panel, 'h-full min-w-0 overflow-x-hidden'].join(' ')}>
       <div className="mb-4 min-h-14 rounded-phantom-card border border-phantom-line bg-phantom-surface px-4 py-3">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <p className="text-sm font-semibold text-phantom-ink">Riport</p>
-          <StatusPill tone={status.tone}>{status.label}</StatusPill>
+        <div className="flex min-w-0 flex-wrap items-center justify-between gap-3">
+          <p className="min-w-0 truncate text-sm font-semibold text-phantom-ink">Riport</p>
+          <div className="flex min-w-0 flex-wrap items-center gap-2">
+            <StatusPill tone={status.tone}>{status.label}</StatusPill>
+            {canCloseReport && (
+              <button
+                type="button"
+                onClick={onCloseReport}
+                className="inline-flex min-h-8 items-center justify-center gap-1 rounded-phantom-control border border-phantom-line bg-phantom-surface-muted px-2.5 py-1 text-xs font-semibold text-phantom-muted transition-phantom duration-phantom-base hover:border-phantom-accent hover:text-phantom-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus"
+                aria-label="Riport bezárása"
+              >
+                <X className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Bezárás</span>
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -546,6 +563,17 @@ export default function AnalysisWorkspace({
         </div>
       )}
 
+      {phase === 'blocked' && (
+        <div className="rounded-phantom-card border border-phantom-danger-border bg-phantom-danger-soft p-4">
+          <p className="text-sm font-semibold text-phantom-danger-text">
+            Nem indítható az elemzés
+          </p>
+          <p className="mt-1 break-words text-xs text-phantom-danger-text">
+            Töltsd fel és osztályozd helyesen mind az 5 kötelező kategóriát: Master File, Local File, Contract, Benchmark Study, Invoice.
+          </p>
+        </div>
+      )}
+
       {(phase === 'starting' || phase === 'polling') && <ProgressView status={auditStatus} />}
 
       {phase === 'failed' && (
@@ -556,12 +584,12 @@ export default function AnalysisWorkspace({
       )}
 
       {phase === 'completed' && auditReport && (
-        <div className="space-y-3">
+        <div className="min-w-0 space-y-3">
           {/* Agent status strip — always visible above tabs */}
           <AgentStatusStrip mode="completed" agentRuns={auditReport.agent_runs} />
 
           {/* Tab bar */}
-          <div className="flex gap-1.5" role="tablist">
+          <div className="flex min-w-0 flex-wrap gap-1.5" role="tablist">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
@@ -570,7 +598,7 @@ export default function AnalysisWorkspace({
                 aria-selected={activeTab === tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={[
-                  'rounded-phantom-control px-3 py-1.5 text-xs font-medium ring-1 ring-inset transition-phantom',
+                  'max-w-full rounded-phantom-control px-3 py-1.5 text-xs font-medium ring-1 ring-inset transition-phantom',
                   activeTab === tab.id
                     ? 'bg-phantom-accent-soft text-phantom-accent ring-phantom-accent/30'
                     : 'bg-phantom-surface-muted text-phantom-muted ring-phantom-line hover:bg-phantom-surface',
