@@ -1,0 +1,44 @@
+name: Template CI CD Pipeline
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ["main", "master"]
+  pull_request:
+    branches: ["main", "master"]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Runtime
+        run: |
+          echo "Add stack-specific runtime setup here"
+
+      - name: Install Dependencies
+        run: |
+          echo "Add dependency installation command here"
+
+      - name: Lint
+        run: |
+          echo "Add lint command here"
+
+      - name: Build
+        run: |
+          echo "Add build command here"
+
+      - name: Test
+        run: |
+          echo "Add test command here"
+
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy Placeholder
+        run: |
+          echo "Add deployment steps here (staging or production)"
