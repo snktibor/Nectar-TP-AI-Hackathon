@@ -28,6 +28,7 @@ class DocumentType(str, Enum):
     BENCHMARK_STUDY = "benchmark_study"
     INVOICE = "invoice"
     OTHER = "other"
+    CROSS_DOCUMENT = "cross_document"
 
 
 class AuditStatus(str, Enum):

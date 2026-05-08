@@ -145,6 +145,46 @@ class RagService:
             for c in merged[:n_results]
         ]
 
+    async def query_cross_doc_context(
+        self,
+        session_id: UUID,
+        query: str,
+        n_results: int = 8,
+    ) -> list[EvidenceChunk]:
+        """Cross-document retrieval for the consistency agent.
+
+        Fans out across EVERY per-document collection in the session (no
+        doc_type filter) and merges with the static legal knowledge base.
+        Used by the cross-document consistency agent so it can spot
+        contradictions between e.g. Master File claims and Local File facts,
+        with the relevant legal context attached.
+        """
+        legal_n = max(2, n_results // 3)
+        doc_chunks, legal_chunks = await asyncio.gather(
+            asyncio.to_thread(
+                self.query_session_documents,
+                session_id,
+                query,
+                max(2, n_results // 2),
+            ),
+            asyncio.to_thread(
+                self.query_legal_knowledge,
+                query,
+                legal_n,
+            ),
+        )
+        merged = doc_chunks + legal_chunks
+        merged.sort(key=lambda c: -c.score)
+        return [
+            EvidenceChunk(
+                filename=c.source,
+                page=c.page,
+                chunk_index=c.chunk_index,
+                quote=c.text[:500] if c.text else None,
+            )
+            for c in merged[:n_results]
+        ]
+
     def _query_session_by_doc_type(
         self,
         session_id: UUID,
