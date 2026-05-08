@@ -50,3 +50,6 @@ docs/GitHub-Principle.md
 docs/Claude-Principle.md
 
 settings.local.json
+/app/backend/data/chromadb
+/app/backend/data/chromadb
+/app/backend/data/chromadb
