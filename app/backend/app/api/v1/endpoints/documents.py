@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime, timezone
+from typing import Annotated
 from uuid import UUID, uuid4
 
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile, status
@@ -19,7 +20,10 @@ from app.models.schemas import (
     DocumentRecord,
     DocumentType,
     DocumentUploadResponse,
+    IngestResponse,
+    IngestedDocument,
 )
+from app.services.ingest_pipeline import ingest_batch
 
 logger = logging.getLogger(__name__)
 
@@ -111,3 +115,110 @@ async def list_documents(session_id: UUID) -> ApiResponse[DocumentListResponse]:
         total=len(documents),
     )
     return ApiResponse[DocumentListResponse](success=True, data=payload)
+
+
+_ACCEPTED_EXTENSIONS = {".pdf", ".docx"}
+_MAX_INGEST_BYTES = 50 * 1024 * 1024
+
+
+@router.post(
+    "/ingest",
+    response_model=ApiResponse[IngestResponse],
+    status_code=status.HTTP_200_OK,
+    summary="Batch ingest documents: parse, classify, chunk, and vectorize.",
+)
+async def ingest_documents(
+    session_id: Annotated[UUID, Form(description="Session UUID for this ingest batch.")],
+    files: list[UploadFile] = File(..., description="PDF or DOCX files to ingest."),
+) -> ApiResponse[IngestResponse]:
+    """Accept multiple files, run the full ingest pipeline, return classification results."""
+    if not files:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"code": "NO_FILES", "message": "At least one file is required."},
+        )
+
+    file_payloads: list[tuple[str, bytes]] = []
+    for f in files:
+        if not f.filename:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={"code": "INVALID_FILE", "message": "A file has no filename."},
+            )
+
+        ext = "." + f.filename.rsplit(".", 1)[-1].lower() if "." in f.filename else ""
+        if ext not in _ACCEPTED_EXTENSIONS:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={
+                    "code": "UNSUPPORTED_FILE_TYPE",
+                    "message": f"File '{f.filename}' has unsupported type '{ext}'. Accepted: {', '.join(_ACCEPTED_EXTENSIONS)}.",
+                },
+            )
+
+        payload = await f.read()
+        if len(payload) == 0:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={"code": "EMPTY_FILE", "message": f"File '{f.filename}' is empty."},
+            )
+        if len(payload) > _MAX_INGEST_BYTES:
+            raise HTTPException(
+                status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                detail={
+                    "code": "FILE_TOO_LARGE",
+                    "message": f"File '{f.filename}' exceeds {_MAX_INGEST_BYTES} byte limit.",
+                },
+            )
+
+        file_payloads.append((f.filename, payload))
+
+    results = await ingest_batch(session_id, file_payloads)
+
+    processed = sum(1 for r in results if r.status == "success")
+    failed = sum(1 for r in results if r.status == "failed")
+
+    for doc in results:
+        if doc.status == "success":
+            record = DocumentRecord(
+                document_id=doc.document_id,
+                session_id=session_id,
+                document_type=_map_doc_type(doc.detected_type),
+                filename=doc.filename,
+                size_bytes=doc.size_bytes,
+                uploaded_at=datetime.now(timezone.utc),
+            )
+            _DOCUMENTS.setdefault(session_id, {})[record.document_id] = record
+
+    response = IngestResponse(
+        session_id=session_id,
+        total_files=len(file_payloads),
+        processed=processed,
+        failed=failed,
+        documents=results,
+    )
+
+    logger.info(
+        "Ingest complete session_id=%s total=%d processed=%d failed=%d",
+        session_id,
+        len(file_payloads),
+        processed,
+        failed,
+    )
+
+    return ApiResponse[IngestResponse](success=True, data=response)
+
+
+def _map_doc_type(detected: str) -> DocumentType:
+    """Map classifier output string to DocumentType enum."""
+    mapping: dict[str, DocumentType] = {
+        "master_file": DocumentType.MASTER_FILE,
+        "local_file": DocumentType.LOCAL_FILE,
+        "contract": DocumentType.CONTRACT,
+        "benchmark_study": DocumentType.BENCHMARK_STUDY,
+        "invoice": DocumentType.OTHER,
+        "financial_statement": DocumentType.OTHER,
+        "regulatory_document": DocumentType.OTHER,
+        "other": DocumentType.OTHER,
+    }
+    return mapping.get(detected, DocumentType.OTHER)

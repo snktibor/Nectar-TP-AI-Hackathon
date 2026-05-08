@@ -1,3 +1,8 @@
+---
+description: 'Backend standards for REDLINE PHANTOM FastAPI, ingest, rulesets, and audit pipeline work.'
+applyTo: 'app/backend/**/*.py, app/backend/**/*.json, app/backend/requirements.txt'
+---
+
 # Backend Instructions — REDLINE PHANTOM
 
 ## Project Context
@@ -6,23 +11,24 @@ Multi-agent system analyzing Master File, Local File, contracts, invoices, and b
 
 ## Tech Stack
 - **Framework:** Python FastAPI (async)
-- **Document parsing:** LlamaParse or pypdf + python-docx fallback
+- **Document parsing:** pypdf + python-docx; LlamaParse optional later
 - **Vector DB:** ChromaDB (local file-based)
-- **Embedding:** paraphrase-multilingual-MiniLM-L12-v2 (HU+EN)
-- **LLM:** Claude Sonnet for agents, Claude Opus for aggregation
-- **Orchestration:** Custom sequential Python (no LangGraph/CrewAI)
+- **Embedding:** ChromaDB default embedding in PoC; paraphrase-multilingual-MiniLM-L12-v2 target later
+- **LLM:** Mock audit service in PoC; Claude Sonnet/Opus target later
+- **Orchestration:** Custom sequential Python service (no LangGraph/CrewAI)
 
 ## Architecture
 - `app/backend/` is the root for all backend code.
-- Rulesets live in `app/backend/rulesets/*.json` and drive deterministic classification and scoring.
-- The pipeline: Ingestion → Structure mapping → Consistency → Completeness → Benchmark → Risk scoring → API response.
+- Rulesets live in `app/backend/rulesets/*.json` and drive deterministic classification and planned scoring.
+- The current ingest pipeline: Upload → Parse → Classify → Chunk → ChromaDB index → API response.
+- The target audit pipeline: Ingestion → Structure mapping → Consistency → Completeness → Benchmark → Risk scoring → API response.
 
 ## Rulesets (Deterministic Baseline)
 These JSON rulesets MUST be used as the single source of truth for classification and scoring:
-- `document_classification.json` — document type identification (master_file, local_file, contract, invoice, benchmark, etc.)
-- `tp_method_classification.json` — TP method detection (CUP, RPM, CPM, TNMM, PSM) with keyword signals and validation fields
-- `severity_scoring.json` — finding severity levels (critical/high/medium/low) with weighted scores per agent type
-- `nav_risk_categories.json` — NAV audit triggers, penalty structures, entity/transaction categories
+- `document_classification.json` — implemented document type identification (master_file, local_file, contract, invoice, benchmark, etc.)
+- `tp_method_classification.json` — planned TP method detection (CUP, RPM, CPM, TNMM, PSM)
+- `severity_scoring.json` — planned finding severity levels (critical/high/medium/low)
+- `nav_risk_categories.json` — planned NAV audit triggers and penalty categories
 
 ## Engineering Rules
 - Full type hints on all public interfaces. Pydantic models for all request/response DTOs.
@@ -54,11 +60,20 @@ Source references are non-negotiable — unsourced findings are invalid.
 
 ## API Design
 - RESTful endpoints under `/api/v1/`.
-- Upload endpoint with multipart form data.
+- Upload and ingest endpoints with multipart form data.
 - Analysis trigger endpoint returning job ID.
 - Polling or SSE endpoint for analysis progress.
-- Results endpoint with filtering (severity, category, document).
-- All responses use consistent envelope: `{ data, meta, errors }`.
+- Results endpoint for completed audit reports.
+- All responses use consistent envelope: `{success, data, error, meta}`.
+
+## Current API Endpoints
+- `GET /health` — health probe.
+- `POST /api/v1/documents/upload` — simple document metadata upload.
+- `GET /api/v1/documents/{session_id}` — session document listing.
+- `POST /api/v1/documents/ingest` — batch parse, classify, chunk, and vectorize PDF/DOCX files.
+- `POST /api/v1/audits/start` — start mock audit job.
+- `GET /api/v1/audits/status/{audit_task_id}` — poll mock job status.
+- `GET /api/v1/audits/results/{audit_task_id}` — fetch final mock report.
 
 ## Agent Pipeline Implementation
 The "multi-agent" system is 3+ sequential LLM calls with shared working memory:
