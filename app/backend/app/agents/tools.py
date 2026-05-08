@@ -99,18 +99,68 @@ RECORD_FINDING: ToolSchema = {
             "rule_id": {
                 "type": "string",
                 "description": (
-                    "Optional ruleset identifier (e.g. 'NGM_32_2017.section_4'). "
+                    "Primary ruleset identifier (e.g. 'NGM_32_2017.section_4'). "
                     "Use when the finding maps to a known regulation."
+                ),
+            },
+            "legal_references": {
+                "type": "array",
+                "items": {"type": "string"},
+                "description": (
+                    "Additional regulation/guideline citations beyond rule_id "
+                    "(e.g. ['OECD_TPG_2022.Ch_VI', 'HU_Act_LXXXI_1996.§31_B'])."
                 ),
             },
             "confidence": {
                 "type": "number",
                 "minimum": 0,
                 "maximum": 1,
-                "description": "Calibrated confidence in the finding (0..1).",
+                "description": (
+                    "Calibrated confidence in [0,1]. ≥0.9 only when the cited "
+                    "evidence directly proves the finding. 0.6–0.8 means inferential "
+                    "gaps remain — set requires_human_review=true. Below 0.5 do "
+                    "NOT record; keep searching instead."
+                ),
+            },
+            "reasoning": {
+                "type": "string",
+                "minLength": 20,
+                "maxLength": 2000,
+                "description": (
+                    "Plain-language reasoning chain: how you moved from the cited "
+                    "evidence chunks to this finding. Quote the relevant phrasing, "
+                    "name the contradiction, and explain why the law/standard you "
+                    "cite applies. Surfaced verbatim in the UI's explainability "
+                    "panel for the human reviewer."
+                ),
+            },
+            "uncertainty_notes": {
+                "type": "string",
+                "maxLength": 1000,
+                "description": (
+                    "Explicit caveats: ambiguity in the source text, missing "
+                    "context, limits of the retrieved evidence, alternative "
+                    "interpretations. Use this to avoid false certainty. Leave "
+                    "out only if the finding has no known caveats."
+                ),
+            },
+            "requires_human_review": {
+                "type": "boolean",
+                "description": (
+                    "Whether a human expert MUST validate this finding before "
+                    "action. Default True. Lower to False only when confidence "
+                    "is ≥0.9 AND the finding maps cleanly to a cited legal "
+                    "reference AND the citation directly proves the finding."
+                ),
             },
         },
-        "required": ["kind", "payload", "evidence_chunks", "confidence"],
+        "required": [
+            "kind",
+            "payload",
+            "evidence_chunks",
+            "confidence",
+            "reasoning",
+        ],
     },
 }
 

@@ -19,6 +19,23 @@ Transfer pricing documentation consistency auditor. Multi-agent AI system for Pw
 6. Align UX with `.claude/agents/ui-ux-style-profile.md`.
 7. **Run `.claude/agents/docs-sync.md`** to keep instruction files synchronized.
 
+## Project Scope (Domain)
+
+- Analyze transfer pricing document packages (Master File, Local File, contracts, invoices, benchmark).
+- Detect cross-document contradictions with source citations.
+- Check mandatory content completeness (32/2017 NGM rendelet).
+- Validate benchmark range positioning (IQR).
+- Compute explainable NAV-oriented risk categories.
+- Every finding requires source references and severity classification.
+
+## Tech Stack
+
+- Backend: Python FastAPI + Pydantic v2 + ChromaDB
+- Frontend: React 18 + Vite + TypeScript (strict) + Tailwind CSS 3.4
+- Parsing: pypdf + python-docx; LlamaParse optional later
+- Embedding: ChromaDB default embedding in PoC; paraphrase-multilingual-MiniLM-L12-v2 target later
+- Agent pipeline: mock service in PoC; Claude-based agents target later
+
 ## Agent Roster
 
 ### Infrastructure Agents
@@ -39,9 +56,9 @@ Transfer pricing documentation consistency auditor. Multi-agent AI system for Pw
 - `tp-benchmark-agent.md` — IQR range validation, method coherence
 - `tp-risk-scorer.md` — aggregated NAV-oriented risk report
 
-## Rulesets
+## Ruleset-Driven Behavior
 
-Implemented classification and planned scoring use `app/backend/rulesets/*.json`:
+Use backend rulesets as the deterministic baseline:
 
 - `document_classification.json` — implemented document type signals
 - `tp_method_classification.json` — planned TP method identification
@@ -50,10 +67,12 @@ Implemented classification and planned scoring use `app/backend/rulesets/*.json`
 
 ## Current PoC Features
 
-- React 18 + Vite + Tailwind frontend with `DocumentIngestor` and `phantomDesign` tokens.
+- React 18 + Vite + Tailwind frontend with strict 5-document ingest guardrails and `phantomDesign` tokens.
 - FastAPI backend with standardized `{success, data, error, meta}` envelope.
 - Batch PDF/DOCX ingest, parsing, ruleset classification, chunking, and ChromaDB indexing.
-- Mock audit pipeline with polling endpoints and demo risk report output.
+- Required ingest coverage validation for `master_file`, `local_file`, `contract`, `benchmark_study`, and `invoice` with explicit issue reporting.
+- Active frontend audit lifecycle wired to `/api/v1/audits/start`, `/status/{id}`, and `/results/{id}` with polling.
+- Backend-driven report surface with findings, agent run details, and telemetry tabs.
 
 ## Quality Gate
 

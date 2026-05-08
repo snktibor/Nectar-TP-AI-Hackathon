@@ -119,6 +119,10 @@ class DocumentTypeAgent(ABC):
         """Execute one complete tool-use loop. Always returns an AgentRunResult."""
         started_at = datetime.now(timezone.utc)
         seen: set[ChunkKey] = set()
+        # Cache the FULL retrieved EvidenceChunk per key so that when the agent
+        # cites it, we can hydrate the recorded citation with precise location
+        # data (char_start/char_end, source_kind) the agent itself never sees.
+        seen_lookup: dict[ChunkKey, EvidenceChunk] = {}
         findings = _FindingsBuffer()
         usage = LlmUsage()
         tool_calls = 0
@@ -163,6 +167,7 @@ class DocumentTypeAgent(ABC):
                         tool_name=block.name,
                         tool_input=block.input,
                         seen=seen,
+                        seen_lookup=seen_lookup,
                         findings=findings,
                     )
                     tool_results.append(
@@ -229,7 +234,13 @@ class DocumentTypeAgent(ABC):
 
     def _prompt_text(self) -> str:
         if self._prompt_text_cache is None:
-            self._prompt_text_cache = self.prompt_path.read_text(encoding="utf-8")
+            base = self.prompt_path.read_text(encoding="utf-8")
+            addendum_path = self.prompt_path.parent / "_traceability_addendum.md"
+            if addendum_path.exists():
+                addendum = addendum_path.read_text(encoding="utf-8")
+                self._prompt_text_cache = f"{base}\n\n---\n\n{addendum}"
+            else:
+                self._prompt_text_cache = base
         return self._prompt_text_cache
 
     async def _dispatch_tool(
@@ -238,12 +249,15 @@ class DocumentTypeAgent(ABC):
         tool_name: str,
         tool_input: dict[str, object],
         seen: set[ChunkKey],
+        seen_lookup: dict[ChunkKey, EvidenceChunk],
         findings: _FindingsBuffer,
     ) -> tuple[str, bool]:
         if tool_name == TOOL_SEARCH_CONTEXT:
-            return await self._handle_search_context(session_id, tool_input, seen)
+            return await self._handle_search_context(
+                session_id, tool_input, seen, seen_lookup
+            )
         if tool_name == TOOL_RECORD_FINDING:
-            return self._handle_record_finding(tool_input, seen, findings)
+            return self._handle_record_finding(tool_input, seen, seen_lookup, findings)
         if tool_name == TOOL_VERIFY_TAX_NUMBER:
             return await self._handle_verify_tax_number(tool_input)
         return (f"Unknown tool: {tool_name}", True)
@@ -253,6 +267,7 @@ class DocumentTypeAgent(ABC):
         session_id: UUID,
         tool_input: dict[str, object],
         seen: set[ChunkKey],
+        seen_lookup: dict[ChunkKey, EvidenceChunk],
     ) -> tuple[str, bool]:
         query_raw = tool_input.get("query")
         if not isinstance(query_raw, str) or not query_raw.strip():
@@ -270,13 +285,16 @@ class DocumentTypeAgent(ABC):
             n_results=n_results,
         )
         for chunk in chunks:
-            seen.add((chunk.filename, chunk.page, chunk.chunk_index))
+            key = (chunk.filename, chunk.page, chunk.chunk_index)
+            seen.add(key)
+            seen_lookup[key] = chunk
         return (_format_chunks(chunks), False)
 
     def _handle_record_finding(
         self,
         tool_input: dict[str, object],
         seen: set[ChunkKey],
+        seen_lookup: dict[ChunkKey, EvidenceChunk],
         findings: _FindingsBuffer,
     ) -> tuple[str, bool]:
         kind_raw = tool_input.get("kind")
@@ -284,6 +302,10 @@ class DocumentTypeAgent(ABC):
         citations_raw = tool_input.get("evidence_chunks")
         confidence_raw = tool_input.get("confidence")
         rule_id_raw = tool_input.get("rule_id")
+        reasoning_raw = tool_input.get("reasoning")
+        uncertainty_raw = tool_input.get("uncertainty_notes")
+        legal_refs_raw = tool_input.get("legal_references")
+        review_raw = tool_input.get("requires_human_review")
 
         if kind_raw not in ("consistency_error", "benchmark_risk", "missing_element"):
             return ("kind must be one of: consistency_error, benchmark_risk, missing_element.", True)
@@ -292,24 +314,38 @@ class DocumentTypeAgent(ABC):
         if not isinstance(citations_raw, list) or not citations_raw:
             return ("evidence_chunks must be a non-empty array.", True)
 
-        # Validate citations and check seen-set membership.
+        # Validate citations and check seen-set membership. We hydrate each
+        # cited chunk with the FULL EvidenceChunk we returned during retrieval
+        # (carrying char_start/char_end and source_kind), so the recorded
+        # finding always has the precise highlight info — even if the LLM
+        # only echoed back filename/page/chunk_index/quote.
         citations: list[EvidenceChunk] = []
         for raw in citations_raw:
             if not isinstance(raw, dict):
                 return ("each evidence_chunks entry must be an object.", True)
             try:
-                chunk = EvidenceChunk.model_validate(raw)
+                cited = EvidenceChunk.model_validate(raw)
             except ValidationError as exc:
                 return (f"evidence_chunks entry invalid: {_first_error(exc)}", True)
-            key = (chunk.filename, chunk.page, chunk.chunk_index)
+            key = (cited.filename, cited.page, cited.chunk_index)
             if key not in seen:
                 return (
-                    f"Citation {chunk.filename}:p{chunk.page}:c{chunk.chunk_index} was not "
+                    f"Citation {cited.filename}:p{cited.page}:c{cited.chunk_index} was not "
                     "returned by any search_context call in this run. Call search_context "
                     "first and only cite chunks you actually retrieved.",
                     True,
                 )
-            citations.append(chunk)
+            original = seen_lookup.get(key)
+            if original is not None:
+                # Prefer the agent's quote (it picked the salient phrase) but
+                # use the retrieved chunk's precise location and source_kind.
+                citations.append(
+                    original.model_copy(
+                        update={"quote": cited.quote or original.quote}
+                    )
+                )
+            else:
+                citations.append(cited)
 
         # Confidence.
         try:
@@ -321,12 +357,42 @@ class DocumentTypeAgent(ABC):
 
         rule_id = str(rule_id_raw) if rule_id_raw is not None else None
 
+        reasoning = str(reasoning_raw).strip() if isinstance(reasoning_raw, str) else None
+        if not reasoning:
+            return (
+                "reasoning is required: explain in plain language how the cited "
+                "evidence supports this finding (≥20 chars). The UI surfaces it "
+                "verbatim for human reviewers.",
+                True,
+            )
+        uncertainty_notes = (
+            str(uncertainty_raw).strip()
+            if isinstance(uncertainty_raw, str) and uncertainty_raw.strip()
+            else None
+        )
+        if isinstance(legal_refs_raw, list):
+            legal_references = [str(r) for r in legal_refs_raw if isinstance(r, str) and r.strip()]
+        else:
+            legal_references = []
+        # Default: a human MUST review unless the agent explicitly asserts it can
+        # be trusted. A low-confidence finding force-flips the flag back on.
+        if isinstance(review_raw, bool):
+            requires_human_review = review_raw
+        else:
+            requires_human_review = True
+        if confidence < 0.9 and not requires_human_review:
+            requires_human_review = True
+
         attribution = FindingAttribution(
             agent_id=self.agent_id,
             doc_type_scope=self.doc_type,
             confidence=confidence,
             evidence_chunks=citations,
+            reasoning=reasoning,
+            uncertainty_notes=uncertainty_notes,
+            requires_human_review=requires_human_review,
             rule_id=rule_id,
+            legal_references=legal_references,
             prompt_version=self.prompt_version,
         )
 
@@ -405,7 +471,8 @@ def _format_chunks(chunks: list[EvidenceChunk]) -> str:
         return "No matching chunks found."
     lines = [f"Retrieved {len(chunks)} chunk(s):"]
     for i, chunk in enumerate(chunks, start=1):
-        meta = f"{chunk.filename}:p{chunk.page}:c{chunk.chunk_index}"
+        tag = "LEGAL" if chunk.source_kind == "legal" else "DOC"
+        meta = f"[{tag}] {chunk.filename}:p{chunk.page}:c{chunk.chunk_index}"
         body = chunk.quote or ""
         lines.append(f"[{i}] {meta}\n{body}".rstrip())
     return "\n\n".join(lines)

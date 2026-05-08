@@ -247,6 +247,13 @@ class EvidenceChunk(BaseModel):
     chunk that was actually returned by the agent's RAG calls during the run.
     The dispatcher rejects any citation not present in the per-run `seen_chunks`
     set.
+
+    Highlighting contract: `char_start` / `char_end` are character offsets into
+    the parsed document text (computed at ingest time and stored in ChromaDB
+    metadata). The UI uses them to draw the highlight/circle on the source
+    viewer when the user clicks a finding. `source_kind` lets the UI route the
+    deep-link to the correct viewer — uploaded documents open in the document
+    viewer, legal corpus chunks open in the legal viewer.
     """
 
     model_config = ConfigDict(extra="forbid")
@@ -255,18 +262,101 @@ class EvidenceChunk(BaseModel):
     page: int = Field(..., ge=0)
     chunk_index: int = Field(..., ge=0)
     quote: str | None = Field(default=None, max_length=500)
+    char_start: int | None = Field(
+        default=None,
+        ge=0,
+        description=(
+            "Character offset of the chunk start in the parsed document text. "
+            "The UI uses this with char_end to highlight the exact span. "
+            "Optional because legacy / non-indexed sources may not expose it."
+        ),
+    )
+    char_end: int | None = Field(
+        default=None,
+        ge=0,
+        description="Character offset of the chunk end (exclusive).",
+    )
+    source_kind: Literal["document", "legal"] = Field(
+        default="document",
+        description=(
+            "Where this chunk lives. 'document' → uploaded TP package file "
+            "(opens in the document viewer). 'legal' → legal_knowledge "
+            "collection (NGM 32/2017, OECD TPG, HU Act LXXXI; opens in the "
+            "legal viewer). Drives the click-through routing."
+        ),
+    )
 
 
 class FindingAttribution(BaseModel):
-    """Per-finding provenance: which agent emitted it, with what confidence."""
+    """Per-finding provenance: which agent emitted it, with what confidence,
+    on what basis, and whether the agent itself flags the finding for human
+    review.
+
+    Designed to satisfy the project's traceability requirements:
+    every finding can be reconstructed from `evidence_chunks`, the agent's
+    `reasoning`, the cited `legal_references`, and the operator can use
+    `requires_human_review` and `uncertainty_notes` to decide whether to
+    accept the finding as-is or escalate it.
+    """
 
     model_config = ConfigDict(extra="forbid")
 
     agent_id: str = Field(..., min_length=1)
     doc_type_scope: DocumentType
-    confidence: float = Field(..., ge=0.0, le=1.0)
+    confidence: float = Field(
+        ...,
+        ge=0.0,
+        le=1.0,
+        description=(
+            "Calibrated confidence in [0,1]. Below 0.6 the agent SHOULD set "
+            "requires_human_review=True; below 0.5 the agent SHOULD NOT record "
+            "the finding at all and keep searching for evidence."
+        ),
+    )
     evidence_chunks: list[EvidenceChunk] = Field(..., min_length=1)
-    rule_id: str | None = None
+    reasoning: str | None = Field(
+        default=None,
+        max_length=2000,
+        description=(
+            "Plain-language reasoning chain — how the agent moved from the "
+            "cited evidence to the recorded finding. Optional for backward "
+            "compatibility, but strongly recommended; the UI surfaces this "
+            "in the explainability panel so the human reviewer can audit "
+            "the inference."
+        ),
+    )
+    uncertainty_notes: str | None = Field(
+        default=None,
+        max_length=1000,
+        description=(
+            "Explicit caveats: ambiguity in the source text, missing context, "
+            "limits of the retrieved evidence. Use this to avoid false "
+            "certainty when a confident-looking finding still has known gaps."
+        ),
+    )
+    requires_human_review: bool = Field(
+        default=True,
+        description=(
+            "Agent's recommendation that a human expert validates this "
+            "finding before action. Defaults to True — agents lower it to "
+            "False only for high-confidence findings (≥0.9) that map "
+            "cleanly to a cited legal reference."
+        ),
+    )
+    rule_id: str | None = Field(
+        default=None,
+        description=(
+            "Primary regulation anchor (e.g. 'NGM_32_2017.section_4'). "
+            "Use legal_references for additional supporting citations."
+        ),
+    )
+    legal_references: list[str] = Field(
+        default_factory=list,
+        description=(
+            "Additional regulation / guideline citations beyond rule_id "
+            "(e.g. ['OECD_TPG_2022.Ch_VI', 'HU_Act_LXXXI_1996.§31_B'])."
+        ),
+    )
     prompt_version: str | None = None
 
 

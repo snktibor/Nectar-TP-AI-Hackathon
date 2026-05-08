@@ -49,9 +49,11 @@ Use backend rulesets as the deterministic baseline:
 ## Current PoC Features
 
 - Batch PDF/DOCX ingest through `POST /api/v1/documents/ingest`.
+- FastAPI backend with standardized `{success, data, error, meta}` envelope.
 - Parser, classifier, chunker, and ChromaDB vector store services.
-- React `DocumentIngestor` with drag-drop upload and classification result cards.
-- Mock audit task pipeline with polling endpoints and demo findings.
+- React `DocumentIngestor` with strict 5-document intake, required-category validation, and detailed classification issue reporting.
+- Active frontend audit flow wired to `POST /api/v1/audits/start`, polling `GET /status/{id}`, and loading `GET /results/{id}`.
+- Backend-driven report UI with findings, per-agent run breakdown, and telemetry tabs.
 - `phantomDesign` frontend design system with Tailwind `phantom` tokens.
 
 ## Agent Roster

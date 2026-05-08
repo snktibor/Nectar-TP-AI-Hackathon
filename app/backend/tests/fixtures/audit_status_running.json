@@ -1,0 +1,27 @@
+{
+  "success": true,
+  "data": {
+    "audit_task_id": "e5de3c0e-e9ad-44b1-b48c-e150e9aaa6ab",
+    "session_id": "7d2a1e10-9c5e-4f55-8a02-2f1e7b3d4a91",
+    "status": "in_progress",
+    "progress": 47,
+    "stage": "agent:cross_doc_consistency_agent:running",
+    "started_at": "2026-05-08T22:03:10.865862Z",
+    "updated_at": "2026-05-08T22:03:10.866416Z",
+    "error": null,
+    "agent_progress": {
+      "master_file_agent": "ok",
+      "local_file_agent": "running",
+      "benchmark_agent": "running",
+      "contract_agent": "pending",
+      "invoice_agent": "pending",
+      "cross_doc_consistency_agent": "running"
+    }
+  },
+  "error": null,
+  "meta": {
+    "request_id": "056a78a6-a9ad-4daf-ba71-46c031a34cd5",
+    "timestamp": "2026-05-08T22:03:10.867429Z",
+    "api_version": "v1"
+  }
+}

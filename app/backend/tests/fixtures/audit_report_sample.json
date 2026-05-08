@@ -1,0 +1,916 @@
+{
+  "success": true,
+  "data": {
+    "audit_task_id": "e5de3c0e-e9ad-44b1-b48c-e150e9aaa6ab",
+    "session_id": "7d2a1e10-9c5e-4f55-8a02-2f1e7b3d4a91",
+    "generated_at": "2026-05-08T22:03:10.866021Z",
+    "consistency_errors": [
+      {
+        "error_id": "8442b077-add0-4663-9367-fceb8a9ddc5f",
+        "description": "A Local File-ban szerepl\u0151 m\u0171k\u00f6d\u00e9si \u00e1rr\u00e9s (4,2%) nem egyezik a p\u00e9nz\u00fcgyi mell\u00e9kletben kisz\u00e1molt \u00e9rt\u00e9kkel (3,7%).",
+        "severity": "high",
+        "locations": [
+          {
+            "filename": "LocalFile_HU_2024.pdf",
+            "line_numbers": [
+              12,
+              15
+            ]
+          },
+          {
+            "filename": "financial_annex.pdf",
+            "line_numbers": [
+              8
+            ]
+          }
+        ],
+        "evidence": "Local File \u00a73.2 vs. II. mell\u00e9klet 4. t\u00e1bl\u00e1zat",
+        "attribution": {
+          "agent_id": "local_file_agent",
+          "doc_type_scope": "local_file",
+          "confidence": 0.91,
+          "evidence_chunks": [
+            {
+              "filename": "LocalFile_HU_2024.pdf",
+              "page": 3,
+              "chunk_index": 2,
+              "quote": "A vizsg\u00e1lt f\u00e9l a 2024-es \u00fczleti \u00e9vben 4,2%-os m\u0171k\u00f6d\u00e9si \u00e1rr\u00e9st realiz\u00e1lt.",
+              "char_start": 4210,
+              "char_end": 4298,
+              "source_kind": "document"
+            },
+            {
+              "filename": "financial_annex.pdf",
+              "page": 1,
+              "chunk_index": 4,
+              "quote": "\u00dczemi eredm\u00e9ny / nett\u00f3 \u00e1rbev\u00e9tel = 3,7% (II. mell\u00e9klet, 4. t\u00e1bl\u00e1zat).",
+              "char_start": 812,
+              "char_end": 914,
+              "source_kind": "document"
+            }
+          ],
+          "reasoning": "A Local File \u00a73.2 (3. oldal) explicit m\u00f3don 4,2%-os m\u0171k\u00f6d\u00e9si \u00e1rr\u00e9st jelent a vizsg\u00e1lt f\u00e9lre 2024-re. A t\u00e1mogat\u00f3 p\u00e9nz\u00fcgyi mell\u00e9klet II. mell\u00e9klet 4. t\u00e1bl\u00e1zata viszont az \u00fczemi eredm\u00e9ny / nett\u00f3 \u00e1rbev\u00e9tel h\u00e1nyadost 3,7%-ban sz\u00e1mszer\u0171s\u00edti \u2014 ugyanarra az id\u0151szakra. Az 50 bp elt\u00e9r\u00e9s (>10% relat\u00edv hiba) sz\u00e1mszaki ellentmond\u00e1s a Local File narrat\u00edv\u00e1ja \u00e9s a saj\u00e1t mell\u00e9klet\u00e9nek adatai k\u00f6z\u00f6tt, ami a 32/2017 NGM \u00a75(2) pontja szerint a TP elemz\u00e9shez haszn\u00e1lt adatok \u00e9s a k\u00f6nyvelt adatok egyez\u00e9s\u00e9nek k\u00f6vetelm\u00e9ny\u00e9t s\u00e9rti.",
+          "uncertainty_notes": "A k\u00e9t adatpont esetleg elt\u00e9r\u0151 sz\u00e1m\u00edt\u00e1si alapon k\u00e9sz\u00fclt (pl. egyik a teljes v\u00e1llalat, m\u00e1sik csak a tesztelt tev\u00e9kenys\u00e9g). A Local File nem tartalmaz erre vonatkoz\u00f3 tie-up t\u00e1bl\u00e1t, ez\u00e9rt nem lehet kiz\u00e1rni egy m\u00f3dszertani magyar\u00e1zatot \u2014 emberi szak\u00e9rt\u0151i meger\u0151s\u00edt\u00e9s sz\u00fcks\u00e9ges.",
+          "requires_human_review": true,
+          "rule_id": "NGM_32_2017.section_5",
+          "legal_references": [
+            "NGM_32_2017.section_5(2)",
+            "OECD_TPG_2022.Ch_V_Annex_II"
+          ],
+          "prompt_version": "local_file_v1"
+        }
+      },
+      {
+        "error_id": "d32d647c-ff5a-4b21-839e-df4c6a0928a9",
+        "description": "A szolg\u00e1ltat\u00e1si szerz\u0151d\u00e9s hat\u00e1lya (2024.04.01. \u2013 2025.03.31.) nem fedi le a 2024. janu\u00e1r\u2013m\u00e1rciusban kisz\u00e1ml\u00e1zott szolg\u00e1ltat\u00e1sokat.",
+        "severity": "medium",
+        "locations": [
+          {
+            "filename": "service_agreement.pdf",
+            "line_numbers": [
+              3
+            ]
+          },
+          {
+            "filename": "invoice_2024_Q1.pdf",
+            "line_numbers": [
+              1
+            ]
+          }
+        ],
+        "evidence": null,
+        "attribution": {
+          "agent_id": "contract_agent",
+          "doc_type_scope": "contract",
+          "confidence": 0.86,
+          "evidence_chunks": [
+            {
+              "filename": "service_agreement.pdf",
+              "page": 0,
+              "chunk_index": 0,
+              "quote": "Jelen Meg\u00e1llapod\u00e1s 2024. \u00e1prilis 1-j\u00e9n l\u00e9p hat\u00e1lyba\u2026",
+              "char_start": 120,
+              "char_end": 242,
+              "source_kind": "document"
+            },
+            {
+              "filename": "invoice_2024_Q1.pdf",
+              "page": 0,
+              "chunk_index": 0,
+              "quote": "Sz\u00e1mla teljes\u00edt\u00e9si id\u0151szaka: 2024.01.01. \u2013 2024.03.31.",
+              "char_start": 80,
+              "char_end": 180,
+              "source_kind": "document"
+            }
+          ],
+          "reasoning": "A szolg\u00e1ltat\u00e1si szerz\u0151d\u00e9s 1. oldali bevezet\u00e9se szerint a hat\u00e1ly 2024. \u00e1prilis 1-j\u00e9n kezd\u0151dik. Az invoice_2024_Q1.pdf viszont 2024. janu\u00e1r\u2013m\u00e1rciusi id\u0151szakra kibocs\u00e1tott csoporton bel\u00fcli szolg\u00e1ltat\u00e1si sz\u00e1ml\u00e1kat tartalmaz. Az OECD TPG Ch.I.D.1 szerint a kapcsol\u00f3d\u00f3 v\u00e1llalkoz\u00e1sok k\u00f6z\u00f6tti t\u00e9nyleges magatart\u00e1s \u00e9s a szerz\u0151d\u00e9ses felt\u00e9telek id\u0151beli inkonzisztenci\u00e1ja a tranzakci\u00f3 jelleg\u00e9nek \u00fajra\u00e9rt\u00e9kel\u00e9s\u00e9t indokolhatja.",
+          "uncertainty_notes": "Lehets\u00e9ges, hogy egy kor\u00e1bbi keretszerz\u0151d\u00e9s vagy letter-of-intent fedi a Q1-es id\u0151szakot \u2014 ilyen dokumentum a session corpus-ban nem volt fellelhet\u0151, de a teljes szerz\u0151d\u00e9s\u00e1llom\u00e1ny emberi fel\u00fclvizsg\u00e1lata ezt meger\u0151s\u00edtheti vagy c\u00e1folhatja.",
+          "requires_human_review": true,
+          "rule_id": "OECD_TPG_2022.Ch_I.D.1",
+          "legal_references": [
+            "OECD_TPG_2022.Ch_I.D.1.2.1"
+          ],
+          "prompt_version": "contract_v1"
+        }
+      },
+      {
+        "error_id": "c1417012-d7f1-4cb2-9b86-9950890c6436",
+        "description": "A Q1\u2013Q4 csoporton bel\u00fcli szolg\u00e1ltat\u00e1si sz\u00e1ml\u00e1k \u00f6sszege (4,82 M EUR) nem egyezik a Local File-ban deklar\u00e1lt tranzakci\u00f3s \u00f6sszeggel (5,10 M EUR).",
+        "severity": "medium",
+        "locations": [
+          {
+            "filename": "invoice_2024_Q1.pdf",
+            "line_numbers": null
+          },
+          {
+            "filename": "invoice_2024_Q2.pdf",
+            "line_numbers": null
+          },
+          {
+            "filename": "invoice_2024_Q3.pdf",
+            "line_numbers": null
+          },
+          {
+            "filename": "invoice_2024_Q4.pdf",
+            "line_numbers": null
+          },
+          {
+            "filename": "LocalFile_HU_2024.pdf",
+            "line_numbers": [
+              71
+            ]
+          }
+        ],
+        "evidence": null,
+        "attribution": {
+          "agent_id": "invoice_agent",
+          "doc_type_scope": "invoice",
+          "confidence": 0.79,
+          "evidence_chunks": [
+            {
+              "filename": "invoice_2024_Q1.pdf",
+              "page": 0,
+              "chunk_index": 0,
+              "quote": null,
+              "char_start": 80,
+              "char_end": 180,
+              "source_kind": "document"
+            },
+            {
+              "filename": "LocalFile_HU_2024.pdf",
+              "page": 4,
+              "chunk_index": 1,
+              "quote": "A deklar\u00e1lt csoporton bel\u00fcli szolg\u00e1ltat\u00e1si forgalom \u00f6sszesen: 5 100 000 EUR.",
+              "char_start": 6210,
+              "char_end": 6308,
+              "source_kind": "document"
+            }
+          ],
+          "reasoning": "A n\u00e9gy negyed\u00e9ves csoporton bel\u00fcli szolg\u00e1ltat\u00e1si sz\u00e1mla (Q1\u2013Q4) \u00f6sszevont v\u00e9g\u00f6sszege 4 820 000 EUR. A Local File 4. oldal\u00e1n deklar\u00e1lt tranzakci\u00f3s forgalom ugyanerre a kateg\u00f3ri\u00e1ra 5 100 000 EUR. A 280 000 EUR (~5,5%) egyeztet\u00e9si hi\u00e1ny a 32/2017 NGM \u00a75(2)(c) szerinti adat-egyez\u0151s\u00e9gi k\u00f6vetelm\u00e9nyt s\u00e9rti.",
+          "uncertainty_notes": "A k\u00fcl\u00f6nb\u00f6zet ad\u00f3dhat id\u0151szaki hat\u00e1r\u00e1tny\u00fal\u00e1sb\u00f3l (elhat\u00e1rol\u00e1s vs. kibocs\u00e1t\u00e1s d\u00e1tum) vagy Q5-be \u00e1th\u00faz\u00f3d\u00f3 t\u00e9telekb\u0151l. A korrekci\u00f3k forr\u00e1s\u00e1t emberi szak\u00e9rt\u0151nek kell tiszt\u00e1znia a k\u00f6nyvel\u00e9si kivonatok alapj\u00e1n.",
+          "requires_human_review": true,
+          "rule_id": "NGM_32_2017.section_5",
+          "legal_references": [
+            "NGM_32_2017.section_5(2)(c)"
+          ],
+          "prompt_version": "invoice_v1"
+        }
+      },
+      {
+        "error_id": "823df602-68b5-489d-88bd-9aaf04189643",
+        "description": "A Master File az ACME-DE-t nevezi meg a v\u00e9djegyportf\u00f3li\u00f3 jogi tulajdonosak\u00e9nt; a Local File 3. mell\u00e9klete ugyanezekre a v\u00e9djegyekre az ACME-HU-t jel\u00f6li meg jogosultk\u00e9nt. Az immateri\u00e1lis javak ellentmond\u00f3 tulajdonjoga k\u00f6zvetlen DEMPE-hat\u00e1ssal j\u00e1r.",
+        "severity": "critical",
+        "locations": [
+          {
+            "filename": "MasterFile_2024.pdf",
+            "line_numbers": [
+              412,
+              413
+            ]
+          },
+          {
+            "filename": "LocalFile_HU_2024.pdf",
+            "line_numbers": [
+              88
+            ]
+          }
+        ],
+        "evidence": "K\u00e9t dokumentum elt\u00e9r\u0151en nyilatkozik a 2024-es \u00fczleti \u00e9vre vonatkoz\u00f3 immateri\u00e1lis jog tulajdonos\u00e1r\u00f3l.",
+        "attribution": {
+          "agent_id": "cross_doc_consistency_agent",
+          "doc_type_scope": "cross_document",
+          "confidence": 0.95,
+          "evidence_chunks": [
+            {
+              "filename": "MasterFile_2024.pdf",
+              "page": 14,
+              "chunk_index": 3,
+              "quote": "Az ACME-DE a csoport v\u00e9djegyportf\u00f3li\u00f3j\u00e1nak bejegyzett jogi tulajdonosa.",
+              "char_start": 11840,
+              "char_end": 11948,
+              "source_kind": "document"
+            },
+            {
+              "filename": "LocalFile_HU_2024.pdf",
+              "page": 3,
+              "chunk_index": 1,
+              "quote": "Az ACME-HU a magyarorsz\u00e1gi \u00e9s KKE-r\u00e9gi\u00f3s v\u00e9djegyek jogosultja.",
+              "char_start": 3650,
+              "char_end": 3752,
+              "source_kind": "document"
+            },
+            {
+              "filename": "OECD_TPG_2022.pdf",
+              "page": 237,
+              "chunk_index": 4,
+              "quote": "Legal ownership alone does not determine entitlement to returns from intangibles (Ch.VI.B.1).",
+              "char_start": 712010,
+              "char_end": 712286,
+              "source_kind": "legal"
+            }
+          ],
+          "reasoning": "A Master File 14. oldal 3. sz\u00f6vegr\u00e9sze kategorikusan kimondja: \u00bbAz ACME-DE a csoport v\u00e9djegyportf\u00f3li\u00f3j\u00e1nak bejegyzett jogi tulajdonosa.\u00ab Ezzel k\u00f6zvetlen\u00fcl szembehelyezkedik a Local File 3. oldal 1. sz\u00f6vegr\u00e9sze: \u00bbAz ACME-HU a magyarorsz\u00e1gi \u00e9s KKE-r\u00e9gi\u00f3s v\u00e9djegyek jogosultja.\u00ab A k\u00e9t kijelent\u00e9s ugyanarra a v\u00e9djegyk\u00f6rre vonatkozik (\u00bbcsoport v\u00e9djegyportf\u00f3li\u00f3\u00ab vs. \u00bbmagyarorsz\u00e1gi \u00e9s KKE-r\u00e9gi\u00f3s v\u00e9djegyek\u00ab, ami az el\u0151bbi r\u00e9szhalmaza), teh\u00e1t k\u00f6lcs\u00f6n\u00f6sen kiz\u00e1r\u00f3. Az OECD TPG Ch.VI.B.1 szerint a jogi tulajdonos azonos\u00edt\u00e1sa a DEMPE-funkci\u00f3 elemz\u00e9s kiindul\u00f3pontja, \u00edgy az ellentmond\u00e1s k\u00f6zvetlen TP allok\u00e1ci\u00f3s hat\u00e1ssal b\u00edr, \u00e9s a HU LXXXI/1996 \u00a731/B szerinti dokument\u00e1ci\u00f3s k\u00f6telezetts\u00e9g alapj\u00e1t is megrend\u00edti.",
+          "uncertainty_notes": "Nem z\u00e1rhat\u00f3 ki, hogy a k\u00e9t dokumentum elt\u00e9r\u0151 jogi fogalmat haszn\u00e1l ugyanarra a t\u00e9nyre (pl. \u00bbregistered owner\u00ab vs. \u00bbeconomic owner\u00ab). A teljes v\u00e9djegyregiszter \u00e9s a csoporton bel\u00fcli IP transfer szerz\u0151d\u00e9sek emberi szak\u00e9rt\u0151i ellen\u0151rz\u00e9se a finding meger\u0151s\u00edt\u00e9s\u00e9hez elengedhetetlen \u2014 ez critical s\u00faly\u00fa, NAV-relevanci\u00e1j\u00fa kock\u00e1zat.",
+          "requires_human_review": true,
+          "rule_id": "OECD_TPG_2022.Ch_VI",
+          "legal_references": [
+            "OECD_TPG_2022.Ch_VI.B.1",
+            "OECD_TPG_2022.Ch_VI.D",
+            "HU_Act_LXXXI_1996.\u00a731_B"
+          ],
+          "prompt_version": "cross_doc_consistency_v1"
+        }
+      }
+    ],
+    "benchmark_risks": [
+      {
+        "risk_id": "c7e8ad8f-9947-4a7d-ab30-228ac6c20d21",
+        "metric": "operating_margin",
+        "observed_value": 0.037,
+        "benchmark_range": [
+          0.045,
+          0.078
+        ],
+        "severity": "high",
+        "rationale": "A vizsg\u00e1lt f\u00e9l m\u0171k\u00f6d\u00e9si \u00e1rr\u00e9se (3,7%) az \u00f6sszehasonl\u00edthat\u00f3 forgalmaz\u00f3i minta interkvartilis tartom\u00e1ny\u00e1nak als\u00f3 hat\u00e1ra (4,5%) alatt van.",
+        "locations": [
+          {
+            "filename": "intercompany_contract_2023.pdf",
+            "line_numbers": [
+              19,
+              20
+            ]
+          }
+        ],
+        "attribution": {
+          "agent_id": "benchmark_agent",
+          "doc_type_scope": "benchmark_study",
+          "confidence": 0.88,
+          "evidence_chunks": [
+            {
+              "filename": "BenchmarkStudy_2024.xlsx",
+              "page": 2,
+              "chunk_index": 0,
+              "quote": "V\u00e9gleges \u00f6sszehasonl\u00edthat\u00f3 minta: 9 v\u00e1llalat; IQR [4,5%; 7,8%].",
+              "char_start": 1420,
+              "char_end": 1538,
+              "source_kind": "document"
+            },
+            {
+              "filename": "financial_annex.pdf",
+              "page": 1,
+              "chunk_index": 4,
+              "quote": null,
+              "char_start": 812,
+              "char_end": 914,
+              "source_kind": "document"
+            },
+            {
+              "filename": "OECD_TPG_2022.pdf",
+              "page": 104,
+              "chunk_index": 1,
+              "quote": "Where the value of the controlled transaction falls outside the arm's-length range, an adjustment is appropriate (Ch.III.A.4).",
+              "char_start": 312540,
+              "char_end": 312812,
+              "source_kind": "legal"
+            }
+          ],
+          "reasoning": "A benchmark study 9 elem\u0171 v\u00e9gleges mint\u00e1t hat\u00e1rozott meg, melynek interkvartilis tartom\u00e1nya [4,5%; 7,8%]. A vizsg\u00e1lt f\u00e9l t\u00e9nyleges m\u0171k\u00f6d\u00e9si \u00e1rr\u00e9se (3,7%, a p\u00e9nz\u00fcgyi mell\u00e9kletb\u0151l) az als\u00f3 kvartilis (4,5%) alatt van \u2014 vagyis a vizsg\u00e1lt f\u00e9l a kompar\u00e1lhat\u00f3 minta szok\u00e1sos piaci tartom\u00e1ny\u00e1n k\u00edv\u00fcl teljes\u00edt. Az OECD TPG Ch.III.A szerint az IQR-en k\u00edv\u00fcl es\u0151 \u00e9rt\u00e9khez kiigaz\u00edt\u00e1s vagy magyar\u00e1zat sz\u00fcks\u00e9ges; a dokument\u00e1ci\u00f3ban ilyen nem szerepel.",
+          "uncertainty_notes": "A 3,7%-os \u00e9rt\u00e9k a p\u00e9nz\u00fcgyi mell\u00e9kletb\u0151l sz\u00e1rmazik, nem a Local File narrat\u00edv\u00e1j\u00e1b\u00f3l (ahol 4,2% szerepel). A tartom\u00e1ny-elt\u00e9r\u00e9s nagys\u00e1ga f\u00fcgg att\u00f3l, melyik adat a val\u00f3s tesztelt teljes\u00edtm\u00e9ny \u2014 ezt emberi review-nak kell tiszt\u00e1znia (l\u00e1sd local_file_agent finding).",
+          "requires_human_review": true,
+          "rule_id": "OECD_TPG_2022.Ch_III.A",
+          "legal_references": [
+            "OECD_TPG_2022.Ch_III.A.4",
+            "NGM_32_2017.section_6"
+          ],
+          "prompt_version": "benchmark_v1"
+        }
+      },
+      {
+        "risk_id": "99020308-57c4-4f47-9e45-044dad9e239d",
+        "metric": "royalty_rate",
+        "observed_value": 6.0,
+        "benchmark_range": [
+          2.0,
+          5.0
+        ],
+        "severity": "medium",
+        "rationale": "A jogd\u00edjkulcs (6,0%) meghaladja az \u00f6sszehasonl\u00edthat\u00f3 minta fels\u0151 kvartilis\u00e9t (5,0%).",
+        "locations": [
+          {
+            "filename": "license_agreement.pdf",
+            "line_numbers": [
+              7
+            ]
+          },
+          {
+            "filename": "LocalFile_HU_2024.pdf",
+            "line_numbers": [
+              55
+            ]
+          }
+        ],
+        "attribution": {
+          "agent_id": "benchmark_agent",
+          "doc_type_scope": "benchmark_study",
+          "confidence": 0.74,
+          "evidence_chunks": [
+            {
+              "filename": "license_agreement.pdf",
+              "page": 1,
+              "chunk_index": 2,
+              "quote": "A Licencbe vev\u0151 a nett\u00f3 \u00e1rbev\u00e9tel 6,0%-\u00e1nak megfelel\u0151 jogd\u00edjat fizet\u2026",
+              "char_start": 2240,
+              "char_end": 2362,
+              "source_kind": "document"
+            }
+          ],
+          "reasoning": "A licencszerz\u0151d\u00e9s 6,0%-os jogd\u00edjkulcsot r\u00f6gz\u00edt, ami a benchmark study jogd\u00edj-tartom\u00e1ny\u00e1nak [2,0%; 5,0%] fels\u0151 kvartilis\u00e9t is meghaladja. Mivel a dokument\u00e1ci\u00f3ban nincs magyar\u00e1zat (pl. egyedi immateri\u00e1lis hozz\u00e1j\u00e1rul\u00e1s) az elt\u00e9r\u00e9sre, ez piaci tartom\u00e1nyon k\u00edv\u00fcli \u00e1raz\u00e1s kock\u00e1zat\u00e1t hordozza.",
+          "uncertainty_notes": "A benchmark study jogd\u00edjmint\u00e1j\u00e1hoz tartoz\u00f3 ipar\u00e1gi k\u00f3dok \u00e9s id\u0151szak nem voltak k\u00f6zvetlen\u00fcl el\u00e9rhet\u0151ek a lek\u00e9rt r\u00e9szletekben. Lehets\u00e9ges hogy a 6,0%-os kulcsot kvalitat\u00edv \u00f6sszehasonl\u00edt\u00f3 elemz\u00e9s indokolja a study egy m\u00e1sik r\u00e9sz\u00e9ben \u2014 emberi review sz\u00fcks\u00e9ges.",
+          "requires_human_review": true,
+          "rule_id": "OECD_TPG_2022.Ch_VI.D",
+          "legal_references": [
+            "OECD_TPG_2022.Ch_VI.D.2"
+          ],
+          "prompt_version": "benchmark_v1"
+        }
+      }
+    ],
+    "missing_elements": [
+      {
+        "element_id": "229dbd2c-e957-4502-bc00-d40b1ca91b67",
+        "description": "Hi\u00e1nyzik a csoportszint\u0171 p\u00e9nz\u00fcgyi tev\u00e9kenys\u00e9gek (csoportfinansz\u00edroz\u00e1si strukt\u00fara) bemutat\u00e1sa.",
+        "expected_in": "MasterFile_2024.pdf",
+        "required_by": "32/2017 NGM rendelet \u00a74(2)(d)",
+        "severity": "high",
+        "attribution": {
+          "agent_id": "master_file_agent",
+          "doc_type_scope": "master_file",
+          "confidence": 0.82,
+          "evidence_chunks": [
+            {
+              "filename": "MasterFile_2024.pdf",
+              "page": 22,
+              "chunk_index": 0,
+              "quote": "Az 5. fejezet a csoport immateri\u00e1lis javait \u00e9s K+F politik\u00e1j\u00e1t t\u00e1rgyalja\u2026",
+              "char_start": 18420,
+              "char_end": 18642,
+              "source_kind": "document"
+            },
+            {
+              "filename": "32_2017_NGM.pdf",
+              "page": 4,
+              "chunk_index": 2,
+              "quote": "\u00a74(2)(d) A p\u00e9nz\u00fcgyi tev\u00e9kenys\u00e9gek le\u00edr\u00e1sa, ide\u00e9rtve a k\u00f6zponti finansz\u00edroz\u00f3 entit\u00e1s azonos\u00edt\u00e1s\u00e1t\u2026",
+              "char_start": 2104,
+              "char_end": 2358,
+              "source_kind": "legal"
+            }
+          ],
+          "reasoning": "A 32/2017 NGM rendelet \u00a74(2)(d) pontja k\u00f6telez\u0151v\u00e9 teszi a csoport p\u00e9nz\u00fcgyi tev\u00e9kenys\u00e9geinek bemutat\u00e1s\u00e1t (k\u00f6zponti finansz\u00edroz\u00f3 entit\u00e1s, csoportszint\u0171 TP politika a p\u00e9nz\u00fcgyi \u00fcgyletekre). A Master File 22. oldali tartalomjegyz\u00e9ke csak az 5. fejezetet (immateri\u00e1lis javak, K+F) eml\u00edti; sehol nem tal\u00e1lhat\u00f3 \u00f6n\u00e1ll\u00f3 p\u00e9nz\u00fcgyi tev\u00e9kenys\u00e9gekre vonatkoz\u00f3 fejezet vagy \u00e9rdemi szakasz. Teh\u00e1t a k\u00f6telez\u0151en el\u0151\u00edrt elem hi\u00e1nyzik.",
+          "uncertainty_notes": "Nem z\u00e1rhat\u00f3 ki, hogy a p\u00e9nz\u00fcgyi tev\u00e9kenys\u00e9gek le\u00edr\u00e1sa egy olyan oldalon szerepel, amely az indexelt tal\u00e1latok k\u00f6z\u00e9 nem ker\u00fclt be \u2014 emberi review-val \u00e9rdemes ellen\u0151rizni a teljes Master File-t a finding meger\u0151s\u00edt\u00e9se el\u0151tt.",
+          "requires_human_review": true,
+          "rule_id": "NGM_32_2017.section_4",
+          "legal_references": [
+            "NGM_32_2017.section_4(2)(d)",
+            "OECD_TPG_2022.Ch_V"
+          ],
+          "prompt_version": "master_file_v1"
+        }
+      }
+    ],
+    "overall_risk": "high",
+    "summary": "6/6 \u00e1gens sikeresen lefutott; 4 konzisztencia-, 2 benchmark- \u00e9s 1 teljess\u00e9gi meg\u00e1llap\u00edt\u00e1s. Kritikus s\u00faly\u00fa ellentmond\u00e1s az immateri\u00e1lis javak tulajdonjog\u00e1ban a Master File \u00e9s a Local File k\u00f6z\u00f6tt.",
+    "agent_runs": [
+      {
+        "agent_id": "master_file_agent",
+        "doc_type_scope": "master_file",
+        "prompt_version": "master_file_v1",
+        "model": "claude-sonnet-4-6-mock",
+        "started_at": "2026-05-08T22:03:10.865862Z",
+        "finished_at": "2026-05-08T22:03:07.866021Z",
+        "tool_calls": 5,
+        "input_tokens": 12000,
+        "output_tokens": 980,
+        "cache_read_tokens": 8000,
+        "cache_creation_tokens": 4000,
+        "consistency_errors": [],
+        "benchmark_risks": [],
+        "missing_elements": [
+          {
+            "element_id": "229dbd2c-e957-4502-bc00-d40b1ca91b67",
+            "description": "Hi\u00e1nyzik a csoportszint\u0171 p\u00e9nz\u00fcgyi tev\u00e9kenys\u00e9gek (csoportfinansz\u00edroz\u00e1si strukt\u00fara) bemutat\u00e1sa.",
+            "expected_in": "MasterFile_2024.pdf",
+            "required_by": "32/2017 NGM rendelet \u00a74(2)(d)",
+            "severity": "high",
+            "attribution": {
+              "agent_id": "master_file_agent",
+              "doc_type_scope": "master_file",
+              "confidence": 0.82,
+              "evidence_chunks": [
+                {
+                  "filename": "MasterFile_2024.pdf",
+                  "page": 22,
+                  "chunk_index": 0,
+                  "quote": "Az 5. fejezet a csoport immateri\u00e1lis javait \u00e9s K+F politik\u00e1j\u00e1t t\u00e1rgyalja\u2026",
+                  "char_start": 18420,
+                  "char_end": 18642,
+                  "source_kind": "document"
+                },
+                {
+                  "filename": "32_2017_NGM.pdf",
+                  "page": 4,
+                  "chunk_index": 2,
+                  "quote": "\u00a74(2)(d) A p\u00e9nz\u00fcgyi tev\u00e9kenys\u00e9gek le\u00edr\u00e1sa, ide\u00e9rtve a k\u00f6zponti finansz\u00edroz\u00f3 entit\u00e1s azonos\u00edt\u00e1s\u00e1t\u2026",
+                  "char_start": 2104,
+                  "char_end": 2358,
+                  "source_kind": "legal"
+                }
+              ],
+              "reasoning": "A 32/2017 NGM rendelet \u00a74(2)(d) pontja k\u00f6telez\u0151v\u00e9 teszi a csoport p\u00e9nz\u00fcgyi tev\u00e9kenys\u00e9geinek bemutat\u00e1s\u00e1t (k\u00f6zponti finansz\u00edroz\u00f3 entit\u00e1s, csoportszint\u0171 TP politika a p\u00e9nz\u00fcgyi \u00fcgyletekre). A Master File 22. oldali tartalomjegyz\u00e9ke csak az 5. fejezetet (immateri\u00e1lis javak, K+F) eml\u00edti; sehol nem tal\u00e1lhat\u00f3 \u00f6n\u00e1ll\u00f3 p\u00e9nz\u00fcgyi tev\u00e9kenys\u00e9gekre vonatkoz\u00f3 fejezet vagy \u00e9rdemi szakasz. Teh\u00e1t a k\u00f6telez\u0151en el\u0151\u00edrt elem hi\u00e1nyzik.",
+              "uncertainty_notes": "Nem z\u00e1rhat\u00f3 ki, hogy a p\u00e9nz\u00fcgyi tev\u00e9kenys\u00e9gek le\u00edr\u00e1sa egy olyan oldalon szerepel, amely az indexelt tal\u00e1latok k\u00f6z\u00e9 nem ker\u00fclt be \u2014 emberi review-val \u00e9rdemes ellen\u0151rizni a teljes Master File-t a finding meger\u0151s\u00edt\u00e9se el\u0151tt.",
+              "requires_human_review": true,
+              "rule_id": "NGM_32_2017.section_4",
+              "legal_references": [
+                "NGM_32_2017.section_4(2)(d)",
+                "OECD_TPG_2022.Ch_V"
+              ],
+              "prompt_version": "master_file_v1"
+            }
+          }
+        ],
+        "status": "ok",
+        "error": null
+      },
+      {
+        "agent_id": "local_file_agent",
+        "doc_type_scope": "local_file",
+        "prompt_version": "local_file_v1",
+        "model": "claude-sonnet-4-6-mock",
+        "started_at": "2026-05-08T22:03:11.265862Z",
+        "finished_at": "2026-05-08T22:03:08.466021Z",
+        "tool_calls": 6,
+        "input_tokens": 12400,
+        "output_tokens": 980,
+        "cache_read_tokens": 8200,
+        "cache_creation_tokens": 4000,
+        "consistency_errors": [
+          {
+            "error_id": "8442b077-add0-4663-9367-fceb8a9ddc5f",
+            "description": "A Local File-ban szerepl\u0151 m\u0171k\u00f6d\u00e9si \u00e1rr\u00e9s (4,2%) nem egyezik a p\u00e9nz\u00fcgyi mell\u00e9kletben kisz\u00e1molt \u00e9rt\u00e9kkel (3,7%).",
+            "severity": "high",
+            "locations": [
+              {
+                "filename": "LocalFile_HU_2024.pdf",
+                "line_numbers": [
+                  12,
+                  15
+                ]
+              },
+              {
+                "filename": "financial_annex.pdf",
+                "line_numbers": [
+                  8
+                ]
+              }
+            ],
+            "evidence": "Local File \u00a73.2 vs. II. mell\u00e9klet 4. t\u00e1bl\u00e1zat",
+            "attribution": {
+              "agent_id": "local_file_agent",
+              "doc_type_scope": "local_file",
+              "confidence": 0.91,
+              "evidence_chunks": [
+                {
+                  "filename": "LocalFile_HU_2024.pdf",
+                  "page": 3,
+                  "chunk_index": 2,
+                  "quote": "A vizsg\u00e1lt f\u00e9l a 2024-es \u00fczleti \u00e9vben 4,2%-os m\u0171k\u00f6d\u00e9si \u00e1rr\u00e9st realiz\u00e1lt.",
+                  "char_start": 4210,
+                  "char_end": 4298,
+                  "source_kind": "document"
+                },
+                {
+                  "filename": "financial_annex.pdf",
+                  "page": 1,
+                  "chunk_index": 4,
+                  "quote": "\u00dczemi eredm\u00e9ny / nett\u00f3 \u00e1rbev\u00e9tel = 3,7% (II. mell\u00e9klet, 4. t\u00e1bl\u00e1zat).",
+                  "char_start": 812,
+                  "char_end": 914,
+                  "source_kind": "document"
+                }
+              ],
+              "reasoning": "A Local File \u00a73.2 (3. oldal) explicit m\u00f3don 4,2%-os m\u0171k\u00f6d\u00e9si \u00e1rr\u00e9st jelent a vizsg\u00e1lt f\u00e9lre 2024-re. A t\u00e1mogat\u00f3 p\u00e9nz\u00fcgyi mell\u00e9klet II. mell\u00e9klet 4. t\u00e1bl\u00e1zata viszont az \u00fczemi eredm\u00e9ny / nett\u00f3 \u00e1rbev\u00e9tel h\u00e1nyadost 3,7%-ban sz\u00e1mszer\u0171s\u00edti \u2014 ugyanarra az id\u0151szakra. Az 50 bp elt\u00e9r\u00e9s (>10% relat\u00edv hiba) sz\u00e1mszaki ellentmond\u00e1s a Local File narrat\u00edv\u00e1ja \u00e9s a saj\u00e1t mell\u00e9klet\u00e9nek adatai k\u00f6z\u00f6tt, ami a 32/2017 NGM \u00a75(2) pontja szerint a TP elemz\u00e9shez haszn\u00e1lt adatok \u00e9s a k\u00f6nyvelt adatok egyez\u00e9s\u00e9nek k\u00f6vetelm\u00e9ny\u00e9t s\u00e9rti.",
+              "uncertainty_notes": "A k\u00e9t adatpont esetleg elt\u00e9r\u0151 sz\u00e1m\u00edt\u00e1si alapon k\u00e9sz\u00fclt (pl. egyik a teljes v\u00e1llalat, m\u00e1sik csak a tesztelt tev\u00e9kenys\u00e9g). A Local File nem tartalmaz erre vonatkoz\u00f3 tie-up t\u00e1bl\u00e1t, ez\u00e9rt nem lehet kiz\u00e1rni egy m\u00f3dszertani magyar\u00e1zatot \u2014 emberi szak\u00e9rt\u0151i meger\u0151s\u00edt\u00e9s sz\u00fcks\u00e9ges.",
+              "requires_human_review": true,
+              "rule_id": "NGM_32_2017.section_5",
+              "legal_references": [
+                "NGM_32_2017.section_5(2)",
+                "OECD_TPG_2022.Ch_V_Annex_II"
+              ],
+              "prompt_version": "local_file_v1"
+            }
+          }
+        ],
+        "benchmark_risks": [],
+        "missing_elements": [],
+        "status": "ok",
+        "error": null
+      },
+      {
+        "agent_id": "benchmark_agent",
+        "doc_type_scope": "benchmark_study",
+        "prompt_version": "benchmark_v1",
+        "model": "claude-sonnet-4-6-mock",
+        "started_at": "2026-05-08T22:03:11.665862Z",
+        "finished_at": "2026-05-08T22:03:09.066021Z",
+        "tool_calls": 8,
+        "input_tokens": 12800,
+        "output_tokens": 1060,
+        "cache_read_tokens": 8400,
+        "cache_creation_tokens": 4000,
+        "consistency_errors": [],
+        "benchmark_risks": [
+          {
+            "risk_id": "c7e8ad8f-9947-4a7d-ab30-228ac6c20d21",
+            "metric": "operating_margin",
+            "observed_value": 0.037,
+            "benchmark_range": [
+              0.045,
+              0.078
+            ],
+            "severity": "high",
+            "rationale": "A vizsg\u00e1lt f\u00e9l m\u0171k\u00f6d\u00e9si \u00e1rr\u00e9se (3,7%) az \u00f6sszehasonl\u00edthat\u00f3 forgalmaz\u00f3i minta interkvartilis tartom\u00e1ny\u00e1nak als\u00f3 hat\u00e1ra (4,5%) alatt van.",
+            "locations": [
+              {
+                "filename": "intercompany_contract_2023.pdf",
+                "line_numbers": [
+                  19,
+                  20
+                ]
+              }
+            ],
+            "attribution": {
+              "agent_id": "benchmark_agent",
+              "doc_type_scope": "benchmark_study",
+              "confidence": 0.88,
+              "evidence_chunks": [
+                {
+                  "filename": "BenchmarkStudy_2024.xlsx",
+                  "page": 2,
+                  "chunk_index": 0,
+                  "quote": "V\u00e9gleges \u00f6sszehasonl\u00edthat\u00f3 minta: 9 v\u00e1llalat; IQR [4,5%; 7,8%].",
+                  "char_start": 1420,
+                  "char_end": 1538,
+                  "source_kind": "document"
+                },
+                {
+                  "filename": "financial_annex.pdf",
+                  "page": 1,
+                  "chunk_index": 4,
+                  "quote": null,
+                  "char_start": 812,
+                  "char_end": 914,
+                  "source_kind": "document"
+                },
+                {
+                  "filename": "OECD_TPG_2022.pdf",
+                  "page": 104,
+                  "chunk_index": 1,
+                  "quote": "Where the value of the controlled transaction falls outside the arm's-length range, an adjustment is appropriate (Ch.III.A.4).",
+                  "char_start": 312540,
+                  "char_end": 312812,
+                  "source_kind": "legal"
+                }
+              ],
+              "reasoning": "A benchmark study 9 elem\u0171 v\u00e9gleges mint\u00e1t hat\u00e1rozott meg, melynek interkvartilis tartom\u00e1nya [4,5%; 7,8%]. A vizsg\u00e1lt f\u00e9l t\u00e9nyleges m\u0171k\u00f6d\u00e9si \u00e1rr\u00e9se (3,7%, a p\u00e9nz\u00fcgyi mell\u00e9kletb\u0151l) az als\u00f3 kvartilis (4,5%) alatt van \u2014 vagyis a vizsg\u00e1lt f\u00e9l a kompar\u00e1lhat\u00f3 minta szok\u00e1sos piaci tartom\u00e1ny\u00e1n k\u00edv\u00fcl teljes\u00edt. Az OECD TPG Ch.III.A szerint az IQR-en k\u00edv\u00fcl es\u0151 \u00e9rt\u00e9khez kiigaz\u00edt\u00e1s vagy magyar\u00e1zat sz\u00fcks\u00e9ges; a dokument\u00e1ci\u00f3ban ilyen nem szerepel.",
+              "uncertainty_notes": "A 3,7%-os \u00e9rt\u00e9k a p\u00e9nz\u00fcgyi mell\u00e9kletb\u0151l sz\u00e1rmazik, nem a Local File narrat\u00edv\u00e1j\u00e1b\u00f3l (ahol 4,2% szerepel). A tartom\u00e1ny-elt\u00e9r\u00e9s nagys\u00e1ga f\u00fcgg att\u00f3l, melyik adat a val\u00f3s tesztelt teljes\u00edtm\u00e9ny \u2014 ezt emberi review-nak kell tiszt\u00e1znia (l\u00e1sd local_file_agent finding).",
+              "requires_human_review": true,
+              "rule_id": "OECD_TPG_2022.Ch_III.A",
+              "legal_references": [
+                "OECD_TPG_2022.Ch_III.A.4",
+                "NGM_32_2017.section_6"
+              ],
+              "prompt_version": "benchmark_v1"
+            }
+          },
+          {
+            "risk_id": "99020308-57c4-4f47-9e45-044dad9e239d",
+            "metric": "royalty_rate",
+            "observed_value": 6.0,
+            "benchmark_range": [
+              2.0,
+              5.0
+            ],
+            "severity": "medium",
+            "rationale": "A jogd\u00edjkulcs (6,0%) meghaladja az \u00f6sszehasonl\u00edthat\u00f3 minta fels\u0151 kvartilis\u00e9t (5,0%).",
+            "locations": [
+              {
+                "filename": "license_agreement.pdf",
+                "line_numbers": [
+                  7
+                ]
+              },
+              {
+                "filename": "LocalFile_HU_2024.pdf",
+                "line_numbers": [
+                  55
+                ]
+              }
+            ],
+            "attribution": {
+              "agent_id": "benchmark_agent",
+              "doc_type_scope": "benchmark_study",
+              "confidence": 0.74,
+              "evidence_chunks": [
+                {
+                  "filename": "license_agreement.pdf",
+                  "page": 1,
+                  "chunk_index": 2,
+                  "quote": "A Licencbe vev\u0151 a nett\u00f3 \u00e1rbev\u00e9tel 6,0%-\u00e1nak megfelel\u0151 jogd\u00edjat fizet\u2026",
+                  "char_start": 2240,
+                  "char_end": 2362,
+                  "source_kind": "document"
+                }
+              ],
+              "reasoning": "A licencszerz\u0151d\u00e9s 6,0%-os jogd\u00edjkulcsot r\u00f6gz\u00edt, ami a benchmark study jogd\u00edj-tartom\u00e1ny\u00e1nak [2,0%; 5,0%] fels\u0151 kvartilis\u00e9t is meghaladja. Mivel a dokument\u00e1ci\u00f3ban nincs magyar\u00e1zat (pl. egyedi immateri\u00e1lis hozz\u00e1j\u00e1rul\u00e1s) az elt\u00e9r\u00e9sre, ez piaci tartom\u00e1nyon k\u00edv\u00fcli \u00e1raz\u00e1s kock\u00e1zat\u00e1t hordozza.",
+              "uncertainty_notes": "A benchmark study jogd\u00edjmint\u00e1j\u00e1hoz tartoz\u00f3 ipar\u00e1gi k\u00f3dok \u00e9s id\u0151szak nem voltak k\u00f6zvetlen\u00fcl el\u00e9rhet\u0151ek a lek\u00e9rt r\u00e9szletekben. Lehets\u00e9ges hogy a 6,0%-os kulcsot kvalitat\u00edv \u00f6sszehasonl\u00edt\u00f3 elemz\u00e9s indokolja a study egy m\u00e1sik r\u00e9sz\u00e9ben \u2014 emberi review sz\u00fcks\u00e9ges.",
+              "requires_human_review": true,
+              "rule_id": "OECD_TPG_2022.Ch_VI.D",
+              "legal_references": [
+                "OECD_TPG_2022.Ch_VI.D.2"
+              ],
+              "prompt_version": "benchmark_v1"
+            }
+          }
+        ],
+        "missing_elements": [],
+        "status": "ok",
+        "error": null
+      },
+      {
+        "agent_id": "contract_agent",
+        "doc_type_scope": "contract",
+        "prompt_version": "contract_v1",
+        "model": "claude-sonnet-4-6-mock",
+        "started_at": "2026-05-08T22:03:12.065862Z",
+        "finished_at": "2026-05-08T22:03:09.666021Z",
+        "tool_calls": 6,
+        "input_tokens": 13200,
+        "output_tokens": 980,
+        "cache_read_tokens": 8600,
+        "cache_creation_tokens": 4000,
+        "consistency_errors": [
+          {
+            "error_id": "d32d647c-ff5a-4b21-839e-df4c6a0928a9",
+            "description": "A szolg\u00e1ltat\u00e1si szerz\u0151d\u00e9s hat\u00e1lya (2024.04.01. \u2013 2025.03.31.) nem fedi le a 2024. janu\u00e1r\u2013m\u00e1rciusban kisz\u00e1ml\u00e1zott szolg\u00e1ltat\u00e1sokat.",
+            "severity": "medium",
+            "locations": [
+              {
+                "filename": "service_agreement.pdf",
+                "line_numbers": [
+                  3
+                ]
+              },
+              {
+                "filename": "invoice_2024_Q1.pdf",
+                "line_numbers": [
+                  1
+                ]
+              }
+            ],
+            "evidence": null,
+            "attribution": {
+              "agent_id": "contract_agent",
+              "doc_type_scope": "contract",
+              "confidence": 0.86,
+              "evidence_chunks": [
+                {
+                  "filename": "service_agreement.pdf",
+                  "page": 0,
+                  "chunk_index": 0,
+                  "quote": "Jelen Meg\u00e1llapod\u00e1s 2024. \u00e1prilis 1-j\u00e9n l\u00e9p hat\u00e1lyba\u2026",
+                  "char_start": 120,
+                  "char_end": 242,
+                  "source_kind": "document"
+                },
+                {
+                  "filename": "invoice_2024_Q1.pdf",
+                  "page": 0,
+                  "chunk_index": 0,
+                  "quote": "Sz\u00e1mla teljes\u00edt\u00e9si id\u0151szaka: 2024.01.01. \u2013 2024.03.31.",
+                  "char_start": 80,
+                  "char_end": 180,
+                  "source_kind": "document"
+                }
+              ],
+              "reasoning": "A szolg\u00e1ltat\u00e1si szerz\u0151d\u00e9s 1. oldali bevezet\u00e9se szerint a hat\u00e1ly 2024. \u00e1prilis 1-j\u00e9n kezd\u0151dik. Az invoice_2024_Q1.pdf viszont 2024. janu\u00e1r\u2013m\u00e1rciusi id\u0151szakra kibocs\u00e1tott csoporton bel\u00fcli szolg\u00e1ltat\u00e1si sz\u00e1ml\u00e1kat tartalmaz. Az OECD TPG Ch.I.D.1 szerint a kapcsol\u00f3d\u00f3 v\u00e1llalkoz\u00e1sok k\u00f6z\u00f6tti t\u00e9nyleges magatart\u00e1s \u00e9s a szerz\u0151d\u00e9ses felt\u00e9telek id\u0151beli inkonzisztenci\u00e1ja a tranzakci\u00f3 jelleg\u00e9nek \u00fajra\u00e9rt\u00e9kel\u00e9s\u00e9t indokolhatja.",
+              "uncertainty_notes": "Lehets\u00e9ges, hogy egy kor\u00e1bbi keretszerz\u0151d\u00e9s vagy letter-of-intent fedi a Q1-es id\u0151szakot \u2014 ilyen dokumentum a session corpus-ban nem volt fellelhet\u0151, de a teljes szerz\u0151d\u00e9s\u00e1llom\u00e1ny emberi fel\u00fclvizsg\u00e1lata ezt meger\u0151s\u00edtheti vagy c\u00e1folhatja.",
+              "requires_human_review": true,
+              "rule_id": "OECD_TPG_2022.Ch_I.D.1",
+              "legal_references": [
+                "OECD_TPG_2022.Ch_I.D.1.2.1"
+              ],
+              "prompt_version": "contract_v1"
+            }
+          }
+        ],
+        "benchmark_risks": [],
+        "missing_elements": [],
+        "status": "ok",
+        "error": null
+      },
+      {
+        "agent_id": "invoice_agent",
+        "doc_type_scope": "invoice",
+        "prompt_version": "invoice_v1",
+        "model": "claude-sonnet-4-6-mock",
+        "started_at": "2026-05-08T22:03:12.465862Z",
+        "finished_at": "2026-05-08T22:03:10.266021Z",
+        "tool_calls": 6,
+        "input_tokens": 13600,
+        "output_tokens": 980,
+        "cache_read_tokens": 8800,
+        "cache_creation_tokens": 4000,
+        "consistency_errors": [
+          {
+            "error_id": "c1417012-d7f1-4cb2-9b86-9950890c6436",
+            "description": "A Q1\u2013Q4 csoporton bel\u00fcli szolg\u00e1ltat\u00e1si sz\u00e1ml\u00e1k \u00f6sszege (4,82 M EUR) nem egyezik a Local File-ban deklar\u00e1lt tranzakci\u00f3s \u00f6sszeggel (5,10 M EUR).",
+            "severity": "medium",
+            "locations": [
+              {
+                "filename": "invoice_2024_Q1.pdf",
+                "line_numbers": null
+              },
+              {
+                "filename": "invoice_2024_Q2.pdf",
+                "line_numbers": null
+              },
+              {
+                "filename": "invoice_2024_Q3.pdf",
+                "line_numbers": null
+              },
+              {
+                "filename": "invoice_2024_Q4.pdf",
+                "line_numbers": null
+              },
+              {
+                "filename": "LocalFile_HU_2024.pdf",
+                "line_numbers": [
+                  71
+                ]
+              }
+            ],
+            "evidence": null,
+            "attribution": {
+              "agent_id": "invoice_agent",
+              "doc_type_scope": "invoice",
+              "confidence": 0.79,
+              "evidence_chunks": [
+                {
+                  "filename": "invoice_2024_Q1.pdf",
+                  "page": 0,
+                  "chunk_index": 0,
+                  "quote": null,
+                  "char_start": 80,
+                  "char_end": 180,
+                  "source_kind": "document"
+                },
+                {
+                  "filename": "LocalFile_HU_2024.pdf",
+                  "page": 4,
+                  "chunk_index": 1,
+                  "quote": "A deklar\u00e1lt csoporton bel\u00fcli szolg\u00e1ltat\u00e1si forgalom \u00f6sszesen: 5 100 000 EUR.",
+                  "char_start": 6210,
+                  "char_end": 6308,
+                  "source_kind": "document"
+                }
+              ],
+              "reasoning": "A n\u00e9gy negyed\u00e9ves csoporton bel\u00fcli szolg\u00e1ltat\u00e1si sz\u00e1mla (Q1\u2013Q4) \u00f6sszevont v\u00e9g\u00f6sszege 4 820 000 EUR. A Local File 4. oldal\u00e1n deklar\u00e1lt tranzakci\u00f3s forgalom ugyanerre a kateg\u00f3ri\u00e1ra 5 100 000 EUR. A 280 000 EUR (~5,5%) egyeztet\u00e9si hi\u00e1ny a 32/2017 NGM \u00a75(2)(c) szerinti adat-egyez\u0151s\u00e9gi k\u00f6vetelm\u00e9nyt s\u00e9rti.",
+              "uncertainty_notes": "A k\u00fcl\u00f6nb\u00f6zet ad\u00f3dhat id\u0151szaki hat\u00e1r\u00e1tny\u00fal\u00e1sb\u00f3l (elhat\u00e1rol\u00e1s vs. kibocs\u00e1t\u00e1s d\u00e1tum) vagy Q5-be \u00e1th\u00faz\u00f3d\u00f3 t\u00e9telekb\u0151l. A korrekci\u00f3k forr\u00e1s\u00e1t emberi szak\u00e9rt\u0151nek kell tiszt\u00e1znia a k\u00f6nyvel\u00e9si kivonatok alapj\u00e1n.",
+              "requires_human_review": true,
+              "rule_id": "NGM_32_2017.section_5",
+              "legal_references": [
+                "NGM_32_2017.section_5(2)(c)"
+              ],
+              "prompt_version": "invoice_v1"
+            }
+          }
+        ],
+        "benchmark_risks": [],
+        "missing_elements": [],
+        "status": "ok",
+        "error": null
+      },
+      {
+        "agent_id": "cross_doc_consistency_agent",
+        "doc_type_scope": "cross_document",
+        "prompt_version": "cross_doc_consistency_v1",
+        "model": "claude-sonnet-4-6-mock",
+        "started_at": "2026-05-08T22:03:12.865862Z",
+        "finished_at": "2026-05-08T22:03:10.866021Z",
+        "tool_calls": 6,
+        "input_tokens": 14000,
+        "output_tokens": 980,
+        "cache_read_tokens": 9000,
+        "cache_creation_tokens": 4000,
+        "consistency_errors": [
+          {
+            "error_id": "823df602-68b5-489d-88bd-9aaf04189643",
+            "description": "A Master File az ACME-DE-t nevezi meg a v\u00e9djegyportf\u00f3li\u00f3 jogi tulajdonosak\u00e9nt; a Local File 3. mell\u00e9klete ugyanezekre a v\u00e9djegyekre az ACME-HU-t jel\u00f6li meg jogosultk\u00e9nt. Az immateri\u00e1lis javak ellentmond\u00f3 tulajdonjoga k\u00f6zvetlen DEMPE-hat\u00e1ssal j\u00e1r.",
+            "severity": "critical",
+            "locations": [
+              {
+                "filename": "MasterFile_2024.pdf",
+                "line_numbers": [
+                  412,
+                  413
+                ]
+              },
+              {
+                "filename": "LocalFile_HU_2024.pdf",
+                "line_numbers": [
+                  88
+                ]
+              }
+            ],
+            "evidence": "K\u00e9t dokumentum elt\u00e9r\u0151en nyilatkozik a 2024-es \u00fczleti \u00e9vre vonatkoz\u00f3 immateri\u00e1lis jog tulajdonos\u00e1r\u00f3l.",
+            "attribution": {
+              "agent_id": "cross_doc_consistency_agent",
+              "doc_type_scope": "cross_document",
+              "confidence": 0.95,
+              "evidence_chunks": [
+                {
+                  "filename": "MasterFile_2024.pdf",
+                  "page": 14,
+                  "chunk_index": 3,
+                  "quote": "Az ACME-DE a csoport v\u00e9djegyportf\u00f3li\u00f3j\u00e1nak bejegyzett jogi tulajdonosa.",
+                  "char_start": 11840,
+                  "char_end": 11948,
+                  "source_kind": "document"
+                },
+                {
+                  "filename": "LocalFile_HU_2024.pdf",
+                  "page": 3,
+                  "chunk_index": 1,
+                  "quote": "Az ACME-HU a magyarorsz\u00e1gi \u00e9s KKE-r\u00e9gi\u00f3s v\u00e9djegyek jogosultja.",
+                  "char_start": 3650,
+                  "char_end": 3752,
+                  "source_kind": "document"
+                },
+                {
+                  "filename": "OECD_TPG_2022.pdf",
+                  "page": 237,
+                  "chunk_index": 4,
+                  "quote": "Legal ownership alone does not determine entitlement to returns from intangibles (Ch.VI.B.1).",
+                  "char_start": 712010,
+                  "char_end": 712286,
+                  "source_kind": "legal"
+                }
+              ],
+              "reasoning": "A Master File 14. oldal 3. sz\u00f6vegr\u00e9sze kategorikusan kimondja: \u00bbAz ACME-DE a csoport v\u00e9djegyportf\u00f3li\u00f3j\u00e1nak bejegyzett jogi tulajdonosa.\u00ab Ezzel k\u00f6zvetlen\u00fcl szembehelyezkedik a Local File 3. oldal 1. sz\u00f6vegr\u00e9sze: \u00bbAz ACME-HU a magyarorsz\u00e1gi \u00e9s KKE-r\u00e9gi\u00f3s v\u00e9djegyek jogosultja.\u00ab A k\u00e9t kijelent\u00e9s ugyanarra a v\u00e9djegyk\u00f6rre vonatkozik (\u00bbcsoport v\u00e9djegyportf\u00f3li\u00f3\u00ab vs. \u00bbmagyarorsz\u00e1gi \u00e9s KKE-r\u00e9gi\u00f3s v\u00e9djegyek\u00ab, ami az el\u0151bbi r\u00e9szhalmaza), teh\u00e1t k\u00f6lcs\u00f6n\u00f6sen kiz\u00e1r\u00f3. Az OECD TPG Ch.VI.B.1 szerint a jogi tulajdonos azonos\u00edt\u00e1sa a DEMPE-funkci\u00f3 elemz\u00e9s kiindul\u00f3pontja, \u00edgy az ellentmond\u00e1s k\u00f6zvetlen TP allok\u00e1ci\u00f3s hat\u00e1ssal b\u00edr, \u00e9s a HU LXXXI/1996 \u00a731/B szerinti dokument\u00e1ci\u00f3s k\u00f6telezetts\u00e9g alapj\u00e1t is megrend\u00edti.",
+              "uncertainty_notes": "Nem z\u00e1rhat\u00f3 ki, hogy a k\u00e9t dokumentum elt\u00e9r\u0151 jogi fogalmat haszn\u00e1l ugyanarra a t\u00e9nyre (pl. \u00bbregistered owner\u00ab vs. \u00bbeconomic owner\u00ab). A teljes v\u00e9djegyregiszter \u00e9s a csoporton bel\u00fcli IP transfer szerz\u0151d\u00e9sek emberi szak\u00e9rt\u0151i ellen\u0151rz\u00e9se a finding meger\u0151s\u00edt\u00e9s\u00e9hez elengedhetetlen \u2014 ez critical s\u00faly\u00fa, NAV-relevanci\u00e1j\u00fa kock\u00e1zat.",
+              "requires_human_review": true,
+              "rule_id": "OECD_TPG_2022.Ch_VI",
+              "legal_references": [
+                "OECD_TPG_2022.Ch_VI.B.1",
+                "OECD_TPG_2022.Ch_VI.D",
+                "HU_Act_LXXXI_1996.\u00a731_B"
+              ],
+              "prompt_version": "cross_doc_consistency_v1"
+            }
+          }
+        ],
+        "benchmark_risks": [],
+        "missing_elements": [],
+        "status": "ok",
+        "error": null
+      }
+    ]
+  },
+  "error": null,
+  "meta": {
+    "request_id": "a98bb57a-217a-4e77-889c-1eff4e5e1f1b",
+    "timestamp": "2026-05-08T22:03:10.866428Z",
+    "api_version": "v1"
+  }
+}

@@ -2,7 +2,7 @@
 
 ## What This Is
 
-React + Vite + TypeScript frontend for a transfer pricing documentation consistency auditor. Provides document upload workflow and risk dashboard for reviewing AI-generated findings.
+React + Vite + TypeScript frontend for a transfer pricing documentation consistency auditor. The active screen is an ingest-first split workspace with backend-driven audit progress and report rendering.
 
 ## Tech Stack
 
@@ -12,18 +12,18 @@ React + Vite + TypeScript frontend for a transfer pricing documentation consiste
 - React hooks/context for state
 - `phantomDesign` namespace for reusable frontend design tokens and component class groups
 - `src/components/ui/DashboardPrimitives.tsx` for reusable dashboard primitives
-- `src/lib/documentDisplay.ts` and `src/lib/frontendAnalysis.ts` for shared display and frontend analysis helpers
+- `src/lib/documentDisplay.ts` and `src/lib/backendAudit.ts` for shared display and backend contract helpers
 
 ## Key Screens
 
-1. **Split Workspace** — bal oldali ingest panel és jobb oldali riport/előkészítő munkaterület
-2. **Workspace Header** — compact status pills for upload/report state, without restoring the removed session/subtitle header UI
-3. **Dashboard Shell** — bal oldali navigáció + felső action/search bar, card-alapú, light-gray control dashboard stílusban
-4. **Document Ingestor** — drag-drop batch PDF/DOCX upload, workflow timeline, backend classification, chunk/index metric cards
-5. **Ingest Progress** — explicit loading, success, and error states during parsing/indexing
-6. **Classification Results** — per-document cards with type badge, page/chunk metadata, confidence, and status
-7. **Analysis Workspace** — üresből induló jobb oldali panel, amely sikeres klasszifikáció után elemzési előnézetet, readiness score-t, finding-preview kártyákat és lefedettséget mutat
-8. **Re-upload Flow** — results view action to add additional files without full UI reset
+1. **Split Workspace** — bal oldali ingest panel és jobb oldali audit/riport munkaterület
+2. **Dashboard Shell** — bal navigációs rail lokális kattintható menüállapotokkal, alul beállítások + profil kártya
+3. **Document Ingestor** — drag-drop batch PDF/DOCX feltöltés, maximum 5 fájl, és ingest csak pontosan 5 fájl esetén
+4. **Classification Validation** — kötelező kategóriák ellenőrzése (`master_file`, `local_file`, `contract`, `benchmark_study`, `invoice`) részletes hibaokokkal
+5. **Ingest Progress + Results** — explicit loading/success/error/warning állapotok, per-dokumentum klasszifikációs kártyák
+6. **Re-upload Flow** — kész állapotban `Fájlok újrafeltöltése` visszaállítja a feltöltési állapotot és újranyitja a file pickert
+7. **Analysis Workspace** — backend audit indítás, státusz polling, majd riport betöltés (`start` → `status` → `results`)
+8. **Completed Report Tabs** — megállapítások, ügynök futások, telemetria
 
 ## Critical Rules
 
@@ -38,8 +38,19 @@ React + Vite + TypeScript frontend for a transfer pricing documentation consiste
 - API response types must match backend Pydantic DTOs.
 - ESLint + Prettier on save.
 - Current active ingest contract is `POST /api/v1/documents/ingest` returning `IngestResponse`.
-- Audit contracts (`POST /api/v1/audits/start`, `GET /status/{id}`, `GET /results/{id}`) exist in backend but are not currently wired into the active frontend screen.
-- The active analyze action in the UI is currently frontend-only scaffolding and does not call backend yet.
+- Audit contracts are actively wired in `src/App.tsx`: `POST /api/v1/audits/start`, `GET /api/v1/audits/status/{id}`, and `GET /api/v1/audits/results/{id}`.
+- Sidebar menu interactions are intentionally local-state only; they must not navigate until routing specs are approved.
+- Keep the 5-document ingest rule and required-category set synchronized with frontend validation and backend DTO expectations.
+
+## Current Frontend File State (2026-05-09)
+
+- `src/App.tsx`: root orchestration for session, ingest completion, audit lifecycle, and polling cleanup.
+- `src/components/DocumentIngestor.tsx`: strict 5-file intake, classification issue diagnostics, and re-upload reset action.
+- `src/components/AnalysisWorkspace.tsx`: phase-based right panel with progress view, findings tab, agent runs tab, and telemetry tab.
+- `src/components/DashboardShell.tsx`: wider sidebar rail, overflow-safe labels, non-active colored layer, and profile footer.
+- `src/lib/backendAudit.ts`: typed audit DTOs, stage/severity formatting, and agent label constants.
+- `src/lib/documentDisplay.ts`: document-type badge mapping and file support checks.
+- `src/components/Header.tsx`, `src/components/UploadPanel.tsx`, `src/components/ResultsPanel.tsx`, `src/components/SeverityBadge.tsx`: jelenleg nem az aktív render útvonal részei.
 
 ## UX Standards
 
@@ -51,4 +62,4 @@ React + Vite + TypeScript frontend for a transfer pricing documentation consiste
 - Responsive behavior must hold down to 320px without page-level horizontal overflow.
 - Long filenames, session IDs, source references, benchmark values, and finding text require explicit overflow handling.
 - Motion is short and purposeful, and must respect `prefers-reduced-motion`.
-- Current UI is intentionally ingest-first and does not render the legacy multi-panel audit dashboard.
+- Current UI is ingest-plus-audit-report first and does not render the legacy dashboard layout.

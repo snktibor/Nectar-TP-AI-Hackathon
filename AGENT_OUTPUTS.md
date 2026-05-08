@@ -79,20 +79,33 @@ The three finding lists are **flattened across all agents** — each finding car
 
 ### 3.1 `EvidenceChunk`
 
-Every finding cites at least one chunk that the agent actually retrieved during its run. Hallucinated citations are rejected by the dispatcher.
+Every finding cites at least one chunk that the agent actually retrieved during its run. Hallucinated citations are rejected by the dispatcher. The dispatcher also hydrates each cited chunk with the precise location (`char_start` / `char_end`) and `source_kind` from the original retrieval — the LLM cannot fake or omit these.
 
 ```ts
 type EvidenceChunk = {
-  filename: string;       // e.g. "MasterFile_2024.pdf"
-  page: number;           // 0-based page index
-  chunk_index: number;    // 0-based chunk index within the page/doc
-  quote?: string;         // ≤ 500 chars verbatim excerpt (optional)
+  filename: string;                              // e.g. "MasterFile_2024.pdf" or "32_2017_NGM.pdf"
+  page: number;                                  // 0-based page index
+  chunk_index: number;                           // 0-based chunk index within the page/doc
+  quote?: string | null;                         // ≤ 500 chars verbatim excerpt (optional)
+  char_start?: number | null;                    // character offset of the chunk start in the parsed document text
+  char_end?: number | null;                      // character offset of the chunk end (exclusive)
+  source_kind: "document" | "legal";             // routes click-through: uploaded TP doc viewer vs. legal viewer
 };
 ```
 
+**Click-through / highlight contract** — when the user clicks a finding's citation chip:
+
+1. If `source_kind === "document"` → open the uploaded-document viewer on `filename`, scroll to `page`, and draw a highlight/circle over the substring `[char_start, char_end)` of the parsed document text. The verbatim `quote` is the same text that lives at that range — render it in the panel and use it as a fallback search target if `char_start` / `char_end` are null (legacy chunks).
+2. If `source_kind === "legal"` → open the legal-corpus viewer on `filename` (e.g. `32_2017_NGM.pdf`, `OECD_TPG_2022.pdf`, `HU_Act_LXXXI_1996.pdf`), same scroll-and-highlight behaviour. The legal viewer can be a separate tab/panel from the document viewer; routing is driven entirely by `source_kind`.
+3. `char_start` / `char_end` are character offsets into the parsed text the chunker produced at ingest, not PDF coordinates. The frontend computes the on-screen highlight by mapping that range to the rendered PDF (text-layer overlay or canvas selection). For chunks without offsets, fall back to a fuzzy search for `quote` on the page.
+
+A finding's citation chips therefore split into two visually-distinct groups:
+- **Document evidence** (`source_kind === "document"`) — what's wrong in the package.
+- **Legal evidence** (`source_kind === "legal"`) — the regulation/standard that's breached. Render with a different icon (e.g. scale/gavel) so the reviewer immediately sees both anchors.
+
 ### 3.2 `FindingAttribution`
 
-Always attached to a real (LLM-emitted) finding so the UI can group by agent and show provenance.
+Always attached to a real (LLM-emitted) finding so the UI can group by agent, show provenance, and surface the explainability fields the human reviewer relies on.
 
 ```ts
 type FindingAttribution = {
@@ -101,12 +114,29 @@ type FindingAttribution = {
     | "master_file" | "local_file" | "contract"
     | "benchmark_study" | "invoice" | "other"
     | "cross_document";
-  confidence: number;                                     // 0..1
-  evidence_chunks: EvidenceChunk[];                       // ≥ 1 entry
-  rule_id?: string | null;                                // e.g. "NGM_32_2017.section_4"
+  confidence: number;                                     // 0..1, calibrated
+  evidence_chunks: EvidenceChunk[];                       // ≥ 1 entry, validated against retrieved chunks
+  reasoning?: string | null;                              // ≤ 2000 chars; agent's plain-language inferential chain
+  uncertainty_notes?: string | null;                      // ≤ 1000 chars; explicit caveats / ambiguity disclosure
+  requires_human_review: boolean;                         // default true; only false for high-confidence + clean legal anchor
+  rule_id?: string | null;                                // primary regulation anchor (e.g. "NGM_32_2017.section_4")
+  legal_references: string[];                             // additional citations (e.g. ["OECD_TPG_2022.Ch_VI"])
   prompt_version?: string | null;                         // e.g. "master_file_v1"
 };
 ```
+
+**Traceability contract** — every emitted finding must satisfy:
+
+1. `evidence_chunks` is non-empty and every chunk was actually returned by a `search_context` call during the run (the dispatcher rejects hallucinated citations).
+2. `reasoning` is non-empty (≥ 20 chars) and explains how the cited evidence supports the finding — UI surfaces it verbatim in the "Miért állapította meg?" / explainability panel.
+3. `confidence` is calibrated:
+   - `≥ 0.9` → only when the citation directly proves the finding.
+   - `0.6 – 0.89` → inferential gap; `requires_human_review` is force-flipped to `true` by the dispatcher.
+   - `< 0.5` → not recorded at all.
+4. `requires_human_review = false` is allowed only when (a) `confidence ≥ 0.9`, (b) at least one `legal_references` / `rule_id` is cited, and (c) the citation directly proves the finding. The dispatcher enforces (a) automatically.
+5. `uncertainty_notes` is filled whenever the agent is aware of ambiguity, missing context, or alternative readings. An empty `uncertainty_notes` is a positive assertion that the agent is NOT aware of caveats.
+
+The frontend MUST render `reasoning`, `uncertainty_notes`, and a visible "human review required" badge whenever `requires_human_review === true`. These fields encode the project's ethical frame: the system supports the expert, it does not replace them.
 
 ### 3.3 `ErrorLocation`
 
@@ -383,6 +413,24 @@ The aggregated lists at `AuditReport` level simply omit findings from this agent
 - **Group findings by agent** using `attribution.agent_id` for the dashboard's per-agent panels; flatten by severity for the global risk strip.
 - **Severity color tokens** are defined in `phantomDesign` — map `low/medium/high/critical` to those tokens, never invent new ones.
 - **Always render at least one citation chip per finding** using `attribution.evidence_chunks[*]` — `filename · p{page} · #chunk_index` plus the optional `quote` in a tooltip. Findings without citations are a backend bug; surface an error badge rather than hiding them.
+- **Click-to-highlight** — every chip is clickable. On click: open the appropriate viewer (`source_kind === "document"` → document viewer, `"legal"` → legal viewer), scroll to `page`, and draw a highlight/circle over `[char_start, char_end)`. Fall back to a fuzzy text search for `quote` if `char_start` / `char_end` are null.
+- **Split document vs legal chips visually** — group `evidence_chunks` by `source_kind` in the citation panel; legal chips get a regulation icon (scale/gavel) and route to the legal viewer.
+- **Reasoning panel** — `attribution.reasoning` MUST be visible (collapsed-by-default expand is fine, hidden is not). This is the "Miért állapította meg?" surface the tax expert audits.
+- **Uncertainty banner** — when `attribution.uncertainty_notes` is non-empty, render it next to the reasoning with a distinct (warning-tone, not error-tone) treatment. An empty value means "no known caveats" — render nothing.
+- **Human review badge** — when `attribution.requires_human_review === true`, show a prominent badge on the finding card AND filter/sort affordances. Findings with `requires_human_review === false` may be rendered as "system-validated" but never as "auto-accepted".
+- **Confidence visualization** — show `attribution.confidence` as a number AND a band (`low <0.6` / `medium 0.6–0.89` / `high ≥0.9`). Never hide it.
+- **Legal references** — render `attribution.rule_id` (primary) and each entry in `attribution.legal_references` as separate citation chips, distinguishable from evidence chunks (different icon/color).
 - **Per-agent status strip** can be driven entirely by `agent_progress` during polling and by `AuditReport.agent_runs[*].status` once the audit completes.
 - **Token spend / latency** for the "telemetry" tab comes from `AgentRunResult` (`input_tokens`, `output_tokens`, `cache_read_tokens`, `started_at`/`finished_at`).
 - **Cross-doc findings** (`attribution.agent_id === "cross_doc_consistency_agent"`) typically have ≥ 2 distinct `filename`s in their `evidence_chunks` — render them with a "between docs" visual marker rather than a single-doc one.
+
+---
+
+## 9. Frontend integration file state snapshot (2026-05-09)
+
+- Active render path: `src/App.tsx` → `src/components/DashboardShell.tsx` → `src/components/DocumentIngestor.tsx` + `src/components/AnalysisWorkspace.tsx`.
+- `DocumentIngestor.tsx` enforces exactly 5 files per ingest run, validates required type coverage (`master_file`, `local_file`, `contract`, `benchmark_study`, `invoice`), and surfaces failed-file reasons.
+- Completed ingest state includes a recovery action (`Fájlok újrafeltöltése`) that resets upload state and reopens file selection.
+- `AnalysisWorkspace.tsx` consumes backend audit phases and shows findings, per-agent run data, and telemetry from `AuditReport`.
+- `DashboardShell.tsx` sidebar is intentionally local-state navigation only (clickable, no route transition yet).
+- `Header.tsx`, `UploadPanel.tsx`, `ResultsPanel.tsx`, and `SeverityBadge.tsx` are currently not on the active render path and should not be used as baseline for new UX behavior.
