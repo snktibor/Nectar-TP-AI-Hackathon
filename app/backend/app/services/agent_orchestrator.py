@@ -295,14 +295,16 @@ def _aggregate_report(state: _AgentTaskState, results: list[AgentRunResult]) -> 
 
 
 def _resolve_rag_service() -> RagService:
-    """Return the parallel team's RagService instance.
+    """Return an AgentRagAdapter wrapping the parallel team's RagService.
 
-    Imported lazily so this module can be imported in environments where the
-    RAG layer hasn't been built yet (tests inject a `FakeRagService` directly).
+    Imported lazily so this module can be imported in test environments where
+    chromadb is unavailable; tests inject FakeRagService directly via the
+    AgentOrchestrator constructor and never call this function.
     """
-    from app.services.rag_service import rag_service as _rag
+    from app.services.agent_rag_adapter import AgentRagAdapter
+    from app.services.rag_service import rag_service as _real_rag
 
-    return _rag  # type: ignore[return-value]  # duck-typed via Protocol
+    return AgentRagAdapter(_real_rag)  # type: ignore[return-value]  # satisfies Protocol
 
 
 # ---------------------------------------------------------------------------
