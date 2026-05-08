@@ -115,4 +115,37 @@ RECORD_FINDING: ToolSchema = {
 }
 
 
-ALL_TOOLS: list[ToolSchema] = [SEARCH_CONTEXT, RECORD_FINDING]
+TOOL_VERIFY_TAX_NUMBER = "verify_tax_number"
+
+VERIFY_TAX_NUMBER: ToolSchema = {
+    "name": TOOL_VERIFY_TAX_NUMBER,
+    "description": (
+        "Validate a counterparty tax / VAT number against an official external registry. "
+        "Call this tool whenever you extract a company tax ID or VAT number from an invoice, "
+        "contract, or any TP document. Returns is_valid, company_name, company_address, "
+        "and the registry source used."
+    ),
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "country_code": {
+                "type": "string",
+                "description": "ISO 3166-1 alpha-2 country code (e.g. 'HU', 'DE', 'AT').",
+                "minLength": 2,
+                "maxLength": 2,
+            },
+            "vat_number": {
+                "type": "string",
+                "description": (
+                    "The numeric or alphanumeric VAT identifier WITHOUT the country-code prefix "
+                    "(e.g. '123456789' not 'DE123456789')."
+                ),
+                "minLength": 1,
+            },
+        },
+        "required": ["country_code", "vat_number"],
+    },
+}
+
+
+ALL_TOOLS: list[ToolSchema] = [SEARCH_CONTEXT, RECORD_FINDING, VERIFY_TAX_NUMBER]

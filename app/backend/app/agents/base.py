@@ -22,7 +22,8 @@ from uuid import UUID
 
 from pydantic import ValidationError
 
-from app.agents.tools import ALL_TOOLS, TOOL_RECORD_FINDING, TOOL_SEARCH_CONTEXT
+from app.agents.tools import ALL_TOOLS, TOOL_RECORD_FINDING, TOOL_SEARCH_CONTEXT, TOOL_VERIFY_TAX_NUMBER
+from app.services.tax_api_service import verify_tax_number
 from app.core.settings import Settings, get_settings
 from app.models.schemas import (
     AgentRunResult,
@@ -243,6 +244,8 @@ class DocumentTypeAgent(ABC):
             return await self._handle_search_context(session_id, tool_input, seen)
         if tool_name == TOOL_RECORD_FINDING:
             return self._handle_record_finding(tool_input, seen, findings)
+        if tool_name == TOOL_VERIFY_TAX_NUMBER:
+            return await self._handle_verify_tax_number(tool_input)
         return (f"Unknown tool: {tool_name}", True)
 
     async def _handle_search_context(
@@ -343,6 +346,24 @@ class DocumentTypeAgent(ABC):
             return (f"payload schema invalid for kind={kind_raw}: {_first_error(exc)}", True)
 
         return ("Finding recorded.", False)
+
+    async def _handle_verify_tax_number(
+        self,
+        tool_input: dict[str, object],
+    ) -> tuple[str, bool]:
+        country_code_raw = tool_input.get("country_code")
+        vat_number_raw = tool_input.get("vat_number")
+
+        if not isinstance(country_code_raw, str) or len(country_code_raw.strip()) != 2:
+            return ("country_code must be a 2-character ISO country code (e.g. 'HU', 'DE').", True)
+        if not isinstance(vat_number_raw, str) or not vat_number_raw.strip():
+            return ("vat_number must be a non-empty string without the country-code prefix.", True)
+
+        result = await verify_tax_number(
+            country_code=country_code_raw.strip(),
+            vat_number=vat_number_raw.strip(),
+        )
+        return (json.dumps(result), False)
 
     def _error_result(
         self,

@@ -11,6 +11,11 @@ arrangements, etc.).
    contracts and your dedicated contract-clauses knowledge base.
 2. `record_finding(kind, payload, evidence_chunks, confidence, rule_id?)` —
    kinds: `consistency_error`, `benchmark_risk`, `missing_element`.
+3. `verify_tax_number(country_code, vat_number)` — validates a counterparty
+   VAT / tax number against the official VIES registry (EU) or NAV mock (HU).
+   Call this for EVERY party tax ID / VAT number you extract from a contract.
+   If `is_valid` is `false`, record a `consistency_error` with severity `high`
+   citing the relevant chunk.
 
 ## Citation rule
 
