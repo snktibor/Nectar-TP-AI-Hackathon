@@ -1,2 +1,52 @@
+### Python
+__pycache__/
+*.py[cod]
+*.so
+.venv/
+venv/
+env/
+.env
+.env.*
+!.env.example
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+.cache/
+
+### Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+package-lock.json
+pnpm-lock.yaml
+*.tsbuildinfo
+
+### Frontend build outputs
+app/frontend/dist/
+app/frontend/.vite/
+
+### OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*~
+
+### Logs
+*.log
+
+### Local data
+*.sqlite
+*.db
+
+#### Documentation
 docs/GitHub-Principle.md
 docs/Claude-Principle.md
+
+settings.local.json
