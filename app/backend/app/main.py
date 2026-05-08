@@ -17,7 +17,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from app.api.v1.endpoints import audits, documents
+from app.api.v1.endpoints import audits, documents, rag
 from app.models.schemas import ApiResponse, ErrorDetail, ResponseMeta
 
 logger = logging.getLogger(__name__)
@@ -72,6 +72,7 @@ def create_app() -> FastAPI:
     api_v1_prefix = "/api/v1"
     app.include_router(documents.router, prefix=api_v1_prefix)
     app.include_router(audits.router, prefix=api_v1_prefix)
+    app.include_router(rag.router, prefix=api_v1_prefix)
 
     # ---- Health probe ------------------------------------------------------
     @app.get("/health", tags=["system"], response_model=ApiResponse[dict[str, str]])

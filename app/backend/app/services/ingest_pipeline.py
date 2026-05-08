@@ -8,7 +8,7 @@ block the others.
 from __future__ import annotations
 
 import logging
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from app.models.schemas import IngestedDocument
 from app.services.chunker import chunk_document
@@ -32,9 +32,12 @@ def ingest_single_file(
         3. Chunk (split into overlapping segments)
         4. Vectorize (store in ChromaDB with metadata)
     """
+    document_id = uuid4()
+
     parsed = parse_document(filename, content)
     if parsed.error:
         return IngestedDocument(
+            document_id=document_id,
             filename=filename,
             size_bytes=len(content),
             detected_type="unknown",
@@ -55,11 +58,18 @@ def ingest_single_file(
         doc_type=classification.doc_type,
     )
 
-    stored_count = store_chunks(session_id, chunks)
+    stored_count = store_chunks(
+        session_id,
+        document_id,
+        chunks,
+        filename=filename,
+        doc_type=classification.doc_type,
+    )
 
     logger.info(
-        "Ingested %s → type=%s confidence=%.2f pages=%d chunks=%d",
+        "Ingested %s → doc_id=%s type=%s confidence=%.2f pages=%d chunks=%d",
         filename,
+        document_id,
         classification.doc_type,
         classification.confidence,
         parsed.page_count,
@@ -67,6 +77,7 @@ def ingest_single_file(
     )
 
     return IngestedDocument(
+        document_id=document_id,
         filename=filename,
         size_bytes=len(content),
         detected_type=classification.doc_type,

@@ -1,9 +1,14 @@
 """ChromaDB vector storage for document chunks.
 
-Provides session-scoped collections with traceability metadata on every
-chunk. Uses paraphrase-multilingual-MiniLM-L12-v2 for HU+EN support —
-the same model used by the legal_knowledge collection in rag_service.py
-so that cross-collection queries are embedding-consistent.
+Each uploaded document gets its own ChromaDB collection (``doc_{document_id}``)
+so per-document agents can query a single document's RAG without contamination
+from sibling files. Collection-level metadata records ``session_id`` and the
+detected ``doc_type`` so a session-scoped or cross-document query can iterate
+the right collections without relying on an external index.
+
+Embedding model is paraphrase-multilingual-MiniLM-L12-v2 — same as
+``rag_service.py`` for the legal_knowledge collection — so cross-collection
+similarity scores remain comparable.
 """
 
 from __future__ import annotations
@@ -30,29 +35,51 @@ def _get_client() -> chromadb.ClientAPI:
     return chromadb.PersistentClient(path=str(_CHROMA_DIR))
 
 
-def _collection_name(session_id: UUID) -> str:
-    return f"session_{str(session_id).replace('-', '_')}"
+def _collection_name(document_id: UUID) -> str:
+    return f"doc_{str(document_id).replace('-', '_')}"
 
 
-def store_chunks(session_id: UUID, chunks: list[TextChunk]) -> int:
-    """Store text chunks in a session-scoped ChromaDB collection.
+def _normalize_session(session_id: UUID) -> str:
+    return str(session_id)
 
-    Returns the number of chunks stored.
+
+def store_chunks(
+    session_id: UUID,
+    document_id: UUID,
+    chunks: list[TextChunk],
+    *,
+    filename: str,
+    doc_type: str,
+) -> int:
+    """Store text chunks in a per-document ChromaDB collection.
+
+    The collection is named ``doc_{document_id}`` and carries
+    ``session_id`` / ``document_id`` / ``filename`` / ``doc_type`` in its
+    own metadata so that cross-document iterators can filter by session
+    without consulting an external registry.
     """
     if not chunks:
         return 0
 
     client = _get_client()
     collection = client.get_or_create_collection(
-        name=_collection_name(session_id),
+        name=_collection_name(document_id),
         embedding_function=_embed,
-        metadata={"hnsw:space": "cosine"},
+        metadata={
+            "hnsw:space": "cosine",
+            "session_id": _normalize_session(session_id),
+            "document_id": str(document_id),
+            "filename": filename,
+            "doc_type": doc_type,
+        },
     )
 
     ids = [c.chunk_id for c in chunks]
     documents = [c.text for c in chunks]
     metadatas = [
         {
+            "session_id": _normalize_session(session_id),
+            "document_id": str(document_id),
             "file_name": c.file_name,
             "doc_type": c.doc_type,
             "chapter_or_page": c.chapter_or_page,
@@ -75,47 +102,118 @@ def store_chunks(session_id: UUID, chunks: list[TextChunk]) -> int:
         stored += end - i
 
     logger.info(
-        "Stored %d chunks in collection %s",
+        "Stored %d chunks in collection %s (session=%s)",
         stored,
-        _collection_name(session_id),
+        _collection_name(document_id),
+        session_id,
     )
     return stored
 
 
-def query_chunks(
-    session_id: UUID,
+def _serialize_results(results: dict, document_id: UUID | None = None) -> list[dict]:
+    output: list[dict] = []
+    docs = results.get("documents") or [[]]
+    metas = results.get("metadatas") or [[]]
+    distances = results.get("distances") or [[]]
+    if not docs or not docs[0]:
+        return output
+    for i, doc in enumerate(docs[0]):
+        meta = metas[0][i] if metas and metas[0] else {}
+        if document_id is not None and "document_id" not in meta:
+            meta = {**meta, "document_id": str(document_id)}
+        entry: dict = {
+            "text": doc,
+            "metadata": meta,
+            "distance": distances[0][i] if distances and distances[0] else None,
+        }
+        output.append(entry)
+    return output
+
+
+def query_document(
+    document_id: UUID,
     query_text: str,
     n_results: int = 5,
-    doc_type_filter: str | None = None,
 ) -> list[dict]:
-    """Query chunks from a session collection.
+    """Query the RAG of a single uploaded document.
 
-    Returns list of dicts with 'text', 'metadata', and 'distance' keys.
+    Returns ``[]`` if the document was never ingested (no collection exists).
     """
     client = _get_client()
-    collection_name = _collection_name(session_id)
-
     try:
-        collection = client.get_collection(name=collection_name, embedding_function=_embed)
+        collection = client.get_collection(
+            name=_collection_name(document_id), embedding_function=_embed
+        )
     except Exception:
         return []
 
-    where_filter = {"doc_type": doc_type_filter} if doc_type_filter else None
+    results = collection.query(query_texts=[query_text], n_results=n_results)
+    return _serialize_results(results, document_id=document_id)
 
-    results = collection.query(
-        query_texts=[query_text],
-        n_results=n_results,
-        where=where_filter,
-    )
 
-    output: list[dict] = []
-    if results["documents"] and results["documents"][0]:
-        for i, doc in enumerate(results["documents"][0]):
-            entry: dict = {
-                "text": doc,
-                "metadata": results["metadatas"][0][i] if results["metadatas"] else {},
-                "distance": results["distances"][0][i] if results["distances"] else None,
+def list_session_documents(session_id: UUID) -> list[dict]:
+    """List the per-document collections that belong to ``session_id``.
+
+    Inspects collection metadata rather than naming conventions, so a
+    document_id alone is sufficient for identification downstream.
+    """
+    client = _get_client()
+    target = _normalize_session(session_id)
+    out: list[dict] = []
+    for col in client.list_collections():
+        meta = col.metadata or {}
+        if meta.get("session_id") != target:
+            continue
+        out.append(
+            {
+                "document_id": meta.get("document_id"),
+                "filename": meta.get("filename"),
+                "doc_type": meta.get("doc_type"),
+                "collection": col.name,
+                "chunk_count": col.count(),
             }
-            output.append(entry)
+        )
+    return out
 
-    return output
+
+def query_session(
+    session_id: UUID,
+    query_text: str,
+    n_results_per_doc: int = 3,
+) -> list[dict]:
+    """Query every document collection in a session and merge the results.
+
+    Each per-document query returns its top ``n_results_per_doc`` chunks;
+    the merged list is sorted by distance (lowest = most similar). Used by
+    the cross-document consistency agent.
+    """
+    client = _get_client()
+    target = _normalize_session(session_id)
+    merged: list[dict] = []
+
+    for col_summary in client.list_collections():
+        meta = col_summary.metadata or {}
+        if meta.get("session_id") != target:
+            continue
+        try:
+            collection = client.get_collection(
+                name=col_summary.name, embedding_function=_embed
+            )
+        except Exception:
+            continue
+        results = collection.query(query_texts=[query_text], n_results=n_results_per_doc)
+        merged.extend(_serialize_results(results))
+
+    merged.sort(key=lambda r: r["distance"] if r["distance"] is not None else 1e9)
+    return merged
+
+
+def delete_document(document_id: UUID) -> bool:
+    """Remove a document's RAG collection. Returns True if it existed."""
+    client = _get_client()
+    name = _collection_name(document_id)
+    try:
+        client.delete_collection(name=name)
+        return True
+    except Exception:
+        return False
