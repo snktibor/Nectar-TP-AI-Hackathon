@@ -4,7 +4,7 @@ import {
   CheckCircle,
   FileText,
   FileUp,
-  Plus,
+  RotateCcw,
   Upload,
   X,
 } from 'lucide-react'
@@ -20,6 +20,7 @@ import { StatusPill } from './ui/DashboardPrimitives'
 const API_BASE = import.meta.env.VITE_API_BASE_URL
 const ACCEPTED_TYPES = '.pdf,.docx'
 const MAX_FILE_SIZE = 50 * 1024 * 1024
+const MAX_FILES = 5
 const FILE_INPUT_ID = 'document-ingest-files'
 
 interface DocumentIngestorProps {
@@ -29,6 +30,64 @@ interface DocumentIngestorProps {
 
 type IngestPhase = 'empty' | 'ready' | 'uploading' | 'done' | 'error'
 
+type RequiredDocumentType =
+  | 'master_file'
+  | 'local_file'
+  | 'contract'
+  | 'benchmark_study'
+  | 'invoice'
+
+const REQUIRED_DOCUMENT_TYPES: RequiredDocumentType[] = [
+  'master_file',
+  'local_file',
+  'contract',
+  'benchmark_study',
+  'invoice',
+]
+
+const REQUIRED_DOCUMENT_TYPE_LABELS: Record<RequiredDocumentType, string> = {
+  master_file: 'Fő Fájl',
+  local_file: 'Helyi Fájl',
+  contract: 'Szerződés',
+  benchmark_study: 'Benchmark tanulmány',
+  invoice: 'Számla',
+}
+
+function isRequiredDocumentType(value: string): value is RequiredDocumentType {
+  return REQUIRED_DOCUMENT_TYPES.includes(value as RequiredDocumentType)
+}
+
+function buildClassificationIssues(documents: IngestedDocument[]): string[] {
+  const issues: string[] = []
+  const matchedTypes = new Set<RequiredDocumentType>()
+
+  for (const document of documents) {
+    if (document.status === 'failed') {
+      issues.push(`${document.filename}: ${document.error ?? 'Ismeretlen osztályozási hiba.'}`)
+      continue
+    }
+
+    if (isRequiredDocumentType(document.detected_type)) {
+      matchedTypes.add(document.detected_type)
+      continue
+    }
+
+    issues.push(
+      `${document.filename}: nem kötelező kategóriába került (${document.detected_type}).`,
+    )
+  }
+
+  for (const requiredType of REQUIRED_DOCUMENT_TYPES) {
+    if (!matchedTypes.has(requiredType)) {
+      issues.push(
+        `Hiányzó kötelező kategória: ${REQUIRED_DOCUMENT_TYPE_LABELS[requiredType]}.`,
+      )
+    }
+  }
+
+  return issues
+}
+
 export default function DocumentIngestor({
   sessionId,
   onIngestComplete,
@@ -37,6 +96,7 @@ export default function DocumentIngestor({
   const [phase, setPhase] = useState<IngestPhase>('empty')
   const [results, setResults] = useState<IngestedDocument[]>([])
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [classificationIssues, setClassificationIssues] = useState<string[]>([])
   const [isDragOver, setIsDragOver] = useState(false)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
 
@@ -45,7 +105,12 @@ export default function DocumentIngestor({
       (file) => isSupportedDocument(file) && file.size <= MAX_FILE_SIZE,
     )
 
-    if (validFiles.length === 0) return
+    if (validFiles.length === 0) {
+      setErrorMessage('Csak PDF vagy DOCX fájl tölthető fel, maximum 50 MB méretben.')
+      return
+    }
+
+    let exceededFileLimit = false
 
     setSelectedFiles((previousFiles) => {
       const filesByName = new Map(previousFiles.map((file) => [file.name, file]))
@@ -54,11 +119,23 @@ export default function DocumentIngestor({
           filesByName.set(file.name, file)
         }
       }
-      return Array.from(filesByName.values())
+
+      const nextFiles = Array.from(filesByName.values())
+      if (nextFiles.length > MAX_FILES) {
+        exceededFileLimit = true
+        return nextFiles.slice(0, MAX_FILES)
+      }
+
+      return nextFiles
     })
 
     setPhase('ready')
-    setErrorMessage(null)
+    setClassificationIssues([])
+    setErrorMessage(
+      exceededFileLimit
+        ? `Maximum ${MAX_FILES} dokumentum adható meg. A többit a rendszer kihagyta.`
+        : null,
+    )
   }, [])
 
   function handleDragOver(event: React.DragEvent): void {
@@ -98,11 +175,29 @@ export default function DocumentIngestor({
     })
   }
 
+  function resetUploadFlow(openPicker = false): void {
+    setSelectedFiles([])
+    setResults([])
+    setErrorMessage(null)
+    setClassificationIssues([])
+    setIsDragOver(false)
+    setPhase('empty')
+
+    if (openPicker) {
+      fileInputRef.current?.click()
+    }
+  }
+
   async function handleIngest(): Promise<void> {
-    if (selectedFiles.length === 0) return
+    if (selectedFiles.length !== MAX_FILES) {
+      setPhase('error')
+      setErrorMessage(`Pontosan ${MAX_FILES} dokumentum szükséges a beolvasáshoz.`)
+      return
+    }
 
     setPhase('uploading')
     setErrorMessage(null)
+    setClassificationIssues([])
     setResults([])
 
     try {
@@ -126,8 +221,16 @@ export default function DocumentIngestor({
         throw new Error('A dokumentumok beolvasása sikertelen volt.')
       }
 
+      const issues = buildClassificationIssues(json.data.documents)
+
       setResults(json.data.documents)
       setPhase('done')
+      setClassificationIssues(issues)
+      setErrorMessage(
+        issues.length > 0
+          ? `A kötelező ${MAX_FILES} kategória besorolása nem teljesült.`
+          : null,
+      )
       onIngestComplete?.(json.data.documents)
     } catch (error) {
       const message =
@@ -135,6 +238,7 @@ export default function DocumentIngestor({
           ? error.message
           : 'A dokumentumok beolvasása sikertelen volt.'
       setErrorMessage(message)
+      setClassificationIssues([])
       setPhase('error')
     }
   }
@@ -143,7 +247,7 @@ export default function DocumentIngestor({
 
   return (
     <section className={[phantomDesign.components.panel, 'h-full'].join(' ')}>
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+      <div className="mb-4 flex min-h-14 flex-wrap items-center justify-between gap-2 rounded-phantom-card border border-phantom-line bg-phantom-surface-muted/60 px-4 py-3">
         <p className="text-sm font-semibold text-phantom-ink">Dokumentum feltöltés</p>
         <StatusPill tone={phase === 'done' ? 'success' : 'neutral'}>PDF / DOCX</StatusPill>
       </div>
@@ -173,24 +277,36 @@ export default function DocumentIngestor({
                   : 'Húzd ide a dokumentumokat, vagy kattints'}
               </p>
               <p className="mt-1 text-xs leading-5 text-phantom-muted">
-                PDF vagy DOCX, max 50 MB / fájl.
+                PDF vagy DOCX, max 50 MB / fájl. Pontosan {MAX_FILES} dokumentum szükséges.
               </p>
             </div>
           </label>
-          <input
-            id={FILE_INPUT_ID}
-            ref={fileInputRef}
-            type="file"
-            accept={ACCEPTED_TYPES}
-            multiple
-            className="hidden"
-            onChange={handleFileInput}
-          />
         </>
       )}
 
+      <input
+        id={FILE_INPUT_ID}
+        ref={fileInputRef}
+        type="file"
+        accept={ACCEPTED_TYPES}
+        multiple
+        className="hidden"
+        onChange={handleFileInput}
+      />
+
       {(phase === 'ready' || phase === 'error') && selectedFiles.length > 0 && (
         <div className="mt-4 space-y-2">
+          <div className="mb-1 flex items-center justify-between gap-2">
+            <p className="text-xs font-semibold text-phantom-muted">
+              Kiválasztva: {selectedFiles.length}/{MAX_FILES}
+            </p>
+            <StatusPill tone={selectedFiles.length === MAX_FILES ? 'success' : 'warning'}>
+              {selectedFiles.length === MAX_FILES
+                ? 'Készen áll'
+                : `Még ${MAX_FILES - selectedFiles.length} hiányzik`}
+            </StatusPill>
+          </div>
+
           {selectedFiles.map((file) => (
             <div
               key={file.name}
@@ -228,20 +344,32 @@ export default function DocumentIngestor({
       )}
 
       {phase === 'done' && results.length > 0 && (
-        <div className="space-y-3">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <p className="text-sm font-semibold text-phantom-success-text">
-              Feldolgozva: {successfulResults.length}/{results.length}
-            </p>
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              className="inline-flex min-h-10 items-center gap-2 rounded-phantom-control border border-phantom-line bg-phantom-surface px-3 py-2 text-sm font-semibold text-phantom-accent transition-phantom duration-phantom-base hover:border-phantom-accent hover:bg-phantom-accent-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus"
-            >
-              <Plus className="h-4 w-4" />
-              Új dokumentum hozzáadása
-            </button>
+        <div className="space-y-4">
+          <div className="rounded-phantom-card border border-phantom-line bg-phantom-surface px-4 py-3 min-h-14">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <p className="text-sm font-semibold text-phantom-success-text">
+                Feldolgozva: {successfulResults.length}/{results.length}
+              </p>
+              <StatusPill tone={classificationIssues.length === 0 ? 'success' : 'danger'}>
+                {classificationIssues.length === 0 ? 'Kategóriák rendben' : 'Kategória hiba'}
+              </StatusPill>
+            </div>
           </div>
+
+          {classificationIssues.length > 0 && (
+            <div className="rounded-phantom-card border border-phantom-danger-border bg-phantom-danger-soft p-4">
+              <p className="text-sm font-semibold text-phantom-danger-text">
+                A kötelező 5 kategória osztályozása nem sikerült teljesen.
+              </p>
+              <ul className="mt-2 space-y-1">
+                {classificationIssues.map((issue, index) => (
+                  <li key={`${issue}-${index}`} className="text-xs text-phantom-danger-text">
+                    - {issue}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           <div className="space-y-2">
             {results.map((document) => {
@@ -302,15 +430,24 @@ export default function DocumentIngestor({
               )
             })}
           </div>
+
+          <button
+            type="button"
+            onClick={() => resetUploadFlow()}
+            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-phantom-control border border-phantom-line bg-phantom-surface-muted px-3 py-2 text-xs font-semibold text-phantom-ink transition-phantom duration-phantom-base hover:border-phantom-accent hover:bg-phantom-accent-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus"
+          >
+            <RotateCcw className="h-4 w-4" />
+            Fájlok újrafeltöltése
+          </button>
         </div>
       )}
 
-      {phase === 'error' && errorMessage && (
+      {errorMessage && phase !== 'uploading' && (
         <div className="mt-4 rounded-phantom-card border border-phantom-danger-border bg-phantom-danger-soft p-4">
           <div className="flex items-start gap-3">
             <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-phantom-danger-text" />
             <div>
-              <p className="text-sm font-semibold text-phantom-danger-text">A beolvasás sikertelen</p>
+              <p className="text-sm font-semibold text-phantom-danger-text">Figyelmeztetés</p>
               <p className="mt-1 text-xs text-phantom-danger-text">{errorMessage}</p>
             </div>
           </div>
@@ -321,7 +458,7 @@ export default function DocumentIngestor({
         <button
           type="button"
           onClick={() => void handleIngest()}
-          disabled={selectedFiles.length === 0}
+          disabled={selectedFiles.length !== MAX_FILES}
           className={[
             phantomDesign.components.buttonBase,
             phantomDesign.components.buttonPrimary,
@@ -329,7 +466,7 @@ export default function DocumentIngestor({
           ].join(' ')}
         >
           <FileUp className="h-4 w-4" />
-          Beolvasás indítása ({selectedFiles.length})
+          Beolvasás indítása ({selectedFiles.length}/{MAX_FILES})
         </button>
       )}
     </section>

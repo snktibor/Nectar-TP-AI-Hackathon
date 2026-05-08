@@ -163,7 +163,6 @@ export default function App(): JSX.Element {
     <div className={[phantomDesign.layout.page, 'h-screen'].join(' ')}>
       <main className="h-full w-full">
         <DashboardShell
-          loadedDocuments={successfulDocumentCount}
           leftPanel={(
             <DocumentIngestor
               sessionId={SESSION_ID}

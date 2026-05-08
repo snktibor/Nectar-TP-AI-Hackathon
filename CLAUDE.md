@@ -50,8 +50,9 @@ Implemented classification and planned scoring use JSON rulesets in `app/backend
 
 - Batch PDF/DOCX ingest through `POST /api/v1/documents/ingest`.
 - pypdf/python-docx parsing, ruleset classification, chunking, and ChromaDB indexing.
-- React `DocumentIngestor` with drag-drop upload and classification result cards.
-- Mock audit task pipeline exposed through `/api/v1/audits/start`, `/status/{id}`, and `/results/{id}`.
+- React `DocumentIngestor` enforces a strict 5-document intake per run and validates required category coverage (`master_file`, `local_file`, `contract`, `benchmark_study`, `invoice`) with explicit failure reasons.
+- Frontend audit flow is actively wired to `/api/v1/audits/start`, `/status/{id}`, and `/results/{id}` with polling lifecycle handling.
+- `AnalysisWorkspace` renders backend-driven findings, per-agent runs, and telemetry tabs.
 - `phantomDesign` frontend design system with Tailwind `phantom` tokens.
 
 ## Roles And Delegation
@@ -64,7 +65,7 @@ Implemented classification and planned scoring use JSON rulesets in `app/backend
 
 ## Strict Execution Cycle
 
-1. A request arrives → read `.agents/orchestrator.md` (Claude) or `.github/agents/orchestrator.md` (Copilot).
+1. A request arrives → read `.claude/agents/orchestrator.md` (Claude) or `.github/agents/orchestrator.md` (Copilot).
 2. Design communication boundaries (API contracts, DTO structures).
 3. Delegate implementation to the right specialist (`frontend` or `backend`).
 4. After coding, a refactor pass with `coding-principles` agent is mandatory.

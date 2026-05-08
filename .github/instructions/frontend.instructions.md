@@ -24,50 +24,47 @@ The frontend provides the document upload workflow and risk dashboard for review
 - Keep reusable design decisions centralized in `src/design-system/phantomDesign.ts`, `tailwind.config.js`, and `src/index.css`.
 - Do not scatter one-off color, spacing, shadow, radius, or animation values through components.
 - Use `src/components/ui/DashboardPrimitives.tsx` for repeated dashboard UI patterns such as section headers, status pills, metric cards, empty panels, and workflow timelines.
-- Keep shared document display helpers in `src/lib/documentDisplay.ts` and frontend-only report scaffolding helpers in `src/lib/frontendAnalysis.ts`.
+- Keep shared document display helpers in `src/lib/documentDisplay.ts` and backend audit DTO/helpers in `src/lib/backendAudit.ts`.
+- Active render path is `src/App.tsx` → `src/components/DashboardShell.tsx` → `src/components/DocumentIngestor.tsx` + `src/components/AnalysisWorkspace.tsx`.
+- Sidebar menu in `DashboardShell` is intentionally local-state only and must not navigate until a routing contract is approved.
+- Legacy components that are not on the active render path must not be treated as UI source of truth.
 
 ## Core Screens
 
 ### 1. Document Ingestor
-- Drag-and-drop or file picker for multiple PDF/DOCX files.
+- Drag-and-drop or file picker for PDF/DOCX files.
+- Enforce max 5 selected files and allow ingest only when exactly 5 files are present.
+- Validate file type, duplicate filenames, and 50 MB per-file limit in the UI before sending.
 - Call `POST /api/v1/documents/ingest` and render backend classification, confidence, page count, chunk count, and file size.
-- Validate file type, non-empty file, duplicate filenames, and 50 MB per-file limit in the UI before sending.
-- Show upload, empty, done, and error states clearly.
+- Require coverage of `master_file`, `local_file`, `contract`, `benchmark_study`, and `invoice` in the processed result set.
+- If coverage is incomplete, show failed files with reasons and list missing required categories.
+- Provide done-state recovery action `Fájlok újrafeltöltése` that resets upload state and reopens the file picker.
 
 ### 2. Analysis Workspace
-- Right-side workspace starts empty until documents are successfully classified.
-- After ingest, show an analysis CTA that prepares the future report surface without backend wiring.
-- Present readiness score, document coverage, finding previews, and next steps from frontend-only scaffolding data.
-- Keep the panel ready for future backend audit pipeline results without duplicating backend scoring logic.
+- Right-side workspace starts empty until at least one document is successfully classified.
+- Analyze CTA calls `POST /api/v1/audits/start` with the active session.
+- Poll `GET /api/v1/audits/status/{audit_task_id}` until terminal state.
+- On completed status, fetch `GET /api/v1/audits/results/{audit_task_id}` and render report data.
+- Keep state transitions explicit via `empty`, `ready`, `starting`, `polling`, `completed`, and `failed` phases.
 
 ### 3. Analysis Progress
-- Job status polling or SSE stream is planned for backend wiring.
-- Current frontend uses workflow timelines to show upload → classification → report preparation.
-- Estimated time or spinner per active stage.
+- While audit runs, show stage label, bounded progress bar, and per-agent status strip.
+- Polling interval and timers must be cleaned up on terminal states and unmount.
+- Start/poll/result failures must surface as recoverable error UI.
 
-### 4. Risk Dashboard (Main View)
-- Overall risk score with color-coded level (LOW/MEDIUM/HIGH/CRITICAL).
-- Summary stats: total findings by severity.
-- Estimated NAV exposure in HUF.
-- Quick filters: severity, finding category, document, transaction.
+### 4. Completed Report Surface
+- Findings tab: grouped-by-agent findings plus severity-filtered flat list.
+- Agent runs tab: model, prompt, runtime, status, and per-agent finding counts.
+- Telemetry tab: token/tool-call totals and per-agent token breakdown table.
 
-### 5. Findings List
-- Card-based or table layout.
-- Each finding shows: ID, type, severity badge, short rationale, source document link.
-- Sortable by severity, category, financial impact.
+### 5. Dashboard Shell
+- Left sidebar rail must protect long labels with truncation and `min-w-0` overflow-safe layout.
+- Non-active menu items keep subtle colored layer styling and hover feedback.
+- Settings and profile remain in the lower sidebar block.
+
+### 6. Severity and Findings
+- Findings must carry severity labels and retain backend attribution details where available.
 - Severity color system from `severity_scoring.json`: critical=#D32F2F, high=#F57C00, medium=#FBC02D, low=#388E3C.
-
-### 6. Planned Finding Detail
-- Full finding description with evidence.
-- Source A and Source B citations with document name, page, paragraph.
-- Financial impact estimate (if available).
-- Remediation suggestion.
-- "View in document" link highlighting the relevant excerpt.
-
-### 7. Planned Completeness Matrix
-- Grid view: checklist items vs. status (present/partial/missing).
-- Separate matrices for Master File and Local File.
-- Aggregate completeness percentage.
 
 ## UX Rules
 - Severity is visually dominant — color, icon, and label together.
@@ -98,3 +95,4 @@ The frontend provides the document upload workflow and risk dashboard for review
 - Severity colors match `severity_scoring.json` exactly.
 - Run `npm run lint` and `npm run build` in `app/frontend` after frontend changes.
 - Check 320px, 375px, 768px, 1024px, and desktop widths for overflow-sensitive dashboard changes.
+- When frontend behavior contracts change, sync `app/frontend/CLAUDE.md`, `.github/agents/frontend.md`, `.claude/agents/frontend.md`, and this file in the same change set.

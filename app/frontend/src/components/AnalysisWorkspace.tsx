@@ -472,9 +472,11 @@ export default function AnalysisWorkspace({
 
   return (
     <section className={[phantomDesign.components.panel, 'h-full'].join(' ')}>
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-        <p className="text-sm font-semibold text-phantom-ink">Riport</p>
-        <StatusPill tone={status.tone}>{status.label}</StatusPill>
+      <div className="mb-4 min-h-14 rounded-phantom-card border border-phantom-line bg-phantom-surface px-4 py-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-sm font-semibold text-phantom-ink">Riport</p>
+          <StatusPill tone={status.tone}>{status.label}</StatusPill>
+        </div>
       </div>
 
       {phase === 'empty' && (

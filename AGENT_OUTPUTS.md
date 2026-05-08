@@ -423,3 +423,14 @@ The aggregated lists at `AuditReport` level simply omit findings from this agent
 - **Per-agent status strip** can be driven entirely by `agent_progress` during polling and by `AuditReport.agent_runs[*].status` once the audit completes.
 - **Token spend / latency** for the "telemetry" tab comes from `AgentRunResult` (`input_tokens`, `output_tokens`, `cache_read_tokens`, `started_at`/`finished_at`).
 - **Cross-doc findings** (`attribution.agent_id === "cross_doc_consistency_agent"`) typically have ≥ 2 distinct `filename`s in their `evidence_chunks` — render them with a "between docs" visual marker rather than a single-doc one.
+
+---
+
+## 9. Frontend integration file state snapshot (2026-05-09)
+
+- Active render path: `src/App.tsx` → `src/components/DashboardShell.tsx` → `src/components/DocumentIngestor.tsx` + `src/components/AnalysisWorkspace.tsx`.
+- `DocumentIngestor.tsx` enforces exactly 5 files per ingest run, validates required type coverage (`master_file`, `local_file`, `contract`, `benchmark_study`, `invoice`), and surfaces failed-file reasons.
+- Completed ingest state includes a recovery action (`Fájlok újrafeltöltése`) that resets upload state and reopens file selection.
+- `AnalysisWorkspace.tsx` consumes backend audit phases and shows findings, per-agent run data, and telemetry from `AuditReport`.
+- `DashboardShell.tsx` sidebar is intentionally local-state navigation only (clickable, no route transition yet).
+- `Header.tsx`, `UploadPanel.tsx`, `ResultsPanel.tsx`, and `SeverityBadge.tsx` are currently not on the active render path and should not be used as baseline for new UX behavior.
