@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Any, Generic, TypeVar
+from typing import Any, Generic, Optional, TypeVar
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -178,6 +178,18 @@ class AuditStatusResponse(BaseModel):
 # --- Final report sub-structures ------------------------------------------------
 
 
+class ErrorLocation(BaseModel):
+    """Precise source location of a finding within the document set."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    filename: str = Field(..., description="Name of the file containing the issue.")
+    line_numbers: Optional[list[int]] = Field(
+        default=None,
+        description="Line numbers where the issue occurs; null if it spans the whole document.",
+    )
+
+
 class ConsistencyError(BaseModel):
     """Inconsistency detected across documents (e.g. mismatched figures)."""
 
@@ -186,7 +198,10 @@ class ConsistencyError(BaseModel):
     error_id: UUID = Field(default_factory=uuid4)
     description: str
     severity: RiskSeverity
-    source_documents: list[UUID] = Field(default_factory=list)
+    locations: list[ErrorLocation] = Field(
+        default_factory=list,
+        description="Source locations involved in the contradiction (one per compared document).",
+    )
     evidence: str | None = None
 
 
@@ -201,6 +216,10 @@ class BenchmarkRisk(BaseModel):
     benchmark_range: tuple[float, float]
     severity: RiskSeverity
     rationale: str
+    locations: list[ErrorLocation] = Field(
+        default_factory=list,
+        description="Contract or invoice files that contain the deviating pricing data.",
+    )
 
 
 class MissingElement(BaseModel):
@@ -209,7 +228,8 @@ class MissingElement(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     element_id: UUID = Field(default_factory=uuid4)
-    name: str
+    description: str = Field(..., description="Human-readable explanation of what is missing.")
+    expected_in: str = Field(..., description="Document where the element should appear (e.g. 'local_file.pdf').")
     required_by: str = Field(..., description="Regulation or guideline reference.")
     severity: RiskSeverity
 

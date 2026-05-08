@@ -21,6 +21,7 @@ from app.models.schemas import (
     BenchmarkRisk,
     ConsistencyError,
     ErrorDetail,
+    ErrorLocation,
     MissingElement,
     RiskSeverity,
 )
@@ -154,6 +155,10 @@ class MockAgentService:
                     "the figure derived from the supporting financial annex (3.7%)."
                 ),
                 severity=RiskSeverity.HIGH,
+                locations=[
+                    ErrorLocation(filename="local_file.pdf", line_numbers=[12, 15]),
+                    ErrorLocation(filename="financial_annex.pdf", line_numbers=[8]),
+                ],
                 evidence="Local File §3.2 vs. Annex II table 4",
             ),
             ConsistencyError(
@@ -162,6 +167,10 @@ class MockAgentService:
                     "intercompany services contract attributes R&D costs locally."
                 ),
                 severity=RiskSeverity.MEDIUM,
+                locations=[
+                    ErrorLocation(filename="master_file.pdf", line_numbers=[42]),
+                    ErrorLocation(filename="service_agreement.pdf", line_numbers=[31, 32]),
+                ],
                 evidence="Master File §5 vs. Service Agreement clause 7.1",
             ),
         ]
@@ -176,6 +185,9 @@ class MockAgentService:
                     "Observed margin falls below the interquartile range of comparable "
                     "distributors in the benchmark study."
                 ),
+                locations=[
+                    ErrorLocation(filename="intercompany_contract_2023.pdf", line_numbers=[19, 20]),
+                ],
             ),
             BenchmarkRisk(
                 metric="royalty_rate",
@@ -183,17 +195,23 @@ class MockAgentService:
                 benchmark_range=(2.0, 5.0),
                 severity=RiskSeverity.MEDIUM,
                 rationale="Royalty rate exceeds the upper quartile of the comparable set.",
+                locations=[
+                    ErrorLocation(filename="license_agreement.pdf", line_numbers=[7]),
+                    ErrorLocation(filename="local_file.pdf", line_numbers=[55]),
+                ],
             ),
         ]
 
         missing_elements = [
             MissingElement(
-                name="Functional analysis of low-value intra-group services",
+                description="Functional analysis of low-value intra-group services is absent.",
+                expected_in="local_file.pdf",
                 required_by="OECD TPG 2022, Chapter VII",
                 severity=RiskSeverity.MEDIUM,
             ),
             MissingElement(
-                name="Country-by-Country reporting reconciliation",
+                description="Country-by-Country reporting reconciliation table is not provided.",
+                expected_in="master_file.pdf",
                 required_by="Hungarian Act LXXXI of 1996, §31/B",
                 severity=RiskSeverity.HIGH,
             ),
