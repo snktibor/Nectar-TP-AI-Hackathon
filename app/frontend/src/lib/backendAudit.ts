@@ -42,6 +42,9 @@ export interface BackendEvidenceChunk {
   readonly page: number
   readonly chunk_index: number
   readonly quote?: string | null
+  readonly source_kind?: 'document' | 'legal' | null
+  readonly char_start?: number | null
+  readonly char_end?: number | null
 }
 
 export interface BackendFindingAttribution {
@@ -51,6 +54,10 @@ export interface BackendFindingAttribution {
   readonly evidence_chunks: BackendEvidenceChunk[]
   readonly rule_id?: string | null
   readonly prompt_version?: string | null
+  readonly reasoning?: string | null
+  readonly uncertainty_notes?: string | null
+  readonly requires_human_review?: boolean | null
+  readonly legal_references?: readonly string[]
 }
 
 export interface BackendAuditStartResponse {

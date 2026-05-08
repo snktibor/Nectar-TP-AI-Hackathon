@@ -19,6 +19,7 @@ import {
   type BackendRiskSeverity,
   type WorkspacePhase,
 } from '../lib/backendAudit'
+import type { CitationTarget } from '../types/viewer'
 import type { IngestedDocument } from '../types/api'
 import AgentStatusStrip from './AgentStatusStrip'
 import FindingCard from './FindingCard'
@@ -34,6 +35,8 @@ interface AnalysisWorkspaceProps {
   readonly auditReport: BackendAuditReport | null
   readonly auditError: string | null
   readonly onAnalyze: () => void
+  readonly sessionId: string
+  readonly onCitationClick: (target: CitationTarget) => void
 }
 
 function resolvePhasePill(phase: WorkspacePhase): { label: string; tone: StatusPillTone } {
@@ -123,7 +126,15 @@ function groupFindingsByAgent(findings: AnyFinding[]): Map<AgentId | 'other', An
 // FindingsView
 // ---------------------------------------------------------------------------
 
-function FindingsView({ report }: Readonly<{ report: BackendAuditReport }>): JSX.Element {
+function FindingsView({
+  report,
+  sessionId,
+  onCitationClick,
+}: Readonly<{
+  report: BackendAuditReport
+  sessionId: string
+  onCitationClick: (target: CitationTarget) => void
+}>): JSX.Element {
   const [severityFilter, setSeverityFilter] = useState<BackendRiskSeverity | null>(null)
 
   const allFindings = flattenFindings(report)
@@ -226,7 +237,13 @@ function FindingsView({ report }: Readonly<{ report: BackendAuditReport }>): JSX
               </summary>
               <div className="space-y-2 border-t border-phantom-line p-3">
                 {filtered.map((f) => (
-                  <FindingCard key={findingKey(f)} variant={f} showAgentBadge={false} />
+                  <FindingCard
+                    key={findingKey(f)}
+                    variant={f}
+                    showAgentBadge={false}
+                    sessionId={sessionId}
+                    onCitationClick={onCitationClick}
+                  />
                 ))}
               </div>
             </details>
@@ -252,7 +269,13 @@ function FindingsView({ report }: Readonly<{ report: BackendAuditReport }>): JSX
               </summary>
               <div className="space-y-2 border-t border-phantom-line p-3">
                 {filtered.map((f) => (
-                  <FindingCard key={findingKey(f)} variant={f} showAgentBadge={false} />
+                  <FindingCard
+                    key={findingKey(f)}
+                    variant={f}
+                    showAgentBadge={false}
+                    sessionId={sessionId}
+                    onCitationClick={onCitationClick}
+                  />
                 ))}
               </div>
             </details>
@@ -268,7 +291,13 @@ function FindingsView({ report }: Readonly<{ report: BackendAuditReport }>): JSX
           </p>
           <div className="space-y-2">
             {filteredFindings.map((f) => (
-              <FindingCard key={findingKey(f)} variant={f} showAgentBadge={true} />
+              <FindingCard
+                key={findingKey(f)}
+                variant={f}
+                showAgentBadge={true}
+                sessionId={sessionId}
+                onCitationClick={onCitationClick}
+              />
             ))}
           </div>
         </section>
@@ -459,6 +488,8 @@ export default function AnalysisWorkspace({
   auditReport,
   auditError,
   onAnalyze,
+  sessionId,
+  onCitationClick,
 }: AnalysisWorkspaceProps): JSX.Element {
   const [activeTab, setActiveTab] = useState<TabId>('findings')
   const successfulDocuments = documents.filter((document) => document.status === 'success')
@@ -551,7 +582,13 @@ export default function AnalysisWorkspace({
           </div>
 
           {/* Tab content */}
-          {activeTab === 'findings' && <FindingsView report={auditReport} />}
+          {activeTab === 'findings' && (
+            <FindingsView
+              report={auditReport}
+              sessionId={sessionId}
+              onCitationClick={onCitationClick}
+            />
+          )}
           {activeTab === 'agent_runs' && <AgentRunsView report={auditReport} />}
           {activeTab === 'telemetry' && <TelemetryView report={auditReport} />}
         </div>

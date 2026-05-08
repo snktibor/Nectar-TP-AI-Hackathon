@@ -13,6 +13,7 @@ from typing import Annotated
 from uuid import UUID, uuid4
 
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile, status
+from fastapi.responses import Response
 
 from app.models.schemas import (
     ApiResponse,
@@ -32,6 +33,9 @@ router = APIRouter(prefix="/documents", tags=["documents"])
 
 # In-memory document registry. {session_id: {document_id: DocumentRecord}}.
 _DOCUMENTS: dict[UUID, dict[UUID, DocumentRecord]] = {}
+
+# Raw file bytes keyed by (session_id, filename). Max 5 × 50 MB = 250 MB/session — acceptable for PoC.
+_FILE_BYTES: dict[tuple[UUID, str], bytes] = {}
 
 _MAX_UPLOAD_BYTES = 50 * 1024 * 1024  # 50 MB hard cap for the PoC.
 
@@ -69,6 +73,8 @@ async def upload_document(
                 "message": f"Maximum upload size is {_MAX_UPLOAD_BYTES} bytes.",
             },
         )
+
+    _FILE_BYTES[(session_id, file.filename)] = payload
 
     record = DocumentRecord(
         document_id=uuid4(),
@@ -172,6 +178,7 @@ async def ingest_documents(
             )
 
         file_payloads.append((f.filename, payload))
+        _FILE_BYTES[(session_id, f.filename)] = payload
 
     results = await ingest_batch(session_id, file_payloads)
 
@@ -207,6 +214,30 @@ async def ingest_documents(
     )
 
     return ApiResponse[IngestResponse](success=True, data=response)
+
+
+@router.get(
+    "/{session_id}/file/{filename:path}",
+    summary="Stream the original uploaded file bytes for in-browser viewing.",
+)
+async def download_document(session_id: UUID, filename: str) -> Response:
+    """Return the raw bytes of a previously ingested file so the UI can render it."""
+    payload = _FILE_BYTES.get((session_id, filename))
+    if payload is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"code": "FILE_NOT_FOUND", "message": f"No stored bytes for '{filename}' in session {session_id}."},
+        )
+    media_type = (
+        "application/pdf"
+        if filename.lower().endswith(".pdf")
+        else "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    )
+    return Response(
+        content=payload,
+        media_type=media_type,
+        headers={"Content-Disposition": f'inline; filename="{filename}"'},
+    )
 
 
 def _map_doc_type(detected: str) -> DocumentType:

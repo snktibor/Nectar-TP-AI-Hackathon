@@ -8,6 +8,8 @@ import {
   type BackendFindingAttribution,
   type BackendMissingElement,
 } from '../lib/backendAudit'
+import type { CitationTarget } from '../types/viewer'
+import { phantomDesign } from '../design-system/phantomDesign'
 import EvidenceChip from './EvidenceChip'
 import { StatusPill } from './ui/DashboardPrimitives'
 
@@ -19,42 +21,104 @@ type FindingVariant =
 interface FindingCardProps {
   readonly variant: FindingVariant
   readonly showAgentBadge?: boolean
+  readonly sessionId?: string
+  readonly onCitationClick?: (target: CitationTarget) => void
 }
 
 function AttributionRow({
   attribution,
   isCrossDoc,
-}: Readonly<{ attribution: BackendFindingAttribution; isCrossDoc: boolean }>): JSX.Element {
+  sessionId,
+  onCitationClick,
+}: Readonly<{
+  attribution: BackendFindingAttribution
+  isCrossDoc: boolean
+  sessionId: string
+  onCitationClick?: (target: CitationTarget) => void
+}>): JSX.Element {
   const hasChunks = attribution.evidence_chunks.length > 0
+  const confidencePct = Math.round(attribution.confidence * 100)
+  const hasLegalRefs = (attribution.legal_references?.length ?? 0) > 0
 
   return (
-    <div className="mt-2 border-t border-phantom-line pt-2">
+    <div className="mt-2 border-t border-phantom-line pt-2 space-y-2">
+      {/* Evidence chips */}
       <div className="flex flex-wrap items-center gap-1.5">
         <span className="text-[11px] text-phantom-subtle">Hivatkozások:</span>
         {hasChunks ? (
-          attribution.evidence_chunks.map((chunk, i) => (
-            <EvidenceChip
-              key={`${chunk.filename}-${chunk.page}-${chunk.chunk_index}-${i}`}
-              chunk={chunk}
-              isCrossDoc={isCrossDoc}
-            />
-          ))
+          attribution.evidence_chunks.map((chunk, i) => {
+            const target: CitationTarget = {
+              sessionId,
+              filename: chunk.filename,
+              page: chunk.page,
+              charStart: chunk.char_start ?? null,
+              charEnd: chunk.char_end ?? null,
+              sourceKind: chunk.source_kind ?? 'document',
+              quote: chunk.quote ?? null,
+            }
+            return (
+              <EvidenceChip
+                key={`${chunk.filename}-${chunk.page}-${chunk.chunk_index}-${i}`}
+                chunk={chunk}
+                isCrossDoc={isCrossDoc}
+                onClick={onCitationClick ? () => onCitationClick(target) : undefined}
+              />
+            )
+          })
         ) : (
           <StatusPill tone="danger">⚠ Hiányzó bizonyíték (BE hiba)</StatusPill>
         )}
       </div>
 
-      <div className="mt-1.5 flex items-center gap-2">
+      {/* Confidence bar + human review badge */}
+      <div className="flex items-center gap-2">
         <div className="h-1 flex-1 overflow-hidden rounded-full bg-phantom-surface ring-1 ring-phantom-line">
           <div
             className="h-full rounded-full bg-phantom-accent"
-            style={{ width: `${Math.round(attribution.confidence * 100)}%` }}
+            style={{ width: `${confidencePct}%` }}
           />
         </div>
         <span className="shrink-0 text-[11px] text-phantom-subtle">
-          Megbízhatóság: {Math.round(attribution.confidence * 100)}%
+          Megbízhatóság: {confidencePct}%
         </span>
+        {attribution.requires_human_review === true && (
+          <StatusPill tone="warning">Emberi felülvizsgálat szükséges</StatusPill>
+        )}
       </div>
+
+      {/* Reasoning (collapsible) */}
+      {attribution.reasoning && (
+        <details className="text-xs">
+          <summary className="cursor-pointer select-none text-phantom-subtle hover:text-phantom-ink">
+            Ügynök indoklás
+          </summary>
+          <p className="mt-1 italic text-phantom-muted leading-relaxed">{attribution.reasoning}</p>
+        </details>
+      )}
+
+      {/* Uncertainty notes */}
+      {attribution.uncertainty_notes && (
+        <p className="text-[11px] text-phantom-subtle border-l-2 border-amber-300 pl-2">
+          {attribution.uncertainty_notes}
+        </p>
+      )}
+
+      {/* Legal references */}
+      {hasLegalRefs && (
+        <details className="text-xs">
+          <summary className="cursor-pointer select-none text-phantom-subtle hover:text-phantom-ink">
+            Jogszabályi hivatkozások
+          </summary>
+          <div className="mt-1 flex flex-wrap gap-1">
+            {attribution.rule_id && (
+              <code className={phantomDesign.components.tag}>{attribution.rule_id}</code>
+            )}
+            {attribution.legal_references?.map((ref) => (
+              <code key={ref} className={phantomDesign.components.tag}>{ref}</code>
+            ))}
+          </div>
+        </details>
+      )}
     </div>
   )
 }
@@ -74,7 +138,12 @@ function findingLocationsCount(variant: FindingVariant): number {
   return variant.finding.locations.length
 }
 
-export default function FindingCard({ variant, showAgentBadge = false }: FindingCardProps): JSX.Element {
+export default function FindingCard({
+  variant,
+  showAgentBadge = false,
+  sessionId = '',
+  onCitationClick,
+}: FindingCardProps): JSX.Element {
   const severity = findingSeverity(variant)
   const attribution = findingAttribution(variant)
   const borderClass = getSeverityBorderClass(severity)
@@ -149,7 +218,12 @@ export default function FindingCard({ variant, showAgentBadge = false }: Finding
       )}
 
       {attribution && (
-        <AttributionRow attribution={attribution} isCrossDoc={isCrossDoc} />
+        <AttributionRow
+          attribution={attribution}
+          isCrossDoc={isCrossDoc}
+          sessionId={sessionId}
+          onCitationClick={onCitationClick}
+        />
       )}
     </article>
   )

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import AnalysisWorkspace from './components/AnalysisWorkspace'
 import DashboardShell from './components/DashboardShell'
 import DocumentIngestor from './components/DocumentIngestor'
+import DocumentViewer from './components/DocumentViewer'
 import { phantomDesign } from './design-system/phantomDesign'
 import type {
   BackendAuditReport,
@@ -9,6 +10,7 @@ import type {
   BackendAuditStatusResponse,
   WorkspacePhase,
 } from './lib/backendAudit'
+import type { CitationTarget } from './types/viewer'
 import type { ApiResponse, IngestedDocument } from './types/api'
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL
@@ -21,6 +23,7 @@ export default function App(): JSX.Element {
   const [auditStatus, setAuditStatus] = useState<BackendAuditStatusResponse | null>(null)
   const [auditReport, setAuditReport] = useState<BackendAuditReport | null>(null)
   const [auditError, setAuditError] = useState<string | null>(null)
+  const [activeCitation, setActiveCitation] = useState<CitationTarget | null>(null)
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const successfulDocumentCount = ingestedDocuments.filter(
@@ -163,12 +166,19 @@ export default function App(): JSX.Element {
     <div className={[phantomDesign.layout.page, 'h-screen'].join(' ')}>
       <main className="h-full w-full">
         <DashboardShell
-          leftPanel={(
-            <DocumentIngestor
-              sessionId={SESSION_ID}
-              onIngestComplete={handleIngestComplete}
-            />
-          )}
+          leftPanel={
+            activeCitation !== null ? (
+              <DocumentViewer
+                citation={activeCitation}
+                onClose={() => setActiveCitation(null)}
+              />
+            ) : (
+              <DocumentIngestor
+                sessionId={SESSION_ID}
+                onIngestComplete={handleIngestComplete}
+              />
+            )
+          }
           rightPanel={(
             <AnalysisWorkspace
               documents={ingestedDocuments}
@@ -177,6 +187,8 @@ export default function App(): JSX.Element {
               auditReport={auditReport}
               auditError={auditError}
               onAnalyze={() => void handleAnalyze()}
+              sessionId={SESSION_ID}
+              onCitationClick={setActiveCitation}
             />
           )}
         />
