@@ -36,8 +36,6 @@ Egy transzferár-dokumentáció **nem egy fájl**, hanem egy összefüggő rends
 - **Csoporton belüli szerződések** — a leány és az anyacég (vagy testvércégek) közötti megállapodások
 - **Számlák** — kiállított és fogadott számlák a kapcsolt felek felé
 - **Benchmark tanulmány** — mennyit kérnek független cégek hasonló szolgáltatásért (független adatbázisokból)
-- **APA** (opcionális) — előzetes árképzési megállapodás a NAV-val
-- **Country-by-Country Report** — a teljes cégcsoport pénzügyi adatai országonként
 
 ### A tényleges fájdalom
 
@@ -239,148 +237,59 @@ A mentortól kérünk egy 1-oldalas "mit kell tartalmaznia" útmutatót → ezt 
 
 ---
 
-## 6. ÜZLETI ÉRTÉK A PwC-NEK
+## 6. MŰKÖDÉSI FOLYAMAT RÉSZLETESEN
 
-### Hogyan lesz ebből pénz
+### 6.1 Bemenet és előfeldolgozás
+1. A felhasználó feltölti a releváns dokumentumokat (Master File, Local File, szerződések, számlák, benchmark).
+2. A dokumentum parser minden fájlt strukturált szövegre bont: oldal, bekezdés, szakaszcím, táblázat.
+3. Minden szövegrész kap egy forrásazonosítót (`<doc_id>:<page>:<paragraph>`), hogy később visszakereshető legyen.
+4. A rendszer a darabolt tartalmat vektorindexbe helyezi, így az ágensek célzottan tudnak keresni.
 
-#### 1. Belső eszköz a transzferárazási csapatnak — közvetlen óramegtakarítás
-Egy senior konzulens jelenleg 200–600 órát tölt egy ügyfél dokumentációjával. Ha a Redline Phantom elvégzi a konzisztencia-ellenőrzés és a kötelező-elem-check 80%-át, az 30–40% órát megtakarít. **Ugyanolyan minőségű deliverable, kevesebb munkaóra → nagyobb margin.**
+### 6.2 Ágens-vezérelt elemzés
+1. **Konzisztencia-Őr**: állításokat (claim) emel ki minden dokumentumból, majd ellentmondásokat keres claim-párok között.
+2. **Kötelező Elem Checker**: a 32/2017 NGM rendelet szerinti checklist alapján elemenként minősít: megvan / hiányos / hiányzik.
+3. **Benchmark Validátor**: interkvartilis tartományt olvas a benchmarkból, és összeveti a Local File tényszámaival.
+4. Az orchestrator közös munkamemóriát tart fenn, így a második és harmadik ágens látja az előző eredményeit.
 
-#### 2. Skálázhatóság — több ügyfél kiszolgálása ugyanannyi emberrel
-A PwC transzferárazási csapata kapacitás-korlátozott. Új ügyfeleket sokszor visszautasítanak. Az automatizált előszűréssel **+40% ügyfélkapacitás** elérhető anélkül hogy új embert vennének fel.
+### 6.3 Aggregáció és priorizálás
+1. Az aggregátor egyesíti a három ágens findings listáját.
+2. Minden finding kap súlyosságot: `critical`, `high`, `medium`, `low`.
+3. A súlyosságokból összesített kockázati pontszám készül.
+4. A rendszer kiszámítja a becsült NAV-kitettséget (ahol számszerűsíthető a pénzügyi hatás).
 
-#### 3. Új termékvonal: "Pre-NAV Health Check"
-Egy önálló, csomagolt termék: az ügyfél feltölti a dokumentációját, kap egy 24 órán belül kész kockázati riportot. **Belépő pont a teljes szolgáltatáshoz**, csábító árképzéssel (pl. 800 ezer Ft / health check, ami a teljes dokumentáció árának 5-10%-a).
-
-#### 4. NAV-vita támogatás — magas díjas tanácsadás
-Ha egy ügyfélnél NAV vizsgálat van, a PwC **óradíjas alapon** dolgozik. A rendszer felhasználható a védekezési stratégia előkészítésére: gyorsan megmutatja hol a leggyengébb pont. **Ez a legmagasabb óradíjas munka** a csapatban.
-
-### A számok egy pitch-slide-ra
-
-| Metrika | Jelenleg | Redline Phantommal |
-|---------|----------|--------------------|
-| Egy dokumentáció átfutási ideje | 6–12 hét | 4–8 hét |
-| Kötelező elem hiány felderítése | ~85% | ~98% |
-| Inkonzisztencia felderítése | Senior tapasztalattól függ | Konzisztens |
-| Junior óra / projekt | 80–150 | 30–60 |
-| Új ügyfél onboarding kapacitás | Korlátozott | +40% |
-
-### Mi NEM a Redline Phantom
-
-**Nem helyettesíti a transzferárazási konzulenst.** A komplex döntéseket továbbra is ember hozza meg (pl. melyik benchmark módszer a megfelelő, hogyan kell érvelni). A rendszer az **előkészítő munka és az ellenőrzési ciklus** automatizálását célozza — ami a csapat idejének 60-70%-a.
+### 6.4 Kimenet
+- Vezetői összefoglaló kockázati szinttel.
+- Részletes findings lista forráshivatkozásokkal.
+- Tranzakció szintű benchmark megfelelési státusz.
+- Kötelező elemek megfelelőségi mátrixa.
 
 ---
 
-## 7. MEGVALÓSÍTÁSI ÜTEMTERV (19 ÓRA)
+## 7. SZABÁLYRENDSZER ÉS OSZTÁLYOZÁS
 
-### Csapatfelosztás
+Az elemzés szabályalapú és LLM-alapú réteget kombinál:
 
-| Csapattag | Felelősségi terület |
-|-----------|---------------------|
-| Hajdú Patrik Zsolt | Backend, orchestrator, API-ok, ágens-logika |
-| Sinka Tibor | Frontend (Next.js), dokumentum parser, demo dashboard |
-| Jonás Gergely | Prompt engineering, ágens-promptok, benchmark logika, pitch tartalom |
+- **Dokumentum-besorolás**: dokumentumtípus azonosítás kulcsszavak és szerkezeti jelek alapján.
+- **TP módszer-besorolás**: CUP, RPM, CPM, TNMM, PSM felismerés és validáció.
+- **Súlyosság-besorolás**: finding-ok minősítése kritikus/magas/közepes/alacsony szintre.
+- **NAV kockázati kategóriák**: audit-trigger és kitettség szerinti besorolás.
 
-### Időrend
-
-**0–2. óra: Előkészítés és architektúra**
-- Repo felállítás, közös API-szerződés definiálása
-- Mentor briefing: kötelező elem lista (32/2017 NGM)
-- Adat: szintetikus dokumentumcsomag első verzió generálása
-
-**2–6. óra: Infrastruktúra**
-- Patrik: FastAPI backend váz, dokumentum-feltöltő endpoint
-- Tibor: Next.js frontend, fájlfeltöltő UI, alap dashboard layout
-- Geri: első ágens prompt-jai (Konzisztencia-Őr), tesztelés a dokumentumokon
-
-**6–10. óra: Ágens fejlesztés**
-- Patrik: orchestrator szekvenciális hívási logika, közös context-objektum
-- Tibor: forráshivatkozás-megjelenítés (chunk → kiemelés a dokumentumon)
-- Geri: a 3 ágens prompt-jainak finomhangolása, kötelező elem checklist beépítése
-
-**10–14. óra: Integráció**
-- End-to-end folyamat: feltöltés → ágensek → dashboard
-- Hibák, edge case-ek
-- Risk score számítási logika
-
-**14–17. óra: Tesztelés és csiszolás**
-- Tesztelés a szintetikus csomagon, ground truth ellenőrzés
-- F1 score mérés, metrikák a pitchhez
-- UI csiszolás, responsive
-
-**17–19. óra: Pitch + demó**
-- Demó videó felvétele backup gyanánt
-- Pitch deck (10–12 slide)
-- Élő demó forgatókönyv
-
-### MVP — minimális győzelmi szint
-
-A 19 óra végén ezt **muszáj** működőképesnek lennie:
-- Felhasználó feltölt 4–5 dokumentumot
-- A rendszer kiad egy dashboardot 8–12 megállapítással
-- Minden megállapításnak van forráshivatkozása
-- A risk score-ok tükrözik a beépített hibákat
-- A szintetikus csomag legalább 70% F1 score-t hoz
-
-### Stretch goalok — *csak ha minden megy*
-- Reális (anonimizált) PDF tesztelés a mentortól
-- Orchestrator átírása LangGraph-ra
-- "Magyarázd el laikusan" gomb minden megállapításhoz
-- PDF export (klienseknek küldhető riport)
+A szabályok célja, hogy az output konzisztens legyen, visszaellenőrizhető legyen, és ne csak szabad szöveges LLM-válaszból álljon.
 
 ---
 
-## 8. PITCH STRUKTÚRA (5 PERC)
+## 8. KORLÁTOK ÉS MINŐSÉGBIZTOSÍTÁS
 
-### Slide-ok
+### Korlátok
+- A rendszer nem helyettesíti az adótanácsadói szakmai döntést.
+- A parser minősége befolyásolja az eredmény pontosságát (különösen komplex PDF esetén).
+- A benchmark értékeléshez megfelelő minőségű összehasonlító adatok szükségesek.
 
-1. **Hook** (30 sec): "Egy NAV transzferár-ellenőrzésen 50–200 millió forint büntetés a tét. Egy junior konzulens 3 hetet tölt egy dokumentáció ellenőrzésével. Mi 3 órára csökkentjük."
-2. **A probléma** (45 sec): Mi a transzferárazás, mi a manuális fájdalom (5–7 dokumentum, 800 oldal, kötelező konzisztencia)
-3. **Tipikus hibák** (30 sec): 3 konkrét példa egy ellentmondásra, hiányzó elemre, benchmark-szakadékra
-4. **A megoldás vizuálisan** (60 sec): A 3 ágens, az orchestrator, a dashboard
-5. **Élő demó** (90 sec): Feltöltés → 30 másodperc várakozás → dashboard a beépített hibákkal
-6. **Üzleti érték a PwC-nek** (45 sec): Óramegtakarítás + új termékvonal + skálázhatóság
-7. **Tech kompetencia** (15 sec): "Mérnök informatikus csapat, BME VIK"
-8. **Závás** (15 sec): "Egy hackathon-MVP 19 óra alatt — éles deploy 3 hónapon belül lehetséges"
-
-### Mit ne mondjunk
-- ❌ "Forradalmi", "diszruptív", "AI-vezérelt"
-- ❌ Azt hogy az SAP nem tud ilyet (de tud, csak strukturált adatokon)
-- ❌ Túlbecsülni a pénzügyi hatást — maradjunk reálisan a sávban
-
-### Mit muszáj mondanunk
-- ✅ "Forráshivatkozás minden megállapításnál" — ez a brief egyik kulcs-elvárása
-- ✅ "Bizonytalanságot kezelünk" — a brief explicit említi
-- ✅ "Multi-dokumentum elemzés, nem chatbot" — ez az amitől eltér a generic AI-tól
-- ✅ "32/2017 NGM rendelet" — legalább egyszer, hogy lássák hogy értjük a domain-t
-
----
-
-## 9. KOCKÁZATOK ÉS MITIGÁCIÓ
-
-| Kockázat | Valószínűség | Mitigáció |
-|----------|--------------|-----------|
-| LLM hallucinál egy ellentmondást ami nincs | KÖZEPES | Forráshivatkozás kötelező → ha nincs, nem fogadjuk el |
-| Nincs idő mind a 3 ágensre | KÖZEPES | Fallback: 2 ágens (Konzisztencia + Kötelező Elem) |
-| PDF parser elszáll a komplex layouton | MAGAS | Backup: minden szintetikus dokumentum legyen "tiszta" PDF, semmi szkennelés |
-| Mentor nem ér rá a kötelező elem listához | KÖZEPES | NAV honlapról letölthető, OECD-ből kiegészíthető — időigényes, de nem blokkoló |
-| Demó során elszáll egy API | ALACSONY | Előre rögzített backup videó kéznél |
-| A zsűri kérdez a szakmai mélységről | MAGAS | Geri legyen a "domain-felelős" — vegye át a transzferárazás vázát mentor briefing alapján |
-
----
-
-## 10. MIÉRT EZ NYER
-
-A brief 6 explicit elvárást támaszt — a Redline Phantom mindegyiket teljesíti:
-
-1. ✅ **Multi-dokumentum értelmezés** — 5–7 fájl együtt elemzése
-2. ✅ **Eltérések, hiányosságok felderítése** — pont ez a fő funkció
-3. ✅ **Forráshivatkozás minden megállapításhoz** — chunk-ID rendszerrel
-4. ✅ **Bizonytalanság kezelése** — minden megállapításnál bizonyossági szint
-5. ✅ **Strukturált, magyarázható output** — risk dashboard és priorizálás
-6. ✅ **Nem helyettesíti az embert, hanem támogatja** — ez a pozícionálásunk magja
-
-És a PwC-s szempontból: **valódi, mérhető, már létező szolgáltatási vonalra építünk**, nem fiktív felhasználási esetre. A transzferárazás a PwC adózási üzletágának egyik legnagyobb és legdokumentum-intenzívebb területe.
+### Minőségbiztosítás
+- Minden finding csak forráshivatkozással érvényes.
+- A bizonyossági szint kötelező mező.
+- A beépített szintetikus hibákon rendszeres visszamérés történik (ground truth ellen).
+- A végső riport emberi validációval zárul.
 
 ---
 

@@ -1,32 +1,29 @@
 ---
 name: Backend Specialist
-description: Stable, scalable, and secure APIs and business logic. Delegate all server-side routes, services, and data-layer implementation here.
+description: Stable, scalable, and secure backend implementation for transfer pricing document intelligence.
 tools: []
 ---
-# Backend Engineering Instructions
+# Backend Specialist (REDLINE PHANTOM)
 
-## Architecture And Layers
-- **Controller/Route Layer:** Accept HTTP requests, validate parameters, and return proper status codes and responses. No business logic here.
-- **Service Layer:** Place business rules, calculations, and orchestration here.
-- **Repository/Data Layer:** Only this layer communicates with databases and external persistence systems.
+## Scope
+Implement APIs and services for parsing, indexing, multi-agent orchestration, ruleset evaluation, and risk scoring.
 
-## Scalability And Robustness
-- **Asynchronous I/O:** Network, file, and database operations should be asynchronous and non-blocking.
-- **Stateless Runtime:** Do not store session state in server memory. Each request must carry required authentication context, such as JWT.
-- **Graceful Error Handling:** Never expose raw stack traces to clients. Use a global error handler and return standardized JSON error responses.
+## Must-Have Backend Components
+- Upload/ingestion API with strict file validation
+- Parser abstraction (PDF/DOCX)
+- Chunk model with source IDs (`doc:page:paragraph`)
+- Retrieval/index service
+- Agent orchestration service
+- Ruleset evaluator using `app/backend/rulesets/*.json`
+- Findings/risk response serializer
 
-## Typing And Contract Safety
-- Use type hints for all function signatures and service boundaries.
-- Define request and response DTOs with Pydantic models.
-- Avoid `Any` and untyped `dict` in API contracts.
+## Engineering Rules
+- Use typed DTOs and explicit error models.
+- Keep business logic in services, not controllers.
+- Ensure deterministic behavior where rulesets apply.
+- Reject unsupported/malformed documents early.
 
-## Development Discipline
-- Use Ruff as the primary lint and format gate.
-- Keep fail-fast behavior in development: do not hide exceptions with silent handlers.
-
-## Enforcement Checklist
-- Controller, service, and repository boundaries are respected.
-- API contracts use typed DTOs with no `Any` or untyped `dict` exposure.
-- Async I/O and stateless runtime assumptions are preserved.
-- Error responses are standardized and do not leak internals.
-- Ruff and type checks pass before completion.
+## Security & Reliability
+- No sensitive document content in logs.
+- Validate input size, format, and count.
+- Return standardized error payloads.

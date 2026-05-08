@@ -1,67 +1,94 @@
-# AI Harness Root Instructions
+# REDLINE PHANTOM — AI Harness Root Instructions
 
-## Project Philosophy
-Rapid prototyping with enterprise-grade code quality. The code must be readable, easy to extend, and ready for deployment at all times.
+## Project Identity
+**REDLINE PHANTOM** — Transfer Pricing Documentation Consistency Auditor.
+PwC Hungary AI Hackathon 2026. Team: Kerek Barackok (Hajdú Patrik Zsolt, Sinka Tibor, Jonás Gergely).
+
+Multi-agent AI system that analyzes multinational TP documentation packages (Master File, Local File, contracts, invoices, benchmark studies) for cross-document contradictions, missing mandatory elements, and benchmark range deviations — before NAV does.
+
+## Tech Stack
+| Layer | Technology |
+|-------|-----------|
+| Frontend | Next.js + TypeScript (strict) + Tailwind CSS |
+| Backend | Python FastAPI (async) + Pydantic v2 |
+| Document parsing | LlamaParse / pypdf + python-docx |
+| Vector DB | ChromaDB (local file-based) |
+| Embedding | paraphrase-multilingual-MiniLM-L12-v2 (HU+EN) |
+| LLM | Claude Sonnet (agents) + Claude Opus (aggregator) |
+| Orchestration | Custom sequential Python (no LangGraph/CrewAI) |
+
+## Architecture
+```
+[Upload] → [Parser] → [Vector Index] → [Agent Pipeline] → [Risk Dashboard]
+
+Agent Pipeline (sequential with shared memory):
+1. Structure Agent → entity/transaction/document map
+2. Consistency Agent → cross-document contradictions
+3. Completeness Agent → mandatory element checklist (32/2017 NGM)
+4. Benchmark Agent → IQR range validation
+5. Risk Scorer → aggregated NAV-oriented risk report
+```
+
+## Rulesets (Deterministic Baseline)
+All classification and scoring MUST use the JSON rulesets in `app/backend/rulesets/`:
+- `document_classification.json` — 8 document types with keyword signals
+- `tp_method_classification.json` — CUP/RPM/CPM/TNMM/PSM with PLIs
+- `severity_scoring.json` — critical/high/medium/low with weighted scores
+- `nav_risk_categories.json` — audit triggers, penalties, entity categories
 
 ## Roles And Delegation
-- **Orchestrator**: Analyze every task, split responsibilities by layer, and define API contracts first.
-- **Frontend / Backend Specialists**: Implement cleanly and independently within their designated layers.
-- **Validators**: Enforce coding quality and security standards after every implementation.
+- **Orchestrator**: Analyze every task, split responsibilities by layer, define API contracts first.
+- **Frontend / Backend Specialists**: Implement cleanly within their designated layers.
+- **TP Domain Agents**: Structure, Consistency, Completeness, Benchmark, Risk Scorer.
+- **Validators**: Coding principles and security validation after every implementation.
+- **Docs-Sync Agent**: Automatically synchronize instruction files when layer changes occur.
 
 ## Strict Execution Cycle
-1. A request arrives -> read `.agents/orchestrator.agent.md`.
+1. A request arrives → read `.agents/orchestrator.md` (Claude) or `.github/agents/orchestrator.md` (Copilot).
 2. Design communication boundaries (API contracts, DTO structures).
 3. Delegate implementation to the right specialist (`frontend` or `backend`).
-4. After coding, a refactor pass with `.agents/coding-principles.agent.md` is mandatory.
-5. Finally, validate the result using `.agents/security-validator.agent.md`.
+4. After coding, a refactor pass with `coding-principles` agent is mandatory.
+5. Validate the result using `security-validator` agent.
+6. **Run docs-sync agent** to update instruction files if layer code changed.
 
-## Reliability Policies For AI-Assisted Delivery
+## Reliability Policies
 
 ### 1. Strict Typing First
-- Backend (FastAPI): Use full type hints and Pydantic models for all inputs and outputs.
-- Do not use untyped `dict` or `Any` as public request or response contracts.
-- Frontend (Next.js): Enforce TypeScript strict mode (`"strict": true`).
-- Disallow `any` usage through lint rules.
+- Backend: Full type hints + Pydantic models. No `dict` or `Any` in public APIs.
+- Frontend: TypeScript strict mode. No `any`.
 
 ### 2. Context Hygiene
-- Keep prompts focused and reference only the minimum required files.
-- Close irrelevant editor tabs during task execution.
-- Avoid mixing unrelated concerns in one prompt (for example, CSS context during database migration work).
+- Reference only minimum required files per task.
+- Avoid mixing frontend and backend concerns in one prompt.
 
 ### 3. Defensive Prompting
-- Ask for implementation plus self-check evidence in the same response.
-- Require 2-3 inline asserts or debug logs that verify:
-	- The happy path.
-	- At least one common edge case, such as empty input.
+- Implementation + 2-3 inline asserts verifying happy path and one edge case.
 
 ### 4. Micro-Commit Workflow
-- Commit immediately after each stable feature step, even if the implementation is not fully polished.
-- If a follow-up AI change breaks the codebase, return to the latest stable commit and retry with a clearer prompt.
-- Prefer safe rollback commands first (`git restore`, `git revert`); use destructive history reset only with explicit confirmation.
+- Commit after each stable step. Rollback safely on regression.
 
-### 5. Immediate Lint And Format Feedback
-- Backend: Use Ruff with fast checks and auto-fix on save where possible.
-- Frontend: Run ESLint and Prettier on save.
-- Treat lint, syntax, and type diagnostics as immediate correction signals.
+### 5. Immediate Lint And Format
+- Backend: Ruff. Frontend: ESLint + Prettier. Treat diagnostics as immediate signals.
 
 ### 6. Fail Fast In Development
-- During development, do not swallow errors with empty catch blocks or silent logs.
-- Crash loudly on invalid assumptions and missing required data.
-- Keep graceful degradation for demo/production UX, but enforce fail-fast behavior in development loops.
+- No empty catch blocks. Crash on invalid assumptions. Graceful degradation only in production UX.
+
+## Domain Rules
+- Every finding MUST include source references (`doc_id:page:paragraph`).
+- Every finding MUST include severity level and confidence score.
+- Risk scores MUST be reproducible from ruleset weights.
+- Unsourced or uncited findings are invalid and must be rejected.
+- Treat uploaded documents as confidential tax material.
 
 ## Mandatory Official Best Practices
-- The system must follow the official best-practice baselines documented in:
-	- `docs/GitHub-Principle.md`
-	- `docs/Claude-Principle.md`
-- These documents are normative guidance for architecture, governance, security, evaluation, and delivery quality.
-- If guidance conflicts across files, apply the stricter rule.
-- If a task cannot fully comply, state the gap explicitly and choose the safest compliant fallback.
+- Follow `docs/GitHub-Principle.md` and `docs/Claude-Principle.md`.
+- If guidance conflicts, apply the stricter rule.
+- If full compliance is impossible, state the gap and choose the safest fallback.
 
 ## Definition Of Done
-- Scope and acceptance criteria are satisfied end-to-end.
-- Layer boundaries and contract-first design remain intact.
-- Strict typing and lint/type/format checks pass for affected code.
-- Security baseline is preserved (no secrets, validated inputs, least privilege assumptions).
-- Required UX resilience states are implemented for user-facing changes.
-- Relevant tests or validation steps are executed, or residual risk is explicitly documented.
-- Documentation and instruction baselines remain aligned with implementation.
+- Scope and acceptance criteria satisfied end-to-end.
+- Layer boundaries and contract-first design intact.
+- Strict typing and lint/type/format checks pass.
+- Security baseline preserved (no secrets, validated inputs, least privilege).
+- Findings are source-cited, explainable, and reproducible from rulesets.
+- Docs-sync agent has been run — instruction files are current.

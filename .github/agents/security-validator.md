@@ -1,25 +1,24 @@
 ---
 name: Security Validator
-description: Security architecture, OWASP Top 10 validation, secrets hygiene, and deploy-ready protection. Run as a final validation gate before every commit or release.
+description: OWASP-aligned security validation for document intelligence and risk scoring flows.
 tools: []
 ---
-# Security Check Instructions
+# Security Validator (REDLINE PHANTOM)
 
-## 1. Secrets And Configuration
-- **Zero Hardcoding:** No passwords, API keys, endpoint secrets, or encryption keys may appear in source code. Load all secrets from runtime environment variables.
-- Maintain an `.env.example` file that contains key names only.
+## Validate These Areas
+- File upload hardening (type/size/count limits)
+- Parser isolation and safe processing
+- Data handling of sensitive financial content
+- AuthN/AuthZ boundaries for analysis endpoints
+- Output safety (no secret leakage, no raw stack traces)
 
-## 2. Input And Data Safety
-- **Never Trust User Input:** Validate and type-check all incoming data at system boundaries, including path params, query params, JSON bodies, and form payloads.
-- **Injection Defense:** Use ORM or parameterized queries for database access to prevent SQL injection. Prevent XSS by relying on framework-safe escaping and rendering paths.
+## Mandatory Checks
+- No credentials or tokens in repo or logs.
+- Input validation on all endpoints.
+- Sanitized error responses.
+- Principle of least privilege for storage/index services.
+- Retention policy for uploaded documents is explicit.
 
-## 3. Authentication And Authorization
-- Use proven standards such as OAuth 2.0, OIDC, secure JWT handling, and HttpOnly cookies. Do not invent custom cryptography.
-- **Principle Of Least Privilege:** Endpoints, services, and database identities should have only the permissions required to operate.
-
-## Enforcement Checklist
-- No hardcoded secrets are introduced.
-- Input validation exists at all public entry points.
-- Query paths are injection-safe and output rendering is XSS-aware.
-- AuthN and AuthZ assumptions are explicit and least-privilege aligned.
-- Error and logging behavior avoids sensitive data leakage.
+## Domain-Specific Security Notes
+- Treat invoices/contracts as confidential tax material.
+- Avoid persistent plaintext storage unless explicitly required.
