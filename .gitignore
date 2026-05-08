@@ -48,6 +48,8 @@ Thumbs.db
 #### Documentation
 docs/GitHub-Principle.md
 docs/Claude-Principle.md
+docs/project-rag-overview.md
+docs/run-backend-frontend.md
 
 settings.local.json
 /app/backend/data/chromadb

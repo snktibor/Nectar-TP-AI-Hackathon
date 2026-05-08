@@ -7,6 +7,11 @@ PwC Hungary AI Hackathon 2026. Team: Kerek Barackok (Hajdú Patrik Zsolt, Sinka 
 
 Multi-agent AI system that analyzes multinational TP documentation packages (Master File, Local File, contracts, invoices, benchmark studies) for cross-document contradictions, missing mandatory elements, and benchmark range deviations — before NAV does.
 
+## Project Docs
+
+- `docs/project-rag-overview.md` — short project-level RAG and workflow overview.
+- `docs/run-backend-frontend.md` — concise local startup guide for backend and frontend.
+
 ## Tech Stack
 
 | Layer | Technology |
