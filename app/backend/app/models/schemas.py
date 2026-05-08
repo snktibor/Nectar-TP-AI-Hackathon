@@ -140,6 +140,58 @@ class DocumentListResponse(BaseModel):
 # ---------------------------------------------------------------------------
 
 
+# ---------------------------------------------------------------------------
+# Document Ingest
+# ---------------------------------------------------------------------------
+
+
+class ChunkMetadata(BaseModel):
+    """Metadata attached to every vector chunk for traceability."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    chunk_id: UUID = Field(default_factory=uuid4)
+    file_name: str
+    doc_type: str
+    chapter_or_page: str
+    chunk_index: int = Field(..., ge=0)
+    char_start: int = Field(..., ge=0)
+    char_end: int = Field(..., ge=0)
+
+
+class IngestedDocument(BaseModel):
+    """Result for a single file processed by the ingest pipeline."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    document_id: UUID = Field(default_factory=uuid4)
+    filename: str
+    size_bytes: int = Field(..., ge=0)
+    detected_type: str
+    confidence: float = Field(..., ge=0.0, le=1.0)
+    page_count: int = Field(..., ge=0)
+    chunk_count: int = Field(..., ge=0)
+    status: str = Field(default="success")
+    error: str | None = None
+
+
+class IngestResponse(BaseModel):
+    """Returned after the batch ingest pipeline completes."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    session_id: UUID
+    total_files: int = Field(..., ge=0)
+    processed: int = Field(..., ge=0)
+    failed: int = Field(..., ge=0)
+    documents: list[IngestedDocument]
+
+
+# ---------------------------------------------------------------------------
+# Audits
+# ---------------------------------------------------------------------------
+
+
 class AuditStartRequest(BaseModel):
     """Body of POST /audits/start."""
 

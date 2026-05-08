@@ -5,10 +5,12 @@ import type {
   AuditReport,
   ApiResponse,
   AuditStartResponse,
+  IngestedDocument,
 } from './types/api'
 import Header from './components/Header'
 import UploadPanel from './components/UploadPanel'
 import type { SlotKey } from './components/UploadPanel'
+import DocumentIngestor from './components/DocumentIngestor'
 import ResultsPanel from './components/ResultsPanel'
 import type { AuditPhase } from './components/ResultsPanel'
 import { phantomDesign } from './design-system/phantomDesign'
@@ -18,6 +20,7 @@ const API_BASE = import.meta.env.VITE_API_BASE_URL
 const SESSION_ID = crypto.randomUUID()
 
 export default function App(): JSX.Element {
+  const [ingestedDocs, setIngestedDocs] = useState<IngestedDocument[]>([])
   const [uploadedDocs, setUploadedDocs] = useState<
     Partial<Record<SlotKey, DocumentUploadResponse>>
   >({})
@@ -148,21 +151,32 @@ export default function App(): JSX.Element {
     setUploadedDocs((prev) => ({ ...prev, [slot]: doc }))
   }
 
+  function handleIngestComplete(docs: IngestedDocument[]): void {
+    setIngestedDocs(docs)
+  }
+
   const isAuditRunning = auditPhase === 'starting' || auditPhase === 'polling'
+  const hasIngestedDocs = ingestedDocs.length > 0
 
   return (
     <div className={phantomDesign.layout.page}>
       <Header sessionId={SESSION_ID} />
       <main className={phantomDesign.layout.container}>
         <div className={phantomDesign.layout.dashboardGrid}>
-          <div className="min-w-0 lg:col-span-1">
-            <UploadPanel
+          <div className="min-w-0 space-y-4 lg:col-span-1">
+            <DocumentIngestor
               sessionId={SESSION_ID}
-              uploadedDocs={uploadedDocs}
-              onUploaded={handleDocUploaded}
-              onStartAudit={() => void handleStartAudit()}
-              isDisabled={isAuditRunning}
+              onIngestComplete={handleIngestComplete}
             />
+            {hasIngestedDocs && (
+              <UploadPanel
+                sessionId={SESSION_ID}
+                uploadedDocs={uploadedDocs}
+                onUploaded={handleDocUploaded}
+                onStartAudit={() => void handleStartAudit()}
+                isDisabled={isAuditRunning}
+              />
+            )}
           </div>
           <div className="min-w-0 lg:col-span-2">
             <ResultsPanel

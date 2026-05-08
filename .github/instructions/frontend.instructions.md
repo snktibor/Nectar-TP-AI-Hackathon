@@ -26,37 +26,42 @@ The frontend provides the document upload workflow and risk dashboard for review
 
 ## Core Screens
 
-### 1. Document Upload
-- Drag-and-drop or file picker for 5-7 documents (PDF/DOCX).
-- Show classified document type after upload (from backend classification).
-- Validate: minimum required documents present (Master File + Local File).
+### 1. Document Ingestor
+- Drag-and-drop or file picker for multiple PDF/DOCX files.
+- Call `POST /api/v1/documents/ingest` and render backend classification, confidence, page count, chunk count, and file size.
+- Validate file type, non-empty file, duplicate filenames, and 50 MB per-file limit in the UI before sending.
+- Show upload, empty, done, and error states clearly.
+
+### 2. Legacy Audit Upload
+- Keep the current required Master File / Local File / Contract slots until ingest results are wired directly into audit start.
+- Validate: minimum required documents present (Master File + Local File + Contract).
 - Show upload progress and validation errors clearly.
 
-### 2. Analysis Progress
+### 3. Analysis Progress
 - Job status polling or SSE stream.
 - Show pipeline stage progress (Structure → Consistency → Completeness → Benchmark → Scoring).
 - Estimated time or spinner per stage.
 
-### 3. Risk Dashboard (Main View)
+### 4. Risk Dashboard (Main View)
 - Overall risk score with color-coded level (LOW/MEDIUM/HIGH/CRITICAL).
 - Summary stats: total findings by severity.
 - Estimated NAV exposure in HUF.
 - Quick filters: severity, finding category, document, transaction.
 
-### 4. Findings List
+### 5. Findings List
 - Card-based or table layout.
 - Each finding shows: ID, type, severity badge, short rationale, source document link.
 - Sortable by severity, category, financial impact.
 - Severity color system from `severity_scoring.json`: critical=#D32F2F, high=#F57C00, medium=#FBC02D, low=#388E3C.
 
-### 5. Finding Detail
+### 6. Planned Finding Detail
 - Full finding description with evidence.
 - Source A and Source B citations with document name, page, paragraph.
 - Financial impact estimate (if available).
 - Remediation suggestion.
 - "View in document" link highlighting the relevant excerpt.
 
-### 6. Completeness Matrix
+### 7. Planned Completeness Matrix
 - Grid view: checklist items vs. status (present/partial/missing).
 - Separate matrices for Master File and Local File.
 - Aggregate completeness percentage.

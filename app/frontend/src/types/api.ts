@@ -36,6 +36,34 @@ export interface DocumentUploadResponse {
   uploaded_at: string
 }
 
+// ---------------------------------------------------------------------------
+// Document Ingest
+// ---------------------------------------------------------------------------
+
+export interface IngestedDocument {
+  document_id: string
+  filename: string
+  size_bytes: number
+  detected_type: string
+  confidence: number
+  page_count: number
+  chunk_count: number
+  status: 'success' | 'failed'
+  error: string | null
+}
+
+export interface IngestResponse {
+  session_id: string
+  total_files: number
+  processed: number
+  failed: number
+  documents: IngestedDocument[]
+}
+
+// ---------------------------------------------------------------------------
+// Audits
+// ---------------------------------------------------------------------------
+
 export interface AuditStartResponse {
   audit_task_id: string
   session_id: string

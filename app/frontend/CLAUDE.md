@@ -14,12 +14,12 @@ React + Vite + TypeScript frontend for a transfer pricing documentation consiste
 
 ## Key Screens
 
-1. **Document Upload** — drag-drop, classified type display, validation
-2. **Analysis Progress** — pipeline stage tracking (Structure → Consistency → Completeness → Benchmark → Scoring)
-3. **Risk Dashboard** — overall score, severity summary, NAV exposure estimate
-4. **Findings List** — filterable cards with severity badges and source links
-5. **Finding Detail** — full evidence, source citations, remediation hint
-6. **Completeness Matrix** — checklist grid for Master File and Local File
+1. **Document Ingestor** — drag-drop batch PDF/DOCX upload, backend classification, chunk/index status cards
+2. **Legacy Audit Upload** — required Master File / Local File / Contract slots after ingest until direct ingest-to-audit wiring exists
+3. **Analysis Progress** — polling-based pipeline stage tracking
+4. **Risk Dashboard** — overall score, severity summary, and mock NAV-oriented risk output
+5. **Findings List** — cards with severity badges and evidence snippets
+6. **Planned Detail Views** — finding detail and completeness matrix are not fully implemented yet
 
 ## Critical Rules
 
@@ -31,6 +31,8 @@ React + Vite + TypeScript frontend for a transfer pricing documentation consiste
 - Domain terms are consistent: Master File, Local File, benchmark study, finding, severity.
 - API response types must match backend Pydantic DTOs.
 - ESLint + Prettier on save.
+- Current active ingest contract is `POST /api/v1/documents/ingest` returning `IngestResponse`.
+- Audit contracts are `POST /api/v1/audits/start`, `GET /status/{id}`, and `GET /results/{id}`.
 
 ## UX Standards
 
@@ -42,3 +44,4 @@ React + Vite + TypeScript frontend for a transfer pricing documentation consiste
 - Responsive behavior must hold down to 320px without page-level horizontal overflow.
 - Long filenames, session IDs, source references, benchmark values, and finding text require explicit overflow handling.
 - Motion is short and purposeful, and must respect `prefers-reduced-motion`.
+- Current workflow unlocks the audit upload panel only after at least one document has been ingested.
