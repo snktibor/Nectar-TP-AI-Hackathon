@@ -1,14 +1,21 @@
-import { useState, useRef, useCallback } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import {
-  Upload,
-  FileText,
-  CheckCircle,
   AlertCircle,
-  X,
+  CheckCircle,
+  FileText,
   FileUp,
+  Plus,
+  Upload,
+  X,
 } from 'lucide-react'
-import type { ApiResponse, IngestResponse, IngestedDocument } from '../types/api'
 import { phantomDesign } from '../design-system/phantomDesign'
+import {
+  formatBytes,
+  getDocumentTypeDisplay,
+  isSupportedDocument,
+} from '../lib/documentDisplay'
+import type { ApiResponse, IngestedDocument, IngestResponse } from '../types/api'
+import { StatusPill } from './ui/DashboardPrimitives'
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL
 const ACCEPTED_TYPES = '.pdf,.docx'
@@ -22,47 +29,6 @@ interface DocumentIngestorProps {
 
 type IngestPhase = 'empty' | 'ready' | 'uploading' | 'done' | 'error'
 
-const DOC_TYPE_LABELS: Record<string, { label: string; color: string }> = {
-  master_file: {
-    label: 'Fő Fájl',
-    color: 'bg-blue-50 text-blue-700 ring-blue-600/20',
-  },
-  local_file: {
-    label: 'Helyi Fájl',
-    color: 'bg-emerald-50 text-emerald-700 ring-emerald-600/20',
-  },
-  benchmark_study: {
-    label: 'Benchmark tanulmány',
-    color: 'bg-purple-50 text-purple-700 ring-purple-600/20',
-  },
-  contract: {
-    label: 'Szerződés',
-    color: 'bg-amber-50 text-amber-700 ring-amber-600/20',
-  },
-  invoice: {
-    label: 'Számla',
-    color: 'bg-orange-50 text-orange-700 ring-orange-600/20',
-  },
-  financial_statement: {
-    label: 'Pénzügyi',
-    color: 'bg-cyan-50 text-cyan-700 ring-cyan-600/20',
-  },
-  regulatory_document: {
-    label: 'Szabályozási',
-    color: 'bg-rose-50 text-rose-700 ring-rose-600/20',
-  },
-  other: {
-    label: 'Egyéb',
-    color: 'bg-gray-50 text-gray-700 ring-gray-600/20',
-  },
-}
-
-function formatBytes(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
-}
-
 export default function DocumentIngestor({
   sessionId,
   onIngestComplete,
@@ -75,60 +41,60 @@ export default function DocumentIngestor({
   const fileInputRef = useRef<HTMLInputElement | null>(null)
 
   const addFiles = useCallback((incoming: FileList | File[]) => {
-    const valid: File[] = []
-    const fileArray = Array.from(incoming)
+    const validFiles = Array.from(incoming).filter(
+      (file) => isSupportedDocument(file) && file.size <= MAX_FILE_SIZE,
+    )
 
-    for (const file of fileArray) {
-      const ext = file.name.split('.').pop()?.toLowerCase() ?? ''
-      if (!['pdf', 'docx'].includes(ext)) continue
-      if (file.size > MAX_FILE_SIZE) continue
-      if (file.size === 0) continue
-      valid.push(file)
-    }
+    if (validFiles.length === 0) return
 
-    if (valid.length === 0) return
-
-    setSelectedFiles((prev) => {
-      const existingNames = new Set(prev.map((f) => f.name))
-      const deduped = valid.filter((f) => !existingNames.has(f.name))
-      return [...prev, ...deduped]
+    setSelectedFiles((previousFiles) => {
+      const filesByName = new Map(previousFiles.map((file) => [file.name, file]))
+      for (const file of validFiles) {
+        if (!filesByName.has(file.name)) {
+          filesByName.set(file.name, file)
+        }
+      }
+      return Array.from(filesByName.values())
     })
+
     setPhase('ready')
     setErrorMessage(null)
   }, [])
 
-  function handleDragOver(e: React.DragEvent): void {
-    e.preventDefault()
-    e.stopPropagation()
+  function handleDragOver(event: React.DragEvent): void {
+    event.preventDefault()
+    event.stopPropagation()
     setIsDragOver(true)
   }
 
-  function handleDragLeave(e: React.DragEvent): void {
-    e.preventDefault()
-    e.stopPropagation()
+  function handleDragLeave(event: React.DragEvent): void {
+    event.preventDefault()
+    event.stopPropagation()
     setIsDragOver(false)
   }
 
-  function handleDrop(e: React.DragEvent): void {
-    e.preventDefault()
-    e.stopPropagation()
+  function handleDrop(event: React.DragEvent): void {
+    event.preventDefault()
+    event.stopPropagation()
     setIsDragOver(false)
-    if (e.dataTransfer.files.length > 0) {
-      addFiles(e.dataTransfer.files)
+
+    if (event.dataTransfer.files.length > 0) {
+      addFiles(event.dataTransfer.files)
     }
   }
 
-  function handleFileInput(e: React.ChangeEvent<HTMLInputElement>): void {
-    if (e.target.files && e.target.files.length > 0) {
-      addFiles(e.target.files)
+  function handleFileInput(event: React.ChangeEvent<HTMLInputElement>): void {
+    if (event.target.files && event.target.files.length > 0) {
+      addFiles(event.target.files)
+      event.currentTarget.value = ''
     }
   }
 
   function removeFile(name: string): void {
-    setSelectedFiles((prev) => {
-      const next = prev.filter((f) => f.name !== name)
-      if (next.length === 0) setPhase('empty')
-      return next
+    setSelectedFiles((previousFiles) => {
+      const nextFiles = previousFiles.filter((file) => file.name !== name)
+      if (nextFiles.length === 0) setPhase('empty')
+      return nextFiles
     })
   }
 
@@ -156,7 +122,6 @@ export default function DocumentIngestor({
       }
 
       const json = (await response.json()) as ApiResponse<IngestResponse>
-
       if (!json.success || !json.data) {
         throw new Error('A dokumentumok beolvasása sikertelen volt.')
       }
@@ -164,25 +129,25 @@ export default function DocumentIngestor({
       setResults(json.data.documents)
       setPhase('done')
       onIngestComplete?.(json.data.documents)
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'A dokumentumok beolvasása sikertelen volt.'
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'A dokumentumok beolvasása sikertelen volt.'
       setErrorMessage(message)
       setPhase('error')
     }
   }
 
+  const successfulResults = results.filter((document) => document.status === 'success')
+
   return (
-    <div className={phantomDesign.components.panel}>
-      <div className={phantomDesign.components.panelHeader}>
-        <h2 className={phantomDesign.components.panelTitle}>
-          Dokumentum beolvasó
-        </h2>
-        <p className={phantomDesign.components.panelDescription}>
-          Tölts fel transzferárazási dokumentumokat automatikus osztályozáshoz és indexeléshez.
-        </p>
+    <section className={[phantomDesign.components.panel, 'h-full'].join(' ')}>
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+        <p className="text-sm font-semibold text-phantom-ink">Dokumentum feltöltés</p>
+        <StatusPill tone={phase === 'done' ? 'success' : 'neutral'}>PDF / DOCX</StatusPill>
       </div>
 
-      {/* Drop Zone — visible when no results yet */}
       {phase !== 'done' && (
         <>
           <label
@@ -191,27 +156,24 @@ export default function DocumentIngestor({
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
             className={[
-              'flex cursor-pointer flex-col items-center justify-center gap-3 rounded-phantom-card border-2 border-dashed p-8 text-center transition-phantom duration-phantom-base',
+              'group flex cursor-pointer flex-col items-center justify-center gap-4 rounded-phantom-card border border-dashed p-6 text-center transition-phantom duration-phantom-base sm:p-8',
               isDragOver
-                ? 'border-phantom-accent bg-phantom-accent-soft'
-                : 'border-phantom-line bg-phantom-surface-muted hover:border-phantom-accent hover:bg-phantom-accent-soft',
-              phase === 'uploading' ? 'pointer-events-none opacity-60' : '',
+                ? 'border-phantom-accent bg-phantom-accent-soft shadow-phantom-soft'
+                : 'border-phantom-line bg-phantom-surface-muted hover:border-phantom-accent hover:bg-phantom-accent-soft hover:shadow-phantom-soft',
+              phase === 'uploading' ? 'pointer-events-none opacity-70' : '',
             ].join(' ')}
           >
-            <Upload
-              className={[
-                'h-8 w-8',
-                isDragOver ? 'text-phantom-accent' : 'text-phantom-subtle',
-              ].join(' ')}
-            />
+            <div className="flex h-14 w-14 items-center justify-center rounded-phantom-card bg-phantom-surface text-phantom-accent shadow-phantom-soft ring-1 ring-phantom-line transition-phantom duration-phantom-base group-hover:-translate-y-0.5">
+              <Upload className="h-7 w-7" />
+            </div>
             <div>
-              <p className="text-sm font-medium text-phantom-ink">
+              <p className="text-sm font-semibold text-phantom-ink">
                 {isDragOver
-                  ? 'Húzd ide a fájlokat'
-                  : 'Húzd ide a dokumentumokat, vagy kattints a kiválasztáshoz'}
+                  ? 'Engedd el itt a dokumentumokat'
+                  : 'Húzd ide a dokumentumokat, vagy kattints'}
               </p>
-              <p className="mt-1 text-xs text-phantom-muted">
-                PDF, DOCX - fájlonként legfeljebb 50 MB
+              <p className="mt-1 text-xs leading-5 text-phantom-muted">
+                PDF vagy DOCX, max 50 MB / fájl.
               </p>
             </div>
           </label>
@@ -227,33 +189,26 @@ export default function DocumentIngestor({
         </>
       )}
 
-      {/* Selected files list (before ingest) */}
       {(phase === 'ready' || phase === 'error') && selectedFiles.length > 0 && (
         <div className="mt-4 space-y-2">
-          <p className="text-xs font-medium text-phantom-muted">
-            {selectedFiles.length} fájl kiválasztva
-          </p>
           {selectedFiles.map((file) => (
             <div
               key={file.name}
-              className="flex items-center gap-3 rounded-phantom-card border border-phantom-line bg-phantom-surface p-3"
+              className="flex items-center gap-3 rounded-phantom-card border border-phantom-line bg-phantom-surface p-3 shadow-sm"
             >
-              <FileText className="h-4 w-4 shrink-0 text-phantom-muted" />
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-phantom-control bg-phantom-surface-muted text-phantom-muted ring-1 ring-phantom-line">
+                <FileText className="h-4 w-4" />
+              </div>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm text-phantom-ink" title={file.name}>
+                <p className="truncate text-sm font-medium text-phantom-ink" title={file.name}>
                   {file.name}
                 </p>
-                <p className="text-xs text-phantom-muted">
-                  {formatBytes(file.size)}
-                </p>
+                <p className="text-xs text-phantom-muted">{formatBytes(file.size)}</p>
               </div>
               <button
                 type="button"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  removeFile(file.name)
-                }}
-                className="shrink-0 rounded p-1 text-phantom-subtle hover:bg-phantom-surface-muted hover:text-phantom-ink"
+                onClick={() => removeFile(file.name)}
+                className="shrink-0 rounded-phantom-control p-2 text-phantom-subtle transition-phantom duration-phantom-base hover:bg-phantom-surface-muted hover:text-phantom-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus"
                 aria-label={`Eltávolítás: ${file.name}`}
               >
                 <X className="h-4 w-4" />
@@ -263,126 +218,105 @@ export default function DocumentIngestor({
         </div>
       )}
 
-      {/* Skeleton loader during upload */}
       {phase === 'uploading' && (
-        <div className="mt-4 space-y-3">
-          <div className="flex items-center gap-2">
-            <div className="force-spin h-4 w-4 animate-spin rounded-full border-2 border-phantom-accent border-t-transparent" />
-            <p className="text-sm font-medium text-phantom-accent">
-              Dokumentumok elemzése és indexelése...
-            </p>
+        <div className="mt-4 rounded-phantom-card border border-phantom-line bg-phantom-surface-muted p-4">
+          <div className="flex items-center gap-3">
+            <div className="force-spin h-5 w-5 animate-spin rounded-full border-2 border-phantom-accent border-t-transparent" />
+            <p className="text-sm font-semibold text-phantom-ink">Beolvasás folyamatban...</p>
           </div>
-          {selectedFiles.map((file) => (
-            <div
-              key={file.name}
-              className="animate-pulse rounded-phantom-card border border-phantom-line bg-phantom-surface-muted p-4"
-            >
-              <div className="flex items-center gap-3">
-                <div className="h-5 w-5 rounded bg-phantom-line" />
-                <div className="flex-1 space-y-2">
-                  <div className="h-3 w-2/3 rounded bg-phantom-line" />
-                  <div className="h-2 w-1/3 rounded bg-phantom-line" />
-                </div>
-                <div className="h-5 w-16 rounded-full bg-phantom-line" />
-              </div>
-            </div>
-          ))}
         </div>
       )}
 
-      {/* Results cards */}
       {phase === 'done' && results.length > 0 && (
         <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <p className="text-xs font-medium text-phantom-success-text">
-              {results.filter((r) => r.status === 'success').length}/{results.length} dokumentum feldolgozva sikeresen
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-sm font-semibold text-phantom-success-text">
+              Feldolgozva: {successfulResults.length}/{results.length}
             </p>
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="text-xs font-medium text-phantom-accent hover:text-phantom-accent-hover"
+              className="inline-flex min-h-10 items-center gap-2 rounded-phantom-control border border-phantom-line bg-phantom-surface px-3 py-2 text-sm font-semibold text-phantom-accent transition-phantom duration-phantom-base hover:border-phantom-accent hover:bg-phantom-accent-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus"
             >
-              További dokumentumok
+              <Plus className="h-4 w-4" />
+              Új dokumentum hozzáadása
             </button>
           </div>
-          {results.map((doc) => {
-            const typeConfig = DOC_TYPE_LABELS[doc.detected_type] ?? DOC_TYPE_LABELS['other']
 
-            if (doc.status === 'failed') {
+          <div className="space-y-2">
+            {results.map((document) => {
+              const typeConfig = getDocumentTypeDisplay(document.detected_type)
+
+              if (document.status === 'failed') {
+                return (
+                  <div
+                    key={document.document_id}
+                    className="rounded-phantom-card border border-phantom-danger-border bg-phantom-danger-soft p-4"
+                  >
+                    <div className="flex items-start gap-3">
+                      <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-phantom-danger-text" />
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-semibold text-phantom-danger-text" title={document.filename}>
+                          {document.filename}
+                        </p>
+                        <p className="mt-1 text-xs text-phantom-danger-text">Feldolgozás meghiúsult.</p>
+                      </div>
+                    </div>
+                  </div>
+                )
+              }
+
               return (
                 <div
-                  key={doc.document_id}
-                  className="rounded-phantom-card border border-red-200 bg-red-50 p-4"
+                  key={document.document_id}
+                  className="rounded-phantom-card border border-phantom-line bg-phantom-surface p-4 shadow-sm"
                 >
                   <div className="flex items-start gap-3">
-                    <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-500" />
+                    <CheckCircle className="mt-0.5 h-5 w-5 shrink-0 text-phantom-success-text" />
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium text-red-800" title={doc.filename}>
-                        {doc.filename}
-                      </p>
-                      <p className="mt-1 text-xs text-red-600">
-                        Feldolgozás meghiúsult.
-                      </p>
+                      <div className="flex min-w-0 flex-wrap items-center gap-2">
+                        <p
+                          className="truncate text-sm font-semibold text-phantom-ink"
+                          title={document.filename}
+                        >
+                          {document.filename}
+                        </p>
+                        <span
+                          className={[
+                            'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ring-1 ring-inset',
+                            typeConfig.badgeClassName,
+                          ].join(' ')}
+                        >
+                          {typeConfig.label}
+                        </span>
+                      </div>
+                      <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-phantom-muted">
+                        <span>{document.page_count} oldal</span>
+                        <span>{document.chunk_count} részlet</span>
+                        <span>{formatBytes(document.size_bytes)}</span>
+                        <span>{Math.round(document.confidence * 100)}% bizalom</span>
+                      </div>
                     </div>
                   </div>
                 </div>
               )
-            }
-
-            return (
-              <div
-                key={doc.document_id}
-                className="rounded-phantom-card border border-phantom-line bg-phantom-surface p-4"
-              >
-                <div className="flex items-start gap-3">
-                  <CheckCircle className="mt-0.5 h-5 w-5 shrink-0 text-phantom-success-text" />
-                  <div className="min-w-0 flex-1">
-                    <div className="flex min-w-0 flex-wrap items-center gap-2">
-                      <p
-                        className="truncate text-sm font-medium text-phantom-ink"
-                        title={doc.filename}
-                      >
-                        {doc.filename}
-                      </p>
-                      <span
-                        className={[
-                          'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ring-1 ring-inset',
-                          typeConfig.color,
-                        ].join(' ')}
-                      >
-                        {typeConfig.label}
-                      </span>
-                    </div>
-                    <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-1 text-xs text-phantom-muted">
-                      <span>{doc.page_count} oldal</span>
-                      <span>{doc.chunk_count} részlet</span>
-                      <span>{formatBytes(doc.size_bytes)}</span>
-                      <span>
-                        {Math.round(doc.confidence * 100)}% bizalom
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )
-          })}
+            })}
+          </div>
         </div>
       )}
 
-      {/* Error state */}
       {phase === 'error' && errorMessage && (
-        <div className="mt-4 rounded-phantom-card border border-red-200 bg-red-50 p-4">
+        <div className="mt-4 rounded-phantom-card border border-phantom-danger-border bg-phantom-danger-soft p-4">
           <div className="flex items-start gap-3">
-            <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-500" />
+            <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-phantom-danger-text" />
             <div>
-              <p className="text-sm font-medium text-red-800">A beolvasás sikertelen</p>
-              <p className="mt-1 text-xs text-red-600">{errorMessage}</p>
+              <p className="text-sm font-semibold text-phantom-danger-text">A beolvasás sikertelen</p>
+              <p className="mt-1 text-xs text-phantom-danger-text">{errorMessage}</p>
             </div>
           </div>
         </div>
       )}
 
-      {/* Action button */}
       {(phase === 'ready' || phase === 'error') && (
         <button
           type="button"
@@ -395,9 +329,9 @@ export default function DocumentIngestor({
           ].join(' ')}
         >
           <FileUp className="h-4 w-4" />
-          BEOLVASÁS INDÍTÁSA ({selectedFiles.length} dokumentum)
+          Beolvasás indítása ({selectedFiles.length})
         </button>
       )}
-    </div>
+    </section>
   )
 }

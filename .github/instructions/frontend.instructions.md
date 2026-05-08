@@ -23,6 +23,8 @@ The frontend provides the document upload workflow and risk dashboard for review
 - Domain terms are consistent: Master File, Local File, benchmark study, finding, severity.
 - Keep reusable design decisions centralized in `src/design-system/phantomDesign.ts`, `tailwind.config.js`, and `src/index.css`.
 - Do not scatter one-off color, spacing, shadow, radius, or animation values through components.
+- Use `src/components/ui/DashboardPrimitives.tsx` for repeated dashboard UI patterns such as section headers, status pills, metric cards, empty panels, and workflow timelines.
+- Keep shared document display helpers in `src/lib/documentDisplay.ts` and frontend-only report scaffolding helpers in `src/lib/frontendAnalysis.ts`.
 
 ## Core Screens
 
@@ -32,15 +34,16 @@ The frontend provides the document upload workflow and risk dashboard for review
 - Validate file type, non-empty file, duplicate filenames, and 50 MB per-file limit in the UI before sending.
 - Show upload, empty, done, and error states clearly.
 
-### 2. Legacy Audit Upload
-- Keep the current required Master File / Local File / Contract slots until ingest results are wired directly into audit start.
-- Validate: minimum required documents present (Master File + Local File + Contract).
-- Show upload progress and validation errors clearly.
+### 2. Analysis Workspace
+- Right-side workspace starts empty until documents are successfully classified.
+- After ingest, show an analysis CTA that prepares the future report surface without backend wiring.
+- Present readiness score, document coverage, finding previews, and next steps from frontend-only scaffolding data.
+- Keep the panel ready for future backend audit pipeline results without duplicating backend scoring logic.
 
 ### 3. Analysis Progress
-- Job status polling or SSE stream.
-- Show pipeline stage progress (Structure → Consistency → Completeness → Benchmark → Scoring).
-- Estimated time or spinner per stage.
+- Job status polling or SSE stream is planned for backend wiring.
+- Current frontend uses workflow timelines to show upload → classification → report preparation.
+- Estimated time or spinner per active stage.
 
 ### 4. Risk Dashboard (Main View)
 - Overall risk score with color-coded level (LOW/MEDIUM/HIGH/CRITICAL).

@@ -50,6 +50,7 @@ export type RiskSeverity = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL'
 export interface ErrorDetail {
   code: string
   message: string
+  details?: Record<string, unknown> | null
 }
 
 export interface ResponseMeta {
@@ -125,7 +126,7 @@ export interface ConsistencyError {
   error_id: string
   description: string
   severity: RiskSeverity
-  source_documents: string[]
+  locations: { filename: string; line_numbers?: number[] | null }[]
   evidence: string | null
   attribution?: FindingAttribution | null
 }
@@ -142,7 +143,8 @@ export interface BenchmarkRisk {
 
 export interface MissingElement {
   element_id: string
-  name: string
+  description: string
+  expected_in: string
   required_by: string
   severity: RiskSeverity
   attribution?: FindingAttribution | null

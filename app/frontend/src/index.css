@@ -4,32 +4,32 @@
 
 @layer base {
 	:root {
-		--phantom-color-canvas: #f8faf8;
-		--phantom-color-surface: #ffffff;
-		--phantom-color-surface-muted: #f3f7f4;
-		--phantom-color-surface-raised: #fffefc;
-		--phantom-color-ink: #17201a;
-		--phantom-color-muted: #5f6d63;
-		--phantom-color-subtle: #8a978e;
-		--phantom-color-line: #dce6df;
-		--phantom-color-line-strong: #bfd0c5;
-		--phantom-color-accent: #f47c67;
-		--phantom-color-accent-hover: #e76652;
-		--phantom-color-accent-pressed: #cc4f3f;
-		--phantom-color-accent-soft: #fff0ec;
-		--phantom-color-focus: #4f9f8f;
-		--phantom-color-disabled: #e9eee9;
-		--phantom-color-success-soft: #eaf6ea;
-		--phantom-color-success-text: #256b2b;
-		--phantom-color-success-border: #b8dcba;
-		--phantom-color-danger-soft: #fdecec;
-		--phantom-color-danger-text: #a51f1f;
-		--phantom-color-danger-border: #f4b6b6;
-		--phantom-radius-card: 0.5rem;
-		--phantom-radius-control: 0.5rem;
-		--phantom-shadow-soft: 0 1px 2px rgb(23 32 26 / 0.06), 0 12px 32px rgb(23 32 26 / 0.06);
-		--phantom-shadow-lift: 0 4px 10px rgb(23 32 26 / 0.08), 0 16px 40px rgb(23 32 26 / 0.08);
-		--phantom-shadow-button: 0 6px 16px rgb(244 124 103 / 0.22);
+		--phantom-color-canvas: #f3ebed;
+		--phantom-color-surface: #faf5f6;
+		--phantom-color-surface-muted: #f4eaec;
+		--phantom-color-surface-raised: #ffffff;
+		--phantom-color-ink: #2d1e21;
+		--phantom-color-muted: #6d5055;
+		--phantom-color-subtle: #9c7d83;
+		--phantom-color-line: #e3d2d5;
+		--phantom-color-line-strong: #d2bbc0;
+		--phantom-color-accent: #c6636f;
+		--phantom-color-accent-hover: #b4535f;
+		--phantom-color-accent-pressed: #a1444f;
+		--phantom-color-accent-soft: #f5e3e6;
+		--phantom-color-focus: #c6636f;
+		--phantom-color-disabled: #efe4e6;
+		--phantom-color-success-soft: #edf7f0;
+		--phantom-color-success-text: #2f6f2d;
+		--phantom-color-success-border: #c7e2cc;
+		--phantom-color-danger-soft: #f9ecec;
+		--phantom-color-danger-text: #a33a3a;
+		--phantom-color-danger-border: #efc0c0;
+		--phantom-radius-card: 1rem;
+		--phantom-radius-control: 0.875rem;
+		--phantom-shadow-soft: 0 1px 2px rgb(56 30 34 / 0.04), 0 10px 26px rgb(56 30 34 / 0.08);
+		--phantom-shadow-lift: 0 10px 26px rgb(56 30 34 / 0.12), 0 22px 56px rgb(56 30 34 / 0.12);
+		--phantom-shadow-button: 0 8px 18px rgb(198 99 111 / 0.28);
 	}
 
 	* {
@@ -49,12 +49,12 @@
 		min-width: 320px;
 		overflow-x: hidden;
 		background:
-			radial-gradient(circle at top left, rgb(255 240 236 / 0.7), transparent 34rem),
-			linear-gradient(180deg, var(--phantom-color-canvas), #f5f8f6 42%, #f8faf8);
+			radial-gradient(circle at top center, rgb(255 255 255 / 0.75), transparent 32rem),
+			linear-gradient(180deg, #f9eef0 0%, var(--phantom-color-canvas) 52%, #efe3e6 100%);
 	}
 
 	::selection {
-		background: rgb(244 124 103 / 0.22);
+		background: rgb(198 99 111 / 0.25);
 	}
 
 	button,

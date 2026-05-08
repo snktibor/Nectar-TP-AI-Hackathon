@@ -2,22 +2,22 @@ import type { RiskSeverity } from '../types/api'
 
 export const phantomDesign = {
   colors: {
-    canvas: '#F8FAF8',
-    surface: '#FFFFFF',
-    surfaceMuted: '#F3F7F4',
-    surfaceRaised: '#FFFEFC',
-    ink: '#17201A',
-    inkMuted: '#5F6D63',
-    inkSubtle: '#8A978E',
-    line: '#DCE6DF',
-    lineStrong: '#BFD0C5',
-    accent: '#F47C67',
-    accentHover: '#E76652',
-    accentSoft: '#FFF0EC',
-    mint: '#DFF4EA',
-    sky: '#E3F0FF',
-    lavender: '#EFEAFF',
-    amber: '#FFF5D8',
+    canvas: '#F3EBED',
+    surface: '#FAF5F6',
+    surfaceMuted: '#F4EAEC',
+    surfaceRaised: '#FFFFFF',
+    ink: '#2D1E21',
+    inkMuted: '#6D5055',
+    inkSubtle: '#9C7D83',
+    line: '#E3D2D5',
+    lineStrong: '#D2BBC0',
+    accent: '#C6636F',
+    accentHover: '#B4535F',
+    accentSoft: '#F5E3E6',
+    mint: '#F6EDEF',
+    sky: '#F9EFF1',
+    lavender: '#F4E8EB',
+    amber: '#F8EDE8',
   },
   severity: {
     CRITICAL: {
@@ -65,7 +65,7 @@ export const phantomDesign = {
   >,
   layout: {
     page: 'min-h-screen overflow-x-hidden bg-phantom-canvas text-phantom-ink antialiased',
-    container: 'mx-auto w-full max-w-7xl px-3 py-4 sm:px-5 sm:py-6 lg:px-8 lg:py-8',
+    container: 'w-full px-2 py-2 sm:px-3 sm:py-3 lg:px-4 lg:py-4',
     dashboardGrid: 'grid min-w-0 gap-4 lg:grid-cols-3 lg:gap-5 xl:gap-6',
   },
   components: {

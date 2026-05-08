@@ -116,15 +116,15 @@ function ConsistencyErrorCard({ error }: Readonly<{ error: ConsistencyError }>):
           &ldquo;{error.evidence}&rdquo;
         </p>
       )}
-      {error.source_documents.length > 0 && (
+      {error.locations.length > 0 && (
         <div className="flex flex-wrap gap-1">
-          {error.source_documents.map((doc) => (
+          {error.locations.map((loc) => (
             <span
-              key={doc}
+              key={loc.filename}
               className={phantomDesign.components.tag}
-              title={doc}
+              title={loc.filename}
             >
-              {doc}
+              {loc.filename}
             </span>
           ))}
         </div>
@@ -161,7 +161,7 @@ function MissingElementRow({ element }: Readonly<{ element: MissingElement }>): 
     <div className="flex min-w-0 items-center gap-3 border-b border-phantom-line py-3 last:border-b-0">
       <XCircle className="h-4 w-4 shrink-0 text-phantom-danger-text" />
       <div className="min-w-0 flex-1">
-        <span className="block break-words text-sm leading-5 text-phantom-ink">{element.name}</span>
+        <span className="block break-words text-sm leading-5 text-phantom-ink">{element.description}</span>
         <span className="text-xs text-phantom-subtle">{element.required_by}</span>
       </div>
       <SeverityBadge severity={element.severity} />
