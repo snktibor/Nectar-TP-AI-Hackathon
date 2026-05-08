@@ -14,6 +14,7 @@ scores remain comparable across legal and uploaded-document queries.
 
 from __future__ import annotations
 
+import asyncio
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -21,6 +22,8 @@ from uuid import UUID
 
 import chromadb
 from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunction
+
+from app.models.schemas import DocumentType, EvidenceChunk
 
 CHROMA_PATH = Path(__file__).parent.parent.parent / "data" / "chromadb"
 EMBED_MODEL = "paraphrase-multilingual-MiniLM-L12-v2"
@@ -98,6 +101,74 @@ class RagService:
             except Exception:
                 continue
             results = collection.query(query_texts=[query], n_results=n_results_per_doc)
+            merged.extend(self._parse_results(results))
+        merged.sort(key=lambda c: -c.score)
+        return merged
+
+    # -- Agent-facing combined query -------------------------------------------
+
+    async def query_context(
+        self,
+        session_id: UUID,
+        doc_type: DocumentType,
+        query: str,
+        n_results: int = 5,
+    ) -> list[EvidenceChunk]:
+        """Combined retrieval: per-doc RAG (filtered by doc_type) + legal knowledge.
+
+        Called by every specialist agent in ``base.py``. ChromaDB is sync so we
+        run both queries in a thread pool and merge the results before returning.
+        """
+        doc_chunks, legal_chunks = await asyncio.gather(
+            asyncio.to_thread(
+                self._query_session_by_doc_type,
+                session_id,
+                doc_type,
+                query,
+                n_results,
+            ),
+            asyncio.to_thread(
+                self.query_legal_knowledge,
+                query,
+                max(2, n_results // 2),
+            ),
+        )
+        merged = doc_chunks + legal_chunks
+        merged.sort(key=lambda c: -c.score)
+        return [
+            EvidenceChunk(
+                filename=c.source,
+                page=c.page,
+                chunk_index=c.chunk_index,
+                quote=c.text[:500] if c.text else None,
+            )
+            for c in merged[:n_results]
+        ]
+
+    def _query_session_by_doc_type(
+        self,
+        session_id: UUID,
+        doc_type: DocumentType,
+        query: str,
+        n_results: int,
+    ) -> list[RagChunk]:
+        """Sync: fan-out query across per-document collections matching doc_type."""
+        target_session = str(session_id)
+        target_type = doc_type.value
+        merged: list[RagChunk] = []
+        for col_summary in self._client.list_collections():
+            meta = col_summary.metadata or {}
+            if meta.get("session_id") != target_session:
+                continue
+            if meta.get("doc_type") != target_type:
+                continue
+            try:
+                collection = self._client.get_collection(
+                    col_summary.name, embedding_function=self._embed
+                )
+            except Exception:
+                continue
+            results = collection.query(query_texts=[query], n_results=n_results)
             merged.extend(self._parse_results(results))
         merged.sort(key=lambda c: -c.score)
         return merged
