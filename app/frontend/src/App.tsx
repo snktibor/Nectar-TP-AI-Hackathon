@@ -147,8 +147,16 @@ export default function App(): JSX.Element {
     }
   }
 
-  function handleDocUploaded(slot: SlotKey, doc: DocumentUploadResponse): void {
-    setUploadedDocs((prev) => ({ ...prev, [slot]: doc }))
+  function handleDocUploaded(
+    slot: SlotKey,
+    doc: DocumentUploadResponse,
+  ): void {
+    setUploadedDocs(
+      (prev: Partial<Record<SlotKey, DocumentUploadResponse>>) => ({
+        ...prev,
+        [slot]: doc,
+      }),
+    )
   }
 
   function handleIngestComplete(docs: IngestedDocument[]): void {
