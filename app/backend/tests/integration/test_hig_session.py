@@ -43,7 +43,6 @@ SentenceTransformerEmbeddingFunction = pytest.importorskip(
 
 from app.agents.master_file_agent import MasterFileAgent  # noqa: E402
 from app.core.settings import Settings  # noqa: E402
-from app.services.agent_rag_adapter import AgentRagAdapter  # noqa: E402
 from app.services.llm_client import LlmClient  # noqa: E402
 from app.services.rag_service import EMBED_MODEL, RagService  # noqa: E402
 from tests.conftest import ScriptedTurn, text_block, tool_use_block, usage  # noqa: E402
@@ -143,7 +142,6 @@ async def test_agent_round_trip_with_real_rag(
     else — embedding, vector search, citation validation — is real.
     """
     svc, session_id = seeded_rag
-    adapter = AgentRagAdapter(svc)
 
     turns = [
         # Turn 1: agent issues a semantic search over the seeded session.
@@ -196,7 +194,7 @@ async def test_agent_round_trip_with_real_rag(
 
     settings = _test_settings()
     client = LlmClient(settings=settings, client=scripted_factory(turns))  # type: ignore[arg-type]
-    agent = MasterFileAgent(llm=client, rag=adapter, settings=settings)
+    agent = MasterFileAgent(llm=client, rag=svc, settings=settings)
 
     result = await agent.run(session_id)
 
