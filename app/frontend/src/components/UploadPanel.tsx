@@ -13,11 +13,11 @@ interface SlotConfig {
 }
 
 const SLOT_CONFIGS: SlotConfig[] = [
-  { key: 'master_file', label: 'Master File', documentType: 'MASTER_FILE', required: true },
-  { key: 'local_file', label: 'Local File', documentType: 'LOCAL_FILE', required: true },
-  { key: 'contract', label: 'Contract', documentType: 'CONTRACT', required: true },
-  { key: 'benchmark', label: 'Benchmark Study', documentType: 'BENCHMARK_STUDY', required: false },
-  { key: 'invoice', label: 'Invoice / Other', documentType: 'OTHER', required: false },
+  { key: 'master_file', label: 'Fő Fájl', documentType: 'MASTER_FILE', required: true },
+  { key: 'local_file', label: 'Helyi Fájl', documentType: 'LOCAL_FILE', required: true },
+  { key: 'contract', label: 'Szerződés', documentType: 'CONTRACT', required: true },
+  { key: 'benchmark', label: 'Benchmark tanulmány', documentType: 'BENCHMARK_STUDY', required: false },
+  { key: 'invoice', label: 'Számla / Egyéb', documentType: 'OTHER', required: false },
 ]
 
 const REQUIRED_SLOTS: SlotKey[] = ['master_file', 'local_file', 'contract']
@@ -102,9 +102,9 @@ export default function UploadPanel({
   return (
     <div className={phantomDesign.components.panel}>
       <div className={phantomDesign.components.panelHeader}>
-        <h2 className={phantomDesign.components.panelTitle}>Document Upload</h2>
+        <h2 className={phantomDesign.components.panelTitle}>Dokumentum feltöltés</h2>
         <p className={phantomDesign.components.panelDescription}>
-        Upload transfer pricing documents to begin the audit.
+        Tölts fel transzfer árazási dokumentumokat az audit megkezdéséhez.
         </p>
       </div>
 
@@ -114,11 +114,11 @@ export default function UploadPanel({
           const loading = loadingSlots[slot.key] ?? false
           const error = slotErrors[slot.key]
           let slotIcon = <FileText className="h-5 w-5 text-phantom-subtle" />
-          let slotStatus = <span className="text-xs text-phantom-subtle">Click to select file</span>
+          let slotStatus = <span className="text-xs text-phantom-subtle">Kattints a fájl kiválasztásához</span>
 
           if (loading) {
             slotIcon = <Loader2 className="h-5 w-5 animate-spin text-phantom-accent" />
-            slotStatus = <span className="text-xs text-phantom-accent">Uploading...</span>
+            slotStatus = <span className="text-xs text-phantom-accent">Feltöltés...</span>
           } else if (uploaded) {
             slotIcon = <CheckCircle className="h-5 w-5 text-phantom-success-text" />
             slotStatus = (
@@ -148,7 +148,7 @@ export default function UploadPanel({
                     <span className="truncate text-sm font-medium text-phantom-ink">{slot.label}</span>
                     {slot.required && (
                       <span className="rounded-full bg-phantom-accent-soft px-1.5 py-0.5 text-xs font-medium text-phantom-accent ring-1 ring-phantom-accent/20">
-                        Required
+                        Kötelező
                       </span>
                     )}
                   </div>

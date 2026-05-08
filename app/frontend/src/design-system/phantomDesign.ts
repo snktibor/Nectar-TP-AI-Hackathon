@@ -21,7 +21,7 @@ export const phantomDesign = {
   },
   severity: {
     CRITICAL: {
-      label: 'Critical',
+      label: 'Kritikus',
       tone: '#D32F2F',
       badge: 'bg-phantom-severity-critical-soft text-phantom-severity-critical-text ring-phantom-severity-critical-border',
       text: 'text-phantom-severity-critical-text',
@@ -29,7 +29,7 @@ export const phantomDesign = {
       icon: 'text-phantom-severity-critical-text',
     },
     HIGH: {
-      label: 'High',
+      label: 'Magas',
       tone: '#F57C00',
       badge: 'bg-phantom-severity-high-soft text-phantom-severity-high-text ring-phantom-severity-high-border',
       text: 'text-phantom-severity-high-text',
@@ -37,7 +37,7 @@ export const phantomDesign = {
       icon: 'text-phantom-severity-high-text',
     },
     MEDIUM: {
-      label: 'Medium',
+      label: 'Közepes',
       tone: '#FBC02D',
       badge: 'bg-phantom-severity-medium-soft text-phantom-severity-medium-text ring-phantom-severity-medium-border',
       text: 'text-phantom-severity-medium-text',
@@ -45,7 +45,7 @@ export const phantomDesign = {
       icon: 'text-phantom-severity-medium-text',
     },
     LOW: {
-      label: 'Low',
+      label: 'Alacsony',
       tone: '#388E3C',
       badge: 'bg-phantom-severity-low-soft text-phantom-severity-low-text ring-phantom-severity-low-border',
       text: 'text-phantom-severity-low-text',

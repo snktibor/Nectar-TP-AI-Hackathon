@@ -27,15 +27,15 @@ interface ResultsPanelProps {
 }
 
 const STAGE_LABELS: Record<string, string> = {
-  queued: 'Queued',
-  starting: 'Starting pipeline…',
-  ingesting_documents: 'Ingesting documents…',
-  extracting_entities: 'Extracting entities…',
-  cross_document_consistency_check: 'Checking cross-document consistency…',
-  benchmark_analysis: 'Running benchmark analysis…',
-  regulatory_completeness_check: 'Checking regulatory completeness…',
-  compiling_report: 'Compiling audit report…',
-  done: 'Finalizing…',
+  queued: 'Várakozik',
+  starting: 'Pipeline indítása…',
+  ingesting_documents: 'Dokumentumok beolvasása…',
+  extracting_entities: 'Entitások kinyerése…',
+  cross_document_consistency_check: 'Dokumentumok közötti konzisztencia ellenőrzése…',
+  benchmark_analysis: 'Benchmark elemzés futtatása…',
+  regulatory_completeness_check: 'Szabályozási teljesség ellenőrzése…',
+  compiling_report: 'Audit jelentés összeállítása…',
+  done: 'Véglegesítés…',
 }
 
 function formatTimestamp(iso: string): string {
@@ -62,9 +62,9 @@ function IdleState(): JSX.Element {
   return (
     <div className="flex flex-col items-center justify-center px-2 py-14 text-center sm:py-16 lg:py-20">
       <Shield className="mb-4 h-14 w-14 text-phantom-subtle sm:h-16 sm:w-16" />
-      <h3 className="text-lg font-semibold text-phantom-ink">Ready for Audit</h3>
+      <h3 className="text-lg font-semibold text-phantom-ink">Auditásra kész</h3>
       <p className="mt-1 max-w-sm text-sm leading-5 text-phantom-muted">
-        Upload documents and click Start Audit to begin.
+        Tölts fel dokumentumokat és kattints az Audit indítás gombra a kezdéshez.
       </p>
     </div>
   )
@@ -83,7 +83,7 @@ function InProgressState({
       <p className="mb-6 text-sm font-medium text-phantom-muted">{label}</p>
       <div className="w-full max-w-sm">
         <div className="mb-2 flex justify-between text-xs text-phantom-subtle">
-          <span>Progress</span>
+          <span>Előrehaladás</span>
           <span>{Math.round(progress)}%</span>
         </div>
         <div className="h-2 w-full overflow-hidden rounded-full bg-phantom-surface-muted ring-1 ring-phantom-line">
@@ -94,7 +94,7 @@ function InProgressState({
         </div>
       </div>
       <p className="mt-4 text-xs text-phantom-subtle">
-        Status: {resolvedStatus(status?.status)}
+        Állapot: {resolvedStatus(status?.status)}
       </p>
     </div>
   )
@@ -144,9 +144,9 @@ function BenchmarkRiskCard({ risk }: Readonly<{ risk: BenchmarkRisk }>): JSX.Ele
         <SeverityBadge severity={risk.severity} />
       </div>
       <p className="mb-2 break-words text-xs leading-5 text-phantom-muted">
-        Observed:{' '}
+        Megfigyelt:{' '}
         <span className="font-medium text-phantom-ink">{risk.observed_value}</span>
-        {' '}— Benchmark range:{' '}
+        {' '}— Benchmark tartomány:{' '}
         <span className="font-medium text-phantom-ink">
           [{low}, {high}]
         </span>
@@ -185,32 +185,32 @@ function CompletedState({ report }: Readonly<{ report: AuditReport }>): JSX.Elem
         <div className="min-w-0">
           <div className="flex min-w-0 flex-wrap items-center gap-2">
             <span className={`text-base font-bold ${severity.text}`}>
-              {severity.label} Risk
+              {severity.label} Kockázat
             </span>
             <SeverityBadge severity={report.overall_risk} />
           </div>
           <p className="text-xs text-phantom-subtle">
-            Generated {formatTimestamp(report.generated_at)}
+            Generálva: {formatTimestamp(report.generated_at)}
           </p>
         </div>
       </div>
 
       <div className={phantomDesign.components.subtleCard}>
         <h4 className="mb-1 text-xs font-semibold uppercase text-phantom-muted">
-          Executive Summary
+          Vezetői Összefoglalás
         </h4>
         <p className="break-words text-sm italic leading-6 text-phantom-muted">{report.summary}</p>
       </div>
 
       <section>
         <h4 className="mb-3 flex flex-wrap items-center gap-2 text-sm font-semibold text-phantom-ink">
-          <span>Consistency Errors</span>
+          <span>Konzisztencia hibák</span>
           <span className={phantomDesign.components.metaPill}>
             {report.consistency_errors.length}
           </span>
         </h4>
         {report.consistency_errors.length === 0 ? (
-          <p className="text-sm text-phantom-subtle">No consistency errors found.</p>
+          <p className="text-sm text-phantom-subtle">Nincs konzisztencia hiba.</p>
         ) : (
           <div className="space-y-3">
             {report.consistency_errors.map((err) => (
@@ -222,13 +222,13 @@ function CompletedState({ report }: Readonly<{ report: AuditReport }>): JSX.Elem
 
       <section>
         <h4 className="mb-3 flex flex-wrap items-center gap-2 text-sm font-semibold text-phantom-ink">
-          <span>Benchmark Risks</span>
+          <span>Benchmark kockázatok</span>
           <span className={phantomDesign.components.metaPill}>
             {report.benchmark_risks.length}
           </span>
         </h4>
         {report.benchmark_risks.length === 0 ? (
-          <p className="text-sm text-phantom-subtle">No benchmark risks identified.</p>
+          <p className="text-sm text-phantom-subtle">Nincs benchmark kockázat.</p>
         ) : (
           <div className="space-y-3">
             {report.benchmark_risks.map((risk) => (
@@ -240,13 +240,13 @@ function CompletedState({ report }: Readonly<{ report: AuditReport }>): JSX.Elem
 
       <section>
         <h4 className="mb-3 flex flex-wrap items-center gap-2 text-sm font-semibold text-phantom-ink">
-          <span>Missing Elements</span>
+          <span>Hiányzó elemek</span>
           <span className={phantomDesign.components.metaPill}>
             {report.missing_elements.length}
           </span>
         </h4>
         {report.missing_elements.length === 0 ? (
-          <p className="text-sm text-phantom-subtle">No missing elements detected.</p>
+          <p className="text-sm text-phantom-subtle">Nincs hiányzó elem.</p>
         ) : (
           <div className="overflow-hidden rounded-phantom-card border border-phantom-line bg-phantom-surface px-3 shadow-phantom-soft sm:px-4">
             {report.missing_elements.map((el) => (

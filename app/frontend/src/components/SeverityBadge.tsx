@@ -11,7 +11,7 @@ export default function SeverityBadge({ severity }: SeverityBadgeProps): JSX.Ele
   return (
     <span
       className={`${phantomDesign.components.statusPill} ${config.badge}`}
-      title={`${config.label} severity`}
+      title={`${config.label} súlyosság`}
     >
       {config.label}
     </span>

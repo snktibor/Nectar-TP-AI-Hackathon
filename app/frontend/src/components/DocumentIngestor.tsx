@@ -13,6 +13,7 @@ import { phantomDesign } from '../design-system/phantomDesign'
 const API_BASE = import.meta.env.VITE_API_BASE_URL
 const ACCEPTED_TYPES = '.pdf,.docx'
 const MAX_FILE_SIZE = 50 * 1024 * 1024
+const FILE_INPUT_ID = 'document-ingest-files'
 
 interface DocumentIngestorProps {
   readonly sessionId: string
@@ -23,35 +24,35 @@ type IngestPhase = 'empty' | 'ready' | 'uploading' | 'done' | 'error'
 
 const DOC_TYPE_LABELS: Record<string, { label: string; color: string }> = {
   master_file: {
-    label: 'Master File',
+    label: 'Fő Fájl',
     color: 'bg-blue-50 text-blue-700 ring-blue-600/20',
   },
   local_file: {
-    label: 'Local File',
+    label: 'Helyi Fájl',
     color: 'bg-emerald-50 text-emerald-700 ring-emerald-600/20',
   },
   benchmark_study: {
-    label: 'Benchmark',
+    label: 'Benchmark tanulmány',
     color: 'bg-purple-50 text-purple-700 ring-purple-600/20',
   },
   contract: {
-    label: 'Contract',
+    label: 'Szerződés',
     color: 'bg-amber-50 text-amber-700 ring-amber-600/20',
   },
   invoice: {
-    label: 'Invoice',
+    label: 'Számla',
     color: 'bg-orange-50 text-orange-700 ring-orange-600/20',
   },
   financial_statement: {
-    label: 'Financial',
+    label: 'Pénzügyi',
     color: 'bg-cyan-50 text-cyan-700 ring-cyan-600/20',
   },
   regulatory_document: {
-    label: 'Regulatory',
+    label: 'Szabályozási',
     color: 'bg-rose-50 text-rose-700 ring-rose-600/20',
   },
   other: {
-    label: 'Other',
+    label: 'Egyéb',
     color: 'bg-gray-50 text-gray-700 ring-gray-600/20',
   },
 }
@@ -151,85 +152,71 @@ export default function DocumentIngestor({
       })
 
       if (!response.ok) {
-        const errorJson = await response.json().catch(() => null)
-        const msg =
-          errorJson?.error?.message ??
-          `HTTP ${response.status}: ${response.statusText}`
-        throw new Error(msg)
+        throw new Error(`A feltöltés sikertelen volt (HTTP ${response.status}).`)
       }
 
       const json = (await response.json()) as ApiResponse<IngestResponse>
 
       if (!json.success || !json.data) {
-        throw new Error(json.error?.message ?? 'Ingest failed')
+        throw new Error('A dokumentumok beolvasása sikertelen volt.')
       }
 
       setResults(json.data.documents)
       setPhase('done')
       onIngestComplete?.(json.data.documents)
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Ingest failed'
+      const message = err instanceof Error ? err.message : 'A dokumentumok beolvasása sikertelen volt.'
       setErrorMessage(message)
       setPhase('error')
     }
-  }
-
-  function handleReset(): void {
-    setSelectedFiles([])
-    setResults([])
-    setPhase('empty')
-    setErrorMessage(null)
   }
 
   return (
     <div className={phantomDesign.components.panel}>
       <div className={phantomDesign.components.panelHeader}>
         <h2 className={phantomDesign.components.panelTitle}>
-          Document Ingestor
+          Dokumentum beolvasó
         </h2>
         <p className={phantomDesign.components.panelDescription}>
-          Upload transfer pricing documents for automatic classification and
-          indexing.
+          Tölts fel transzferárazási dokumentumokat automatikus osztályozáshoz és indexeléshez.
         </p>
       </div>
 
       {/* Drop Zone — visible when no results yet */}
       {phase !== 'done' && (
-        <div
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
-          onClick={() => fileInputRef.current?.click()}
-          role="button"
-          tabIndex={0}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') fileInputRef.current?.click()
-          }}
-          className={[
-            'flex cursor-pointer flex-col items-center justify-center gap-3 rounded-phantom-card border-2 border-dashed p-8 text-center transition-phantom duration-phantom-base',
-            isDragOver
-              ? 'border-phantom-accent bg-phantom-accent-soft'
-              : 'border-phantom-line bg-phantom-surface-muted hover:border-phantom-accent hover:bg-phantom-accent-soft',
-            phase === 'uploading' ? 'pointer-events-none opacity-60' : '',
-          ].join(' ')}
-        >
-          <Upload
+        <>
+          <label
+            htmlFor={FILE_INPUT_ID}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
             className={[
-              'h-8 w-8',
-              isDragOver ? 'text-phantom-accent' : 'text-phantom-subtle',
+              'flex cursor-pointer flex-col items-center justify-center gap-3 rounded-phantom-card border-2 border-dashed p-8 text-center transition-phantom duration-phantom-base',
+              isDragOver
+                ? 'border-phantom-accent bg-phantom-accent-soft'
+                : 'border-phantom-line bg-phantom-surface-muted hover:border-phantom-accent hover:bg-phantom-accent-soft',
+              phase === 'uploading' ? 'pointer-events-none opacity-60' : '',
             ].join(' ')}
-          />
-          <div>
-            <p className="text-sm font-medium text-phantom-ink">
-              {isDragOver
-                ? 'Drop files here'
-                : 'Drag & drop documents here'}
-            </p>
-            <p className="mt-1 text-xs text-phantom-muted">
-              PDF, DOCX — max 50 MB per file
-            </p>
-          </div>
+          >
+            <Upload
+              className={[
+                'h-8 w-8',
+                isDragOver ? 'text-phantom-accent' : 'text-phantom-subtle',
+              ].join(' ')}
+            />
+            <div>
+              <p className="text-sm font-medium text-phantom-ink">
+                {isDragOver
+                  ? 'Húzd ide a fájlokat'
+                  : 'Húzd ide a dokumentumokat, vagy kattints a kiválasztáshoz'}
+              </p>
+              <p className="mt-1 text-xs text-phantom-muted">
+                PDF, DOCX - fájlonként legfeljebb 50 MB
+              </p>
+            </div>
+          </label>
           <input
+            id={FILE_INPUT_ID}
             ref={fileInputRef}
             type="file"
             accept={ACCEPTED_TYPES}
@@ -237,15 +224,14 @@ export default function DocumentIngestor({
             className="hidden"
             onChange={handleFileInput}
           />
-        </div>
+        </>
       )}
 
       {/* Selected files list (before ingest) */}
       {(phase === 'ready' || phase === 'error') && selectedFiles.length > 0 && (
         <div className="mt-4 space-y-2">
           <p className="text-xs font-medium text-phantom-muted">
-            {selectedFiles.length} file{selectedFiles.length > 1 ? 's' : ''}{' '}
-            selected
+            {selectedFiles.length} fájl kiválasztva
           </p>
           {selectedFiles.map((file) => (
             <div
@@ -268,7 +254,7 @@ export default function DocumentIngestor({
                   removeFile(file.name)
                 }}
                 className="shrink-0 rounded p-1 text-phantom-subtle hover:bg-phantom-surface-muted hover:text-phantom-ink"
-                aria-label={`Remove ${file.name}`}
+                aria-label={`Eltávolítás: ${file.name}`}
               >
                 <X className="h-4 w-4" />
               </button>
@@ -281,9 +267,9 @@ export default function DocumentIngestor({
       {phase === 'uploading' && (
         <div className="mt-4 space-y-3">
           <div className="flex items-center gap-2">
-            <div className="h-4 w-4 animate-spin rounded-full border-2 border-phantom-accent border-t-transparent" />
+            <div className="force-spin h-4 w-4 animate-spin rounded-full border-2 border-phantom-accent border-t-transparent" />
             <p className="text-sm font-medium text-phantom-accent">
-              Analyzing and indexing documents...
+              Dokumentumok elemzése és indexelése...
             </p>
           </div>
           {selectedFiles.map((file) => (
@@ -309,15 +295,14 @@ export default function DocumentIngestor({
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <p className="text-xs font-medium text-phantom-success-text">
-              {results.filter((r) => r.status === 'success').length} of{' '}
-              {results.length} documents processed successfully
+              {results.filter((r) => r.status === 'success').length}/{results.length} dokumentum feldolgozva sikeresen
             </p>
             <button
               type="button"
-              onClick={handleReset}
+              onClick={() => fileInputRef.current?.click()}
               className="text-xs font-medium text-phantom-accent hover:text-phantom-accent-hover"
             >
-              Upload more
+              További dokumentumok
             </button>
           </div>
           {results.map((doc) => {
@@ -336,7 +321,7 @@ export default function DocumentIngestor({
                         {doc.filename}
                       </p>
                       <p className="mt-1 text-xs text-red-600">
-                        {doc.error ?? 'Processing failed'}
+                        Feldolgozás meghiúsult.
                       </p>
                     </div>
                   </div>
@@ -369,11 +354,11 @@ export default function DocumentIngestor({
                       </span>
                     </div>
                     <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-1 text-xs text-phantom-muted">
-                      <span>{doc.page_count} pages</span>
-                      <span>{doc.chunk_count} chunks</span>
+                      <span>{doc.page_count} oldal</span>
+                      <span>{doc.chunk_count} részlet</span>
                       <span>{formatBytes(doc.size_bytes)}</span>
                       <span>
-                        {Math.round(doc.confidence * 100)}% confidence
+                        {Math.round(doc.confidence * 100)}% bizalom
                       </span>
                     </div>
                   </div>
@@ -390,7 +375,7 @@ export default function DocumentIngestor({
           <div className="flex items-start gap-3">
             <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-500" />
             <div>
-              <p className="text-sm font-medium text-red-800">Ingest failed</p>
+              <p className="text-sm font-medium text-red-800">A beolvasás sikertelen</p>
               <p className="mt-1 text-xs text-red-600">{errorMessage}</p>
             </div>
           </div>
@@ -410,8 +395,7 @@ export default function DocumentIngestor({
           ].join(' ')}
         >
           <FileUp className="h-4 w-4" />
-          ANALYZE {selectedFiles.length} DOCUMENT
-          {selectedFiles.length > 1 ? 'S' : ''}
+          BEOLVASÁS INDÍTÁSA ({selectedFiles.length} dokumentum)
         </button>
       )}
     </div>
