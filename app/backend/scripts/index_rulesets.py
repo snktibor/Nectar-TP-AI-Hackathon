@@ -23,19 +23,14 @@ from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunct
 # ``python -m scripts.index_rulesets`` from the backend root.
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from app.services.rag_service import (
-    CHROMA_PATH,
-    EMBED_MODEL,
-    LEGAL_COLLECTION,
-    chunk_text,
-    _batch_add,
-)
+from app.services.chunker import chunk_document
+from app.services.rag_service import CHROMA_PATH, EMBED_MODEL, LEGAL_COLLECTION
 
 RULESETS_DIR = Path(__file__).parent.parent / "rulesets"
 
 
 def _extract_pages(pdf_path: Path) -> list[tuple[int, str]]:
-    """Return ``[(page_number, text), ...]`` for all non-empty pages."""
+    """Return [(page_number, text), ...] for all non-empty pages."""
     reader = pypdf.PdfReader(str(pdf_path))
     pages = []
     for page_num, page in enumerate(reader.pages, start=1):
@@ -50,13 +45,16 @@ def main() -> None:
     client = chromadb.PersistentClient(path=str(CHROMA_PATH))
     embed = SentenceTransformerEmbeddingFunction(model_name=EMBED_MODEL)
 
-    # Full rebuild — safe because this is a static collection.
     try:
         client.delete_collection(LEGAL_COLLECTION)
         print(f"Dropped existing '{LEGAL_COLLECTION}' collection.")
     except Exception:
         pass
-    collection = client.create_collection(LEGAL_COLLECTION, embedding_function=embed)
+    collection = client.create_collection(
+        LEGAL_COLLECTION,
+        embedding_function=embed,
+        metadata={"hnsw:space": "cosine"},
+    )
 
     pdf_paths = sorted(RULESETS_DIR.glob("*.pdf"))
     if not pdf_paths:
@@ -64,33 +62,37 @@ def main() -> None:
         sys.exit(1)
 
     ids: list[str] = []
-    texts: list[str] = []
+    documents: list[str] = []
     metadatas: list[dict[str, object]] = []
-    global_idx = 0
 
     for pdf_path in pdf_paths:
         print(f"  Parsing: {pdf_path.name}")
         pages = _extract_pages(pdf_path)
-        file_chunks = 0
+        chunks = chunk_document(
+            pages=pages,
+            file_name=pdf_path.name,
+            doc_type="legal",
+        )
+        for chunk in chunks:
+            ids.append(chunk.chunk_id)
+            documents.append(chunk.text)
+            metadatas.append({
+                "source": chunk.file_name,
+                "page": chunk.chapter_or_page,
+                "chunk_index": chunk.chunk_index,
+                "char_start": chunk.char_start,
+                "char_end": chunk.char_end,
+            })
+        print(f"    > {len(pages)} pages, {len(chunks)} chunks")
 
-        for page_num, page_text in pages:
-            for chunk_idx, chunk in enumerate(chunk_text(page_text)):
-                ids.append(f"legal_{global_idx}")
-                texts.append(chunk)
-                metadatas.append(
-                    {
-                        "source": pdf_path.name,
-                        "page": page_num,
-                        "chunk_index": chunk_idx,
-                    }
-                )
-                global_idx += 1
-                file_chunks += 1
-
-        print(f"    > {len(pages)} pages, {file_chunks} chunks")
-
-    print(f"\nEmbedding and storing {global_idx} chunks …")
-    _batch_add(collection, ids, texts, metadatas)
+    print(f"\nEmbedding and storing {len(ids)} chunks ...")
+    batch_size = 100
+    for i in range(0, len(ids), batch_size):
+        collection.add(
+            ids=ids[i:i + batch_size],
+            documents=documents[i:i + batch_size],
+            metadatas=metadatas[i:i + batch_size],
+        )
     print(f"Done. Legal knowledge base ready at: {CHROMA_PATH}")
 
 

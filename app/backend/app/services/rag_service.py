@@ -3,8 +3,11 @@
 Two ChromaDB collections:
 - ``legal_knowledge``: static index of rulesets/ PDFs (laws, OECD guidelines).
   Built once with ``scripts/index_rulesets.py``.
-- ``job_{job_id}``: per-audit index of the uploaded TP documents.
-  Created by ``index_job_documents`` at the start of each pipeline run.
+- ``session_{session_id}``: per-session index of uploaded TP documents.
+  Written by ``vector_store.store_chunks``; queried here by the agent pipeline.
+
+Both collections use paraphrase-multilingual-MiniLM-L12-v2 so embeddings
+are consistent across legal and document queries.
 """
 
 from __future__ import annotations
@@ -12,6 +15,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
+from uuid import UUID
 
 import chromadb
 from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunction
@@ -33,28 +37,12 @@ class RagChunk:
 
 
 # ---------------------------------------------------------------------------
-# Chunking helper (shared with index_rulesets.py)
-# ---------------------------------------------------------------------------
-
-
-def chunk_text(text: str, size: int = 800, overlap: int = 150) -> list[str]:
-    chunks: list[str] = []
-    start = 0
-    while start < len(text):
-        chunk = text[start : start + size].strip()
-        if chunk:
-            chunks.append(chunk)
-        start += size - overlap
-    return chunks
-
-
-# ---------------------------------------------------------------------------
 # Service
 # ---------------------------------------------------------------------------
 
 
 class RagService:
-    """Thin wrapper around ChromaDB providing query and indexing operations."""
+    """Thin wrapper around ChromaDB providing query operations for agents."""
 
     def __init__(self) -> None:
         CHROMA_PATH.mkdir(parents=True, exist_ok=True)
@@ -74,48 +62,19 @@ class RagService:
         results = collection.query(query_texts=[query], n_results=n_results)
         return self._parse_results(results)
 
-    def query_job_documents(
-        self, job_id: str, query: str, n_results: int = 5
+    def query_session_documents(
+        self, session_id: UUID, query: str, n_results: int = 5
     ) -> list[RagChunk]:
-        """Retrieve chunks from the uploaded TP documents for a specific audit job."""
+        """Retrieve chunks from uploaded TP documents for a specific session."""
+        collection_name = f"session_{str(session_id).replace('-', '_')}"
         try:
             collection = self._client.get_collection(
-                f"job_{job_id}", embedding_function=self._embed
+                collection_name, embedding_function=self._embed
             )
         except Exception:
             return []
         results = collection.query(query_texts=[query], n_results=n_results)
         return self._parse_results(results)
-
-    # -- Indexing --------------------------------------------------------------
-
-    def index_job_documents(
-        self,
-        job_id: str,
-        chunks: list[tuple[str, str, int, int]],
-    ) -> None:
-        """Index uploaded document chunks for a given audit job.
-
-        Args:
-            job_id: Unique audit job identifier.
-            chunks: List of ``(text, source_filename, page_number, chunk_index)``.
-        """
-        collection = self._client.get_or_create_collection(
-            f"job_{job_id}", embedding_function=self._embed
-        )
-        ids = [f"{job_id}_{i}" for i in range(len(chunks))]
-        documents = [c[0] for c in chunks]
-        metadatas: list[dict[str, Any]] = [
-            {"source": c[1], "page": c[2], "chunk_index": c[3]} for c in chunks
-        ]
-        _batch_add(collection, ids, documents, metadatas)
-
-    def delete_job_index(self, job_id: str) -> None:
-        """Remove the per-job collection after the audit is complete or failed."""
-        try:
-            self._client.delete_collection(f"job_{job_id}")
-        except Exception:
-            pass
 
     # -- Internal --------------------------------------------------------------
 
@@ -127,28 +86,13 @@ class RagService:
         return [
             RagChunk(
                 text=doc,
-                source=meta.get("source", ""),
-                page=int(meta.get("page", 0)),
+                source=meta.get("file_name") or meta.get("source", ""),
+                page=int(meta.get("chapter_or_page", "page_0").replace("page_", "") or meta.get("page", 0)),
                 chunk_index=int(meta.get("chunk_index", 0)),
                 score=round(1.0 - float(dist), 4),
             )
             for doc, meta, dist in zip(docs, metas, distances)
         ]
-
-
-def _batch_add(
-    collection: chromadb.Collection,
-    ids: list[str],
-    documents: list[str],
-    metadatas: list[dict[str, Any]],
-    batch_size: int = 100,
-) -> None:
-    for i in range(0, len(ids), batch_size):
-        collection.add(
-            ids=ids[i : i + batch_size],
-            documents=documents[i : i + batch_size],
-            metadatas=metadatas[i : i + batch_size],
-        )
 
 
 # Module-level singleton — matches the pattern of mock_agent_service.

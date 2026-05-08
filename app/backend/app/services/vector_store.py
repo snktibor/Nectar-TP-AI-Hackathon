@@ -1,9 +1,9 @@
 """ChromaDB vector storage for document chunks.
 
 Provides session-scoped collections with traceability metadata on every
-chunk. Uses ChromaDB's default embedding function (all-MiniLM-L6-v2)
-for the PoC; swap to paraphrase-multilingual-MiniLM-L12-v2 for HU+EN
-production use.
+chunk. Uses paraphrase-multilingual-MiniLM-L12-v2 for HU+EN support —
+the same model used by the legal_knowledge collection in rag_service.py
+so that cross-collection queries are embedding-consistent.
 """
 
 from __future__ import annotations
@@ -13,12 +13,16 @@ from pathlib import Path
 from uuid import UUID
 
 import chromadb
+from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunction
 
 from app.services.chunker import TextChunk
 
 logger = logging.getLogger(__name__)
 
 _CHROMA_DIR = Path(__file__).resolve().parents[2] / "data" / "chromadb"
+_EMBED_MODEL = "paraphrase-multilingual-MiniLM-L12-v2"
+
+_embed = SentenceTransformerEmbeddingFunction(model_name=_EMBED_MODEL)
 
 
 def _get_client() -> chromadb.ClientAPI:
@@ -41,6 +45,7 @@ def store_chunks(session_id: UUID, chunks: list[TextChunk]) -> int:
     client = _get_client()
     collection = client.get_or_create_collection(
         name=_collection_name(session_id),
+        embedding_function=_embed,
         metadata={"hnsw:space": "cosine"},
     )
 
@@ -91,7 +96,7 @@ def query_chunks(
     collection_name = _collection_name(session_id)
 
     try:
-        collection = client.get_collection(name=collection_name)
+        collection = client.get_collection(name=collection_name, embedding_function=_embed)
     except Exception:
         return []
 
