@@ -5,6 +5,11 @@
 Transfer pricing documentation consistency auditor for PwC Hungary AI Hackathon 2026.
 Multi-agent AI system analyzing TP document packages for contradictions, missing elements, and benchmark deviations.
 
+## Project Docs
+
+- `docs/project-rag-overview.md` — short project-level RAG and workflow overview.
+- `docs/run-backend-frontend.md` — concise local startup guide for backend and frontend.
+
 ## Core Workflow
 
 1. Start with `.github/agents/orchestrator.md`.

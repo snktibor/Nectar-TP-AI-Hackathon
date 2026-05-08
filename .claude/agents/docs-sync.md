@@ -44,7 +44,7 @@ These file pairs must have matching content (adapted for their platform syntax):
 - Keep the same section ordering and heading style as the existing files.
 - `.github/agents/*.md` files must include `tools: []` in frontmatter; `.claude/agents/*.md` files must not.
 - Do not modify `docs/GitHub-Principle.md` or `docs/Claude-Principle.md` — those are normative references, not sync targets.
-- Do not modify `redline_phantom_project.md` — that is the project spec, not an instruction file.
+- Do not modify operational docs in `docs/` unless explicitly requested by the user — they are content docs, not instruction sync targets.
 - Do not modify `app/backend/rulesets/*.json` — those are data, not documentation.
 
 ## Output

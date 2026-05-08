@@ -1,13 +1,15 @@
-"""RAG service — vector retrieval over legal knowledge and per-job documents.
+"""RAG service — vector retrieval over legal knowledge and per-document RAGs.
 
-Two ChromaDB collections:
+ChromaDB collections:
 - ``legal_knowledge``: static index of rulesets/ PDFs (laws, OECD guidelines).
   Built once with ``scripts/index_rulesets.py``.
-- ``session_{session_id}``: per-session index of uploaded TP documents.
-  Written by ``vector_store.store_chunks``; queried here by the agent pipeline.
+- ``doc_{document_id}``: one collection per uploaded document, written by
+  ``vector_store.store_chunks``. Each per-document agent queries exactly one
+  of these; the cross-document consistency agent fans out across all
+  collections that share the same ``session_id`` in their metadata.
 
-Both collections use paraphrase-multilingual-MiniLM-L12-v2 so embeddings
-are consistent across legal and document queries.
+All collections share paraphrase-multilingual-MiniLM-L12-v2 so similarity
+scores remain comparable across legal and uploaded-document queries.
 """
 
 from __future__ import annotations
@@ -62,11 +64,11 @@ class RagService:
         results = collection.query(query_texts=[query], n_results=n_results)
         return self._parse_results(results)
 
-    def query_session_documents(
-        self, session_id: UUID, query: str, n_results: int = 5
+    def query_document(
+        self, document_id: UUID, query: str, n_results: int = 5
     ) -> list[RagChunk]:
-        """Retrieve chunks from uploaded TP documents for a specific session."""
-        collection_name = f"session_{str(session_id).replace('-', '_')}"
+        """Retrieve chunks from a single uploaded document's RAG."""
+        collection_name = f"doc_{str(document_id).replace('-', '_')}"
         try:
             collection = self._client.get_collection(
                 collection_name, embedding_function=self._embed
@@ -76,23 +78,70 @@ class RagService:
         results = collection.query(query_texts=[query], n_results=n_results)
         return self._parse_results(results)
 
+    def query_session_documents(
+        self, session_id: UUID, query: str, n_results_per_doc: int = 3
+    ) -> list[RagChunk]:
+        """Fan-out query across every per-document RAG in a session.
+
+        Used by the cross-document consistency agent.
+        """
+        merged: list[RagChunk] = []
+        target = str(session_id)
+        for col_summary in self._client.list_collections():
+            meta = col_summary.metadata or {}
+            if meta.get("session_id") != target:
+                continue
+            try:
+                collection = self._client.get_collection(
+                    col_summary.name, embedding_function=self._embed
+                )
+            except Exception:
+                continue
+            results = collection.query(query_texts=[query], n_results=n_results_per_doc)
+            merged.extend(self._parse_results(results))
+        merged.sort(key=lambda c: -c.score)
+        return merged
+
+    def list_session_documents(self, session_id: UUID) -> list[dict[str, Any]]:
+        """Enumerate the per-document collections registered for ``session_id``."""
+        target = str(session_id)
+        out: list[dict[str, Any]] = []
+        for col in self._client.list_collections():
+            meta = col.metadata or {}
+            if meta.get("session_id") != target:
+                continue
+            out.append(
+                {
+                    "document_id": meta.get("document_id"),
+                    "filename": meta.get("filename"),
+                    "doc_type": meta.get("doc_type"),
+                    "collection": col.name,
+                    "chunk_count": col.count(),
+                }
+            )
+        return out
+
     # -- Internal --------------------------------------------------------------
 
     @staticmethod
     def _parse_results(results: dict[str, Any]) -> list[RagChunk]:
-        docs = results.get("documents", [[]])[0]
-        metas = results.get("metadatas", [[]])[0]
-        distances = results.get("distances", [[]])[0]
-        return [
-            RagChunk(
-                text=doc,
-                source=meta.get("file_name") or meta.get("source", ""),
-                page=int(meta.get("chapter_or_page", "page_0").replace("page_", "") or meta.get("page", 0)),
-                chunk_index=int(meta.get("chunk_index", 0)),
-                score=round(1.0 - float(dist), 4),
+        docs = (results.get("documents") or [[]])[0]
+        metas = (results.get("metadatas") or [[]])[0]
+        distances = (results.get("distances") or [[]])[0]
+        parsed: list[RagChunk] = []
+        for doc, meta, dist in zip(docs, metas, distances):
+            page_raw = str(meta.get("chapter_or_page") or meta.get("page") or "0")
+            page_num = int("".join(ch for ch in page_raw if ch.isdigit()) or 0)
+            parsed.append(
+                RagChunk(
+                    text=doc,
+                    source=meta.get("file_name") or meta.get("source") or meta.get("filename", ""),
+                    page=page_num,
+                    chunk_index=int(meta.get("chunk_index", 0)),
+                    score=round(1.0 - float(dist), 4),
+                )
             )
-            for doc, meta, dist in zip(docs, metas, distances)
-        ]
+        return parsed
 
 
 # Module-level singleton — matches the pattern of mock_agent_service.

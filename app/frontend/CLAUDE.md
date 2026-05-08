@@ -15,11 +15,9 @@ React + Vite + TypeScript frontend for a transfer pricing documentation consiste
 ## Key Screens
 
 1. **Document Ingestor** — drag-drop batch PDF/DOCX upload, backend classification, chunk/index status cards
-2. **Legacy Audit Upload** — required Master File / Local File / Contract slots after ingest until direct ingest-to-audit wiring exists
-3. **Analysis Progress** — polling-based pipeline stage tracking
-4. **Risk Dashboard** — overall score, severity summary, and mock NAV-oriented risk output
-5. **Findings List** — cards with severity badges and evidence snippets
-6. **Planned Detail Views** — finding detail and completeness matrix are not fully implemented yet
+2. **Ingest Progress** — explicit loading, success, and error states during parsing/indexing
+3. **Classification Results** — per-document cards with type badge, page/chunk metadata, confidence, and status
+4. **Re-upload Flow** — results view action to add additional files without full UI reset
 
 ## Critical Rules
 
@@ -32,7 +30,7 @@ React + Vite + TypeScript frontend for a transfer pricing documentation consiste
 - API response types must match backend Pydantic DTOs.
 - ESLint + Prettier on save.
 - Current active ingest contract is `POST /api/v1/documents/ingest` returning `IngestResponse`.
-- Audit contracts are `POST /api/v1/audits/start`, `GET /status/{id}`, and `GET /results/{id}`.
+- Audit contracts (`POST /api/v1/audits/start`, `GET /status/{id}`, `GET /results/{id}`) exist in backend but are not currently wired into the active frontend screen.
 
 ## UX Standards
 
@@ -44,4 +42,4 @@ React + Vite + TypeScript frontend for a transfer pricing documentation consiste
 - Responsive behavior must hold down to 320px without page-level horizontal overflow.
 - Long filenames, session IDs, source references, benchmark values, and finding text require explicit overflow handling.
 - Motion is short and purposeful, and must respect `prefers-reduced-motion`.
-- Current workflow unlocks the audit upload panel only after at least one document has been ingested.
+- Current UI is intentionally ingest-first and does not render the legacy multi-panel audit dashboard.

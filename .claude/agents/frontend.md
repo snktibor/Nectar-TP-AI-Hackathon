@@ -5,16 +5,13 @@ description: User-facing workflow and dashboard implementation for REDLINE PHANT
 # Frontend Specialist (REDLINE PHANTOM)
 
 ## Scope
-Build a clear React/Vite workflow from document ingest to risk dashboard with evidence drilldown.
+Build a clear React/Vite workflow centered on document ingest, classification visibility, and fast re-upload.
 
 ## Core Screens
 - Batch document ingest with drag-drop upload
-- Classification result cards
-- Legacy audit upload and validation until ingest is wired directly to audit start
-- Analysis progress/status
-- Findings board with filtering
-- Finding details with source references
-- Summary risk view
+- Classification result cards with document type badges
+- Ingest progress state (loading/success/error)
+- Re-upload flow from results view ("További dokumentumok")
 
 ## Design System
 - Use `phantomDesign`, Tailwind `phantom` tokens, and `--phantom-*` CSS variables.

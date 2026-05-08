@@ -36,20 +36,21 @@ def classify_document(sample_text: str) -> ClassificationResult:
     """Classify document type by matching keyword signals against sample text.
 
     Uses the ruleset's highest-match-count strategy with priority tiebreak.
+    Confidence is saturation-based: reaches 1.0 once `confidence_saturation`
+    distinct keywords are matched, so dense rule lists do not punish scoring.
     """
     ruleset = _load_ruleset()
     categories = ruleset["categories"]
     rules = ruleset["classification_rules"]
     min_confidence = rules.get("min_confidence_threshold", 0.3)
+    default_saturation = rules.get("confidence_saturation", 6)
+    second_lead_margin = rules.get("second_lead_margin", 0)
 
     text_lower = sample_text.lower()
-    best_type = rules["fallback_type"]
-    best_label = categories.get(best_type, {}).get("label", "Other")
-    best_score = 0
-    best_priority = 999
-    best_matched: list[str] = []
-    max_possible = 1
+    fallback_type = rules["fallback_type"]
+    fallback_label = categories.get(fallback_type, {}).get("label", "Other")
 
+    scored: list[tuple[int, int, str, str, list[str], int]] = []
     for cat_key, cat_config in categories.items():
         keywords: list[str] = cat_config.get("keyword_signals", [])
         if not keywords:
@@ -58,25 +59,37 @@ def classify_document(sample_text: str) -> ClassificationResult:
         matched = [kw for kw in keywords if kw.lower() in text_lower]
         match_count = len(matched)
         min_matches = cat_config.get("min_keyword_matches", 1)
-        priority = cat_config.get("priority", 99)
-
         if match_count < min_matches:
             continue
 
-        total_keywords = len(keywords)
-        if total_keywords > max_possible:
-            max_possible = total_keywords
+        priority = cat_config.get("priority", 99)
+        saturation = cat_config.get("confidence_saturation", default_saturation)
+        scored.append((
+            match_count,
+            -priority,
+            cat_key,
+            cat_config.get("label", cat_key),
+            matched,
+            saturation,
+        ))
 
-        if match_count > best_score or (
-            match_count == best_score and priority < best_priority
-        ):
-            best_type = cat_key
-            best_label = cat_config.get("label", cat_key)
-            best_score = match_count
-            best_priority = priority
-            best_matched = matched
+    if not scored:
+        return ClassificationResult(
+            doc_type=fallback_type,
+            label=fallback_label,
+            confidence=0.0,
+            matched_keywords=[],
+        )
 
-    confidence = min(best_score / max(max_possible, 1), 1.0) if best_score > 0 else 0.0
+    scored.sort(key=lambda r: (r[0], r[1]), reverse=True)
+    best_score, _, best_type, best_label, best_matched, best_saturation = scored[0]
+
+    confidence = min(best_score / max(best_saturation, 1), 1.0)
+
+    if len(scored) > 1 and second_lead_margin > 0:
+        runner_up = scored[1][0]
+        if best_score - runner_up < second_lead_margin:
+            confidence *= 0.75
 
     if confidence < min_confidence and best_type != "other":
         return ClassificationResult(
