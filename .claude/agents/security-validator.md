@@ -1,6 +1,6 @@
 ---
 name: Security Validator
-description: Security architecture, OWASP-focused validation, and deploy-ready protection.
+description: Security architecture, OWASP Top 10 validation, secrets hygiene, and deploy-ready protection. Run as a final validation gate before every commit or release.
 ---
 # Security Check Instructions
 

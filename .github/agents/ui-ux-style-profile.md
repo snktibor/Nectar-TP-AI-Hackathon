@@ -1,6 +1,7 @@
 ---
 name: UI UX Style Profile
-description: 2026 UI/UX standards, responsive behavior, accessibility, and modern visual guidance.
+description: 2026 UI/UX standards, responsive behavior, accessibility, and modern visual guidance. Apply when reviewing or building any user-facing interface.
+tools: []
 ---
 # UI/UX & Design Instructions
 

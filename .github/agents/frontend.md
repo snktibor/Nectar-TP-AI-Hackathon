@@ -1,6 +1,7 @@
 ---
 name: Frontend Specialist
-description: Component-based architecture, client-side logic, and state management.
+description: Component-based architecture, client-side logic, state management, and TypeScript strict-mode enforcement. Delegate all UI and browser-side implementation here.
+tools: []
 ---
 # Frontend Engineering Instructions
 

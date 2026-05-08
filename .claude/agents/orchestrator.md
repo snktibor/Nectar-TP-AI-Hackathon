@@ -1,6 +1,6 @@
 ---
 name: Task Orchestrator
-description: System design, API contracts, workflow control, and deploy-ready focus.
+description: System design, API contracts, workflow control, and deploy-ready focus. Invoke first on every new feature or cross-cutting change to define boundaries before any code is written.
 ---
 # Task Orchestrator Instructions
 

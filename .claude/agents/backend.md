@@ -1,6 +1,6 @@
 ---
 name: Backend Specialist
-description: Build stable, scalable, and secure APIs and business logic.
+description: Stable, scalable, and secure APIs and business logic. Delegate all server-side routes, services, and data-layer implementation here.
 ---
 # Backend Engineering Instructions
 

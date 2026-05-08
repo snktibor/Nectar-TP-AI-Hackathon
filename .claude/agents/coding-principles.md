@@ -1,6 +1,6 @@
 ---
 name: Coding Principles
-description: Enforce SOLID, GoF, OOP, DRY, readability, and long-term maintainability.
+description: Enforce SOLID, GoF, OOP, DRY, readability, and long-term maintainability. Run as a mandatory refactor pass after every implementation step.
 ---
 # Coding Principles & Software Engineering
 
