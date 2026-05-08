@@ -1,22 +1,19 @@
 import type { RiskSeverity } from '../types/api'
+import { phantomDesign } from '../design-system/phantomDesign'
 
 interface SeverityBadgeProps {
-  severity: RiskSeverity
-}
-
-const severityStyles: Record<RiskSeverity, string> = {
-  CRITICAL: 'bg-red-100 text-red-700',
-  HIGH: 'bg-red-100 text-red-600',
-  MEDIUM: 'bg-orange-100 text-orange-700',
-  LOW: 'bg-yellow-100 text-yellow-700',
+  readonly severity: RiskSeverity
 }
 
 export default function SeverityBadge({ severity }: SeverityBadgeProps): JSX.Element {
+  const config = phantomDesign.severity[severity]
+
   return (
     <span
-      className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ${severityStyles[severity]}`}
+      className={`${phantomDesign.components.statusPill} ${config.badge}`}
+      title={`${config.label} severity`}
     >
-      {severity}
+      {config.label}
     </span>
   )
 }

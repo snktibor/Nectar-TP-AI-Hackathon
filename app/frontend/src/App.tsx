@@ -11,8 +11,9 @@ import UploadPanel from './components/UploadPanel'
 import type { SlotKey } from './components/UploadPanel'
 import ResultsPanel from './components/ResultsPanel'
 import type { AuditPhase } from './components/ResultsPanel'
+import { phantomDesign } from './design-system/phantomDesign'
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL as string
+const API_BASE = import.meta.env.VITE_API_BASE_URL
 
 const SESSION_ID = crypto.randomUUID()
 
@@ -150,11 +151,11 @@ export default function App(): JSX.Element {
   const isAuditRunning = auditPhase === 'starting' || auditPhase === 'polling'
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className={phantomDesign.layout.page}>
       <Header sessionId={SESSION_ID} />
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="grid gap-6 lg:grid-cols-3">
-          <div className="lg:col-span-1">
+      <main className={phantomDesign.layout.container}>
+        <div className={phantomDesign.layout.dashboardGrid}>
+          <div className="min-w-0 lg:col-span-1">
             <UploadPanel
               sessionId={SESSION_ID}
               uploadedDocs={uploadedDocs}
@@ -163,7 +164,7 @@ export default function App(): JSX.Element {
               isDisabled={isAuditRunning}
             />
           </div>
-          <div className="lg:col-span-2">
+          <div className="min-w-0 lg:col-span-2">
             <ResultsPanel
               phase={auditPhase}
               auditStatus={auditStatus}
