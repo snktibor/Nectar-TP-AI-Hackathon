@@ -73,5 +73,10 @@
 			scroll-behavior: auto !important;
 			transition-duration: 0.01ms !important;
 		}
+
+		.force-spin {
+			animation-duration: 0.9s !important;
+			animation-iteration-count: infinite !important;
+		}
 	}
 }
