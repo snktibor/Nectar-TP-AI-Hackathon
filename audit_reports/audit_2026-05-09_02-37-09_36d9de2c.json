@@ -1,0 +1,478 @@
+{
+  "audit_status": "completed",
+  "report": {
+    "audit_task_id": "36d9de2c-a268-44a1-9b84-b853b77cae23",
+    "session_id": "336ccbb7-d5b3-47f1-891f-aca95cf2ea8d",
+    "generated_at": "2026-05-09T02:37:09.397498Z",
+    "consistency_errors": [
+      {
+        "error_id": "c48719a8-cb23-4177-a14f-aa2f6fb6fe5c",
+        "description": "finding from master_file_agent",
+        "severity": "medium",
+        "locations": [],
+        "evidence": null,
+        "attribution": {
+          "agent_id": "master_file_agent",
+          "doc_type_scope": "master_file",
+          "confidence": 0.9,
+          "evidence_chunks": [
+            {
+              "filename": "x.pdf",
+              "page": 1,
+              "chunk_index": 0,
+              "quote": null,
+              "char_start": null,
+              "char_end": null,
+              "source_kind": "document"
+            }
+          ],
+          "reasoning": null,
+          "uncertainty_notes": null,
+          "requires_human_review": true,
+          "rule_id": null,
+          "legal_references": [],
+          "prompt_version": "master_file_agent_v1"
+        }
+      },
+      {
+        "error_id": "e21c8c14-5aee-4f31-8d1c-2bd241f91304",
+        "description": "finding from local_file_agent",
+        "severity": "medium",
+        "locations": [],
+        "evidence": null,
+        "attribution": {
+          "agent_id": "local_file_agent",
+          "doc_type_scope": "local_file",
+          "confidence": 0.9,
+          "evidence_chunks": [
+            {
+              "filename": "x.pdf",
+              "page": 1,
+              "chunk_index": 0,
+              "quote": null,
+              "char_start": null,
+              "char_end": null,
+              "source_kind": "document"
+            }
+          ],
+          "reasoning": null,
+          "uncertainty_notes": null,
+          "requires_human_review": true,
+          "rule_id": null,
+          "legal_references": [],
+          "prompt_version": "local_file_agent_v1"
+        }
+      },
+      {
+        "error_id": "70b9c518-c0ce-4386-aa57-64991a763a23",
+        "description": "finding from benchmark_agent",
+        "severity": "medium",
+        "locations": [],
+        "evidence": null,
+        "attribution": {
+          "agent_id": "benchmark_agent",
+          "doc_type_scope": "benchmark_study",
+          "confidence": 0.9,
+          "evidence_chunks": [
+            {
+              "filename": "x.pdf",
+              "page": 1,
+              "chunk_index": 0,
+              "quote": null,
+              "char_start": null,
+              "char_end": null,
+              "source_kind": "document"
+            }
+          ],
+          "reasoning": null,
+          "uncertainty_notes": null,
+          "requires_human_review": true,
+          "rule_id": null,
+          "legal_references": [],
+          "prompt_version": "benchmark_agent_v1"
+        }
+      },
+      {
+        "error_id": "2d29f5f4-6e79-471d-bdeb-e4a7659d219f",
+        "description": "finding from contract_agent",
+        "severity": "medium",
+        "locations": [],
+        "evidence": null,
+        "attribution": {
+          "agent_id": "contract_agent",
+          "doc_type_scope": "contract",
+          "confidence": 0.9,
+          "evidence_chunks": [
+            {
+              "filename": "x.pdf",
+              "page": 1,
+              "chunk_index": 0,
+              "quote": null,
+              "char_start": null,
+              "char_end": null,
+              "source_kind": "document"
+            }
+          ],
+          "reasoning": null,
+          "uncertainty_notes": null,
+          "requires_human_review": true,
+          "rule_id": null,
+          "legal_references": [],
+          "prompt_version": "contract_agent_v1"
+        }
+      },
+      {
+        "error_id": "cd0436b6-573e-4893-a3d7-1c8aac2c1952",
+        "description": "finding from invoice_agent",
+        "severity": "medium",
+        "locations": [],
+        "evidence": null,
+        "attribution": {
+          "agent_id": "invoice_agent",
+          "doc_type_scope": "invoice",
+          "confidence": 0.9,
+          "evidence_chunks": [
+            {
+              "filename": "x.pdf",
+              "page": 1,
+              "chunk_index": 0,
+              "quote": null,
+              "char_start": null,
+              "char_end": null,
+              "source_kind": "document"
+            }
+          ],
+          "reasoning": null,
+          "uncertainty_notes": null,
+          "requires_human_review": true,
+          "rule_id": null,
+          "legal_references": [],
+          "prompt_version": "invoice_agent_v1"
+        }
+      },
+      {
+        "error_id": "e2205a4b-ec9b-48de-9d08-e3841b27044c",
+        "description": "finding from cross_doc_consistency_agent",
+        "severity": "medium",
+        "locations": [],
+        "evidence": null,
+        "attribution": {
+          "agent_id": "cross_doc_consistency_agent",
+          "doc_type_scope": "cross_document",
+          "confidence": 0.9,
+          "evidence_chunks": [
+            {
+              "filename": "x.pdf",
+              "page": 1,
+              "chunk_index": 0,
+              "quote": null,
+              "char_start": null,
+              "char_end": null,
+              "source_kind": "document"
+            }
+          ],
+          "reasoning": null,
+          "uncertainty_notes": null,
+          "requires_human_review": true,
+          "rule_id": null,
+          "legal_references": [],
+          "prompt_version": "cross_doc_consistency_agent_v1"
+        }
+      }
+    ],
+    "benchmark_risks": [],
+    "missing_elements": [],
+    "overall_risk": "medium",
+    "summary": "6/6 agents succeeded; 6 consistency, 0 benchmark, 0 completeness findings.",
+    "agent_runs": [
+      {
+        "agent_id": "master_file_agent",
+        "doc_type_scope": "master_file",
+        "prompt_version": "master_file_v1",
+        "model": "claude-sonnet-4-6",
+        "started_at": "2026-05-09T02:37:09.397200Z",
+        "finished_at": "2026-05-09T02:37:09.397200Z",
+        "tool_calls": 1,
+        "input_tokens": 10,
+        "output_tokens": 5,
+        "cache_read_tokens": 5,
+        "cache_creation_tokens": 0,
+        "consistency_errors": [
+          {
+            "error_id": "c48719a8-cb23-4177-a14f-aa2f6fb6fe5c",
+            "description": "finding from master_file_agent",
+            "severity": "medium",
+            "locations": [],
+            "evidence": null,
+            "attribution": {
+              "agent_id": "master_file_agent",
+              "doc_type_scope": "master_file",
+              "confidence": 0.9,
+              "evidence_chunks": [
+                {
+                  "filename": "x.pdf",
+                  "page": 1,
+                  "chunk_index": 0,
+                  "quote": null,
+                  "char_start": null,
+                  "char_end": null,
+                  "source_kind": "document"
+                }
+              ],
+              "reasoning": null,
+              "uncertainty_notes": null,
+              "requires_human_review": true,
+              "rule_id": null,
+              "legal_references": [],
+              "prompt_version": "master_file_agent_v1"
+            }
+          }
+        ],
+        "benchmark_risks": [],
+        "missing_elements": [],
+        "status": "ok",
+        "error": null
+      },
+      {
+        "agent_id": "local_file_agent",
+        "doc_type_scope": "local_file",
+        "prompt_version": "local_file_v1",
+        "model": "claude-sonnet-4-6",
+        "started_at": "2026-05-09T02:37:09.397285Z",
+        "finished_at": "2026-05-09T02:37:09.397286Z",
+        "tool_calls": 1,
+        "input_tokens": 10,
+        "output_tokens": 5,
+        "cache_read_tokens": 5,
+        "cache_creation_tokens": 0,
+        "consistency_errors": [
+          {
+            "error_id": "e21c8c14-5aee-4f31-8d1c-2bd241f91304",
+            "description": "finding from local_file_agent",
+            "severity": "medium",
+            "locations": [],
+            "evidence": null,
+            "attribution": {
+              "agent_id": "local_file_agent",
+              "doc_type_scope": "local_file",
+              "confidence": 0.9,
+              "evidence_chunks": [
+                {
+                  "filename": "x.pdf",
+                  "page": 1,
+                  "chunk_index": 0,
+                  "quote": null,
+                  "char_start": null,
+                  "char_end": null,
+                  "source_kind": "document"
+                }
+              ],
+              "reasoning": null,
+              "uncertainty_notes": null,
+              "requires_human_review": true,
+              "rule_id": null,
+              "legal_references": [],
+              "prompt_version": "local_file_agent_v1"
+            }
+          }
+        ],
+        "benchmark_risks": [],
+        "missing_elements": [],
+        "status": "ok",
+        "error": null
+      },
+      {
+        "agent_id": "benchmark_agent",
+        "doc_type_scope": "benchmark_study",
+        "prompt_version": "benchmark_v1",
+        "model": "claude-sonnet-4-6",
+        "started_at": "2026-05-09T02:37:09.397332Z",
+        "finished_at": "2026-05-09T02:37:09.397332Z",
+        "tool_calls": 1,
+        "input_tokens": 10,
+        "output_tokens": 5,
+        "cache_read_tokens": 5,
+        "cache_creation_tokens": 0,
+        "consistency_errors": [
+          {
+            "error_id": "70b9c518-c0ce-4386-aa57-64991a763a23",
+            "description": "finding from benchmark_agent",
+            "severity": "medium",
+            "locations": [],
+            "evidence": null,
+            "attribution": {
+              "agent_id": "benchmark_agent",
+              "doc_type_scope": "benchmark_study",
+              "confidence": 0.9,
+              "evidence_chunks": [
+                {
+                  "filename": "x.pdf",
+                  "page": 1,
+                  "chunk_index": 0,
+                  "quote": null,
+                  "char_start": null,
+                  "char_end": null,
+                  "source_kind": "document"
+                }
+              ],
+              "reasoning": null,
+              "uncertainty_notes": null,
+              "requires_human_review": true,
+              "rule_id": null,
+              "legal_references": [],
+              "prompt_version": "benchmark_agent_v1"
+            }
+          }
+        ],
+        "benchmark_risks": [],
+        "missing_elements": [],
+        "status": "ok",
+        "error": null
+      },
+      {
+        "agent_id": "contract_agent",
+        "doc_type_scope": "contract",
+        "prompt_version": "contract_v1",
+        "model": "claude-sonnet-4-6",
+        "started_at": "2026-05-09T02:37:09.397369Z",
+        "finished_at": "2026-05-09T02:37:09.397370Z",
+        "tool_calls": 1,
+        "input_tokens": 10,
+        "output_tokens": 5,
+        "cache_read_tokens": 5,
+        "cache_creation_tokens": 0,
+        "consistency_errors": [
+          {
+            "error_id": "2d29f5f4-6e79-471d-bdeb-e4a7659d219f",
+            "description": "finding from contract_agent",
+            "severity": "medium",
+            "locations": [],
+            "evidence": null,
+            "attribution": {
+              "agent_id": "contract_agent",
+              "doc_type_scope": "contract",
+              "confidence": 0.9,
+              "evidence_chunks": [
+                {
+                  "filename": "x.pdf",
+                  "page": 1,
+                  "chunk_index": 0,
+                  "quote": null,
+                  "char_start": null,
+                  "char_end": null,
+                  "source_kind": "document"
+                }
+              ],
+              "reasoning": null,
+              "uncertainty_notes": null,
+              "requires_human_review": true,
+              "rule_id": null,
+              "legal_references": [],
+              "prompt_version": "contract_agent_v1"
+            }
+          }
+        ],
+        "benchmark_risks": [],
+        "missing_elements": [],
+        "status": "ok",
+        "error": null
+      },
+      {
+        "agent_id": "invoice_agent",
+        "doc_type_scope": "invoice",
+        "prompt_version": "invoice_v1",
+        "model": "claude-sonnet-4-6",
+        "started_at": "2026-05-09T02:37:09.397407Z",
+        "finished_at": "2026-05-09T02:37:09.397407Z",
+        "tool_calls": 1,
+        "input_tokens": 10,
+        "output_tokens": 5,
+        "cache_read_tokens": 5,
+        "cache_creation_tokens": 0,
+        "consistency_errors": [
+          {
+            "error_id": "cd0436b6-573e-4893-a3d7-1c8aac2c1952",
+            "description": "finding from invoice_agent",
+            "severity": "medium",
+            "locations": [],
+            "evidence": null,
+            "attribution": {
+              "agent_id": "invoice_agent",
+              "doc_type_scope": "invoice",
+              "confidence": 0.9,
+              "evidence_chunks": [
+                {
+                  "filename": "x.pdf",
+                  "page": 1,
+                  "chunk_index": 0,
+                  "quote": null,
+                  "char_start": null,
+                  "char_end": null,
+                  "source_kind": "document"
+                }
+              ],
+              "reasoning": null,
+              "uncertainty_notes": null,
+              "requires_human_review": true,
+              "rule_id": null,
+              "legal_references": [],
+              "prompt_version": "invoice_agent_v1"
+            }
+          }
+        ],
+        "benchmark_risks": [],
+        "missing_elements": [],
+        "status": "ok",
+        "error": null
+      },
+      {
+        "agent_id": "cross_doc_consistency_agent",
+        "doc_type_scope": "cross_document",
+        "prompt_version": "cross_doc_consistency_v1",
+        "model": "claude-sonnet-4-6",
+        "started_at": "2026-05-09T02:37:09.397439Z",
+        "finished_at": "2026-05-09T02:37:09.397440Z",
+        "tool_calls": 1,
+        "input_tokens": 10,
+        "output_tokens": 5,
+        "cache_read_tokens": 5,
+        "cache_creation_tokens": 0,
+        "consistency_errors": [
+          {
+            "error_id": "e2205a4b-ec9b-48de-9d08-e3841b27044c",
+            "description": "finding from cross_doc_consistency_agent",
+            "severity": "medium",
+            "locations": [],
+            "evidence": null,
+            "attribution": {
+              "agent_id": "cross_doc_consistency_agent",
+              "doc_type_scope": "cross_document",
+              "confidence": 0.9,
+              "evidence_chunks": [
+                {
+                  "filename": "x.pdf",
+                  "page": 1,
+                  "chunk_index": 0,
+                  "quote": null,
+                  "char_start": null,
+                  "char_end": null,
+                  "source_kind": "document"
+                }
+              ],
+              "reasoning": null,
+              "uncertainty_notes": null,
+              "requires_human_review": true,
+              "rule_id": null,
+              "legal_references": [],
+              "prompt_version": "cross_doc_consistency_agent_v1"
+            }
+          }
+        ],
+        "benchmark_risks": [],
+        "missing_elements": [],
+        "status": "ok",
+        "error": null
+      }
+    ]
+  }
+}

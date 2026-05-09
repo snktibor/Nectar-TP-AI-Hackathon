@@ -1,425 +1,117 @@
 {
   "success": true,
   "data": {
-    "audit_task_id": "f3a1b2c4-d5e6-7890-abcd-ef1234567891",
-    "session_id": "c4d5e6f7-a8b9-0123-cdef-234567890abc",
-    "generated_at": "2026-05-09T10:00:28.000000Z",
+    "audit_task_id": "0b87701f-7ef6-4196-a7dc-7df245f754c1",
+    "session_id": "26c0f796-6ebe-4134-81e8-51411b7c33bd",
+    "generated_at": "2026-05-09T02:20:23.660331Z",
     "consistency_errors": [
       {
-        "error_id": "lf03-functional-profile-contradiction",
-        "description": "A Local File 5. fejezete (Funkcionális elemzés) azt állítja, hogy a HIG Manufacturing Kft. részt vesz a beszállítói kiválasztásban, önállóan dönt a termelési kapacitás bővítéséről, és aktívan közreműködik az árstratégia kialakításában. Ez közvetlen ellentmondásban áll a Master File 1.3. fejezetében és a Local File 2.1. fejezetében rögzített 'korlátozott kockázatú szerződéses gyártó' profillal, ahol az ilyen döntési jogkörök kizárólag az Anyavállalatnál koncentrálódnak.",
-        "severity": "critical",
-        "locations": [
-          {
-            "filename": "HIG_LocalFile_2024_FAULTY.pdf",
-            "line_numbers": [null]
-          },
-          {
-            "filename": "HIG_Masterfile_2024.pdf",
-            "line_numbers": [null]
-          }
-        ],
-        "evidence": "Local File 5. fejezet vs. Master File 1.3. fejezet és Local File 2.1. fejezet",
-        "attribution": {
-          "agent_id": "local_file_agent",
-          "doc_type_scope": "local_file",
-          "confidence": 0.96,
-          "evidence_chunks": [
-            {
-              "filename": "HIG_LocalFile_2024_FAULTY.pdf",
-              "page": 25,
-              "chunk_index": 2,
-              "quote": "részt vesz a beszállítói kiválasztásban, önállóan dönt a termelési kapacitás bővítéséről, és aktívan közreműködik az árstratégia kialakításában",
-              "char_start": 18420,
-              "char_end": 18578,
-              "source_kind": "document"
-            },
-            {
-              "filename": "HIG_Masterfile_2024.pdf",
-              "page": 7,
-              "chunk_index": 1,
-              "quote": "A HIG Manufacturing Kft. üzleti és pénzügyi kockázatprofilja korlátozott… az Anyavállalat irányítja",
-              "char_start": 5210,
-              "char_end": 5312,
-              "source_kind": "document"
-            },
-            {
-              "filename": "HIG_LocalFile_2024_FAULTY.pdf",
-              "page": 9,
-              "chunk_index": 0,
-              "quote": "önálló stratégiai döntéshozatali jogköre korlátozott; a beruházási, finanszírozási és termékportfólió-döntések az Anyavállalat jóváhagyásához kötöttek",
-              "char_start": 6300,
-              "char_end": 6452,
-              "source_kind": "document"
-            }
-          ],
-          "reasoning": "A Local File 5. fejezet funkcionális elemzése stratégiai döntési jogköröket rendel a HIG Manufacturing Kft.-hez (beszállítói kiválasztás, kapacitásbővítés, árstratégia). Ezzel közvetlen ellentmondásban áll ugyanazon Local File 2.1. fejezete ('önálló stratégiai döntéshozatali jogköre korlátozott') és a Master File 1.3. fejezete ('korlátozott kockázatú… Anyavállalat irányítja'). Ha a Társaság valóban önálló stratégiai döntéseket hoz, nem minősülhet rutin gyártónak, és a cost-plus 8%-os árazás alátámasztottsága megkérdőjelezhető. Az OECD TPG 1.51–1.106 szerinti funkcionális elemzés konzisztenciája kötelező feltétel.",
-          "uncertainty_notes": "Nem zárható ki, hogy az 5. fejezet szövegezése félreérthető és operatív (nem stratégiai) döntési jogköröket jelent. Emberi szakértői felülvizsgálat szükséges a Társaság tényleges felelősségi körének tisztázásához.",
-          "requires_human_review": true,
-          "rule_id": "OECD_TPG_2022.Ch_I.D.1",
-          "legal_references": [
-            "OECD_TPG_2022.para_1.51-1.106",
-            "OECD_TPG_2022.para_1.60",
-            "45_2025_NGM.section_4(2)"
-          ],
-          "prompt_version": "local_file_v1"
-        }
-      },
-      {
-        "error_id": "lic01-royalty-amount-contract-vs-localfile",
-        "description": "A licencszerződés (HIG-LIC-2024-003) 3. §-a az éves licencdíjat 50 000 000 Ft-ban rögzíti. A Local File 7.1. fejezetében lekönyvelt összeg 45 000 000 Ft (2,0% × 2 250 000 000 Ft árbevétel = 45 000 000 Ft). Az 5 000 000 Ft-os eltérés (11,1%) nem magyarázott.",
-        "severity": "critical",
+        "error_id": "67bff6c8-25f8-481c-8d67-f6d09134fff8",
+        "description": "A HIG-MGMT-2024-002 szerződés szolgáltatás-leírása nem elég konkrét az arm's length elv ellenőrzéséhez. A szerződés csupán 'csoportszintű stratégiai és koordinációs támogatást' említ, de nem sorolja fel a konkrét tevékenységeket, teljesítménykritériumokat vagy az eredmények mérhetőségét. Ez ellentmond az OECD Transfer Pricing Guidelines követelményeinek, amely szerint a csoporton belüli szolgáltatások leírásának elég konkrétnek kell lennie ahhoz, hogy az adhatóság ellenőrizni tudja az arm's length jelleget.",
+        "severity": "high",
         "locations": [
           {
             "filename": "HIG_Contracts_2024.pdf",
-            "line_numbers": [null]
-          },
-          {
-            "filename": "HIG_LocalFile_2024_FAULTY.pdf",
-            "line_numbers": [null]
+            "line_numbers": [
+              4
+            ]
           }
         ],
-        "evidence": "Licencszerződés 3. § (50 MFt) vs. Local File 7.1. fejezet (45 MFt)",
+        "evidence": null,
         "attribution": {
           "agent_id": "contract_agent",
           "doc_type_scope": "contract",
-          "confidence": 0.94,
+          "confidence": 0.72,
           "evidence_chunks": [
             {
               "filename": "HIG_Contracts_2024.pdf",
-              "page": 6,
-              "chunk_index": 1,
-              "quote": "A 2024. adóévre vonatkozó éves licencdíj összege: 50 000 000 Ft (ötvenmillió forint)",
-              "char_start": 4210,
-              "char_end": 4298,
+              "page": 4,
+              "chunk_index": 14,
+              "quote": "A felek rögzítik, hogy a jelen megállapodás szerinti szolgáltatások jellege csoportszintű koordinációs és irányítási természetű; a konkrét tevékenységek és azok eredménye a csoport szintjén, összevontan értékelendő.",
+              "char_start": 9273,
+              "char_end": 10067,
               "source_kind": "document"
             },
             {
-              "filename": "HIG_LocalFile_2024_FAULTY.pdf",
-              "page": 32,
-              "chunk_index": 0,
-              "quote": "licencdíj (HIG Holding GmbH): 45 000 000 Ft",
-              "char_start": 22640,
-              "char_end": 22710,
+              "filename": "HIG_Contracts_2024.pdf",
+              "page": 4,
+              "chunk_index": 13,
+              "quote": "A jelen megállapodás alapján a Szolgáltató csoportszintű stratégiai és koordinációs támogatást nyújt az Igénybe vevő részére.",
+              "char_start": 8528,
+              "char_end": 9507,
               "source_kind": "document"
             }
           ],
-          "reasoning": "A licencszerződés 3. §-a fix 50 000 000 Ft-os éves licencdíjat állapít meg. A Local File 7.1. fejezete ugyanakkor 45 000 000 Ft-ot könyvel el, összhangban a 2%-os kulccsal és a 2 250 000 000 Ft-os árbevétellel (2% × 2 250 000 000 = 45 000 000). Az 5 000 000 Ft eltérés (11,1%) azt jelzi, hogy vagy a minimum-díjklauzula aktívvá vált (de a Local File ezt nem rögzíti), vagy a szerződéses összeg és a könyvelés inkonzisztens. Az OECD TPG 1.10. bekezdése szerint a tényleges magatartásnak és a szerződéses feltételeknek összhangban kell lenniük.",
-          "uncertainty_notes": "Lehetséges, hogy a szerződésben rögzített 50 MFt minimum-díj alkalmazandó, és a Local File-ban hibás összeg szerepel. A könyvelési kivonatok és a bankbizonylatok emberi szakértői vizsgálata szükséges.",
+          "reasoning": "A szerz\\u0151d\\u00e9s 2. \\u00a7-a (chunk c13) csup\\u00e1n azt r\\u00f6gz\\u00edti, hogy 'a Szolg\\u00e1ltat\\u00f3 csoportszint\\u0171 strat\\u00e9giai \\u00e9s koordin\\u00e1ci\\u00f3s t\\u00e1mogat\\u00e1st ny\\u00fajt'. A 4. \\u00a7 (chunk c14) pedig azt \\u00e1ll\\u00edtja, hogy 'a konkr\\u00e9t tev\\u00e9kenys\\u00e9gek \\u00e9s azok eredm\\u00e9nye a csoport szintj\\u00e9n, \\u00f6sszevontan \\u00e9rt\\u00e9kelend\\u0151'. Ez az \\u00f6sszevont \\u00e9rt\\u00e9kel\\u00e9s azonban nem helyettes\\u00edti a konkr\\u00e9t teljes\\u00edtm\\u00e9nykrit\\u00e9riumok hi\\u00e1ny\\u00e1t. Az OECD Transfer Pricing Guidelines 7.1. bekezd\\u00e9se szerint a csoporton bel\\u00fcli szolg\\u00e1ltat\\u00e1sok \\u00e9rt\\u00e9kel\\u00e9s\\u00e9hez konkr\\u00e9t, m\\u00e9rhet\\u0151 alapok sz\\u00fcks\\u00e9gesek. A 45/2025. NGM rendelet 6. \\u00a7 (3) is el\\u0151\\u00edrja, hogy a kapcsolt \\u00fcgylet \\u00e9rt\\u00e9kel\\u00e9s\\u00e9hez az adhat\\u00f3s\\u00e1gnak ellen\\u0151rizhet\\u0151 alapok sz\\u00fcks\\u00e9gesek.\"",
+          "uncertainty_notes": "A szerz\\u0151d\\u00e9s teljes sz\\u00f6vege nem ker\\u00fclt lekérésre, ezért lehetséges, hogy a 2. \\u00a7 vagy egy m\\u00e1sik szakasz r\\u00e9szletesebb le\\u00edr\\u00e1st tartalmaz. Az 'összevontan értékelendő' kifejezés azt sugallja, hogy a felek szándékosan nem k\\u00edv\\u00e1nnak egyedi teljesítménykrit\\u00e9riumokat meghat\\u00e1rozni, amely azonban az arm's length elv ellen\\u0151rz\\u00e9s\\u00e9t neh\\u00e9zz\\u00e9 teszi.\"",
           "requires_human_review": true,
-          "rule_id": "OECD_TPG_2022.para_1.10",
+          "rule_id": "45_2025_NGM_rendelet.section_6",
           "legal_references": [
-            "OECD_TPG_2022.para_1.10",
-            "45_2025_NGM.section_3"
+            "OECD_TPG_2022.Ch_I.1.1",
+            "OECD_TPG_2022.Ch_VII.7.1"
           ],
           "prompt_version": "contract_v1"
         }
       },
       {
-        "error_id": "inv02-royalty-invoice-vs-localfile",
-        "description": "A licencdíj számla (HIG-LIC-2024-001) nettó összege 50 000 000 Ft, míg a Local File 4.3. fejezetében számított összeg 2% × 2 250 000 000 = 45 000 000 Ft. Az 5 000 000 Ft eltérés (11,1%) három dokumentumban jelenik meg egymásnak ellentmondóan: szerződés (50 MFt), számla (50 MFt), Local File (45 MFt).",
-        "severity": "critical",
-        "locations": [
-          {
-            "filename": "HIG_Invoices_2024.pdf",
-            "line_numbers": [null]
-          },
-          {
-            "filename": "HIG_LocalFile_2024_FAULTY.pdf",
-            "line_numbers": [null]
-          },
-          {
-            "filename": "HIG_Contracts_2024.pdf",
-            "line_numbers": [null]
-          }
-        ],
-        "evidence": "Licencdíj számla (50 MFt) vs. Local File 4.3. fejezet (45 MFt); összefügg a LIC-01 szerződéses hibával.",
-        "attribution": {
-          "agent_id": "invoice_agent",
-          "doc_type_scope": "invoice",
-          "confidence": 0.93,
-          "evidence_chunks": [
-            {
-              "filename": "HIG_Invoices_2024.pdf",
-              "page": 7,
-              "chunk_index": 0,
-              "quote": "Nettó összeg: 50 000 000 Ft",
-              "char_start": 5840,
-              "char_end": 5878,
-              "source_kind": "document"
-            },
-            {
-              "filename": "HIG_LocalFile_2024_FAULTY.pdf",
-              "page": 22,
-              "chunk_index": 1,
-              "quote": "2% × 2 250 000 000 = 45 000 000 Ft",
-              "char_start": 16210,
-              "char_end": 16250,
-              "source_kind": "document"
-            }
-          ],
-          "reasoning": "A licencdíj számla 50 000 000 Ft-ot tartalmaz. A Local File 4.3. fejezetének számítása szerint a licencdíj 2% × 2 250 000 000 Ft = 45 000 000 Ft, és a 7.1. fejezet is 45 000 000 Ft-ot könyvel. A számla ezzel 11,1%-kal magasabb összeget tükröz, ami háromirányú inkonzisztenciát alkot a szerződéssel, a számlával és a Local File-lal. Az OECD TPG 1.10. bekezdése szerint a szerződésnek, a számlának és a könyvelésnek egységes képet kell mutatnia.",
-          "uncertainty_notes": "A szerződésben minimum-díjklauzula lehet érvényes, ami indokolhatja az 50 MFt-os számlát — de ha ez a helyes összeg, a Local File-t is javítani kell. Könyvelési bizonylatok emberi felülvizsgálata szükséges.",
-          "requires_human_review": true,
-          "rule_id": "OECD_TPG_2022.para_1.10",
-          "legal_references": [
-            "OECD_TPG_2022.para_1.10",
-            "45_2025_NGM.section_3"
-          ],
-          "prompt_version": "invoice_v1"
-        }
-      },
-      {
-        "error_id": "bench02-method-mismatch-costplus-vs-tnmm",
-        "description": "A Local File a gyártási ügyletnél cost-plus módszert alkalmaz 8%-os haszonkulccsal (Berry-ráta implikált értéke: 1,08). A Benchmark tanulmány ugyanakkor TNMM-et alkalmaz Berry-rátával, és a tesztelt fél Berry-rátáját 1,19-ben állapítja meg. A két érték (1,08 vs. 1,19) nem konzisztens — a Benchmark nem a Local File-ban alkalmazott módszer eredményét validálja.",
+        "error_id": "597110b3-6ff3-4497-9690-1600040a57cf",
+        "description": "A HIG-MFG-2024-001 számú gyártási keretszerződés (Contract Manufacturing Framework Agreement) a díjazás mértékét 'az adott elszámolási időszakra ju[tó]' díjként definiálja, de a konkrét számítási módszer vagy a Cost Base-hez kapcsolódó markup/cost-plus ráta nem teljes mértékben világos a lekért fragmentumokból. A szerződés ugyan felsorolja a Cost Base elemeit (közvetlen anyagköltség, bérköltség), de a markup mértéke nem jelenik meg az elérhető szövegben.",
         "severity": "medium",
         "locations": [
           {
-            "filename": "HIG_Benchmark_2024.pdf",
-            "line_numbers": [null]
-          },
-          {
-            "filename": "HIG_LocalFile_2024_FAULTY.pdf",
-            "line_numbers": [null]
-          }
-        ],
-        "evidence": "Local File cost-plus 8% → Berry-ráta 1,08 vs. Benchmark TNMM Berry-ráta 1,19",
-        "attribution": {
-          "agent_id": "benchmark_agent",
-          "doc_type_scope": "benchmark_study",
-          "confidence": 0.87,
-          "evidence_chunks": [
-            {
-              "filename": "HIG_LocalFile_2024_FAULTY.pdf",
-              "page": 18,
-              "chunk_index": 2,
-              "quote": "A Társaság elsődleges transzferár-módszerként a Cost-Plus módszert alkalmazza 8%-os haszonkulccsal.",
-              "char_start": 12840,
-              "char_end": 12966,
-              "source_kind": "document"
-            },
-            {
-              "filename": "HIG_Benchmark_2024.pdf",
-              "page": 14,
-              "chunk_index": 1,
-              "quote": "a HIG Manufacturing Kft. 2024. évi tényleges Berry-rátája … 1,19",
-              "char_start": 9840,
-              "char_end": 9902,
-              "source_kind": "document"
-            }
-          ],
-          "reasoning": "Ha a Local File cost-plus 8%-os haszonkulcsot alkalmaz, akkor a tesztelt fél Berry-rátája matematikailag 1 + 0,08 = 1,08. A Benchmark azonban 1,19-es Berry-rátát mutat a tesztelt félre, ami ~19%-os implikált cost-plus haszonkulcsnak felel meg. A két értékrendszer (1,08 vs. 1,19) nem konzisztens, és a Benchmark nem az alkalmazott módszer eredményét erősíti meg. Az OECD TPG 2.59. bekezdése szerint a módszer és a tesztelt eredmény konzisztenciája kötelező.",
-          "uncertainty_notes": "Lehetséges, hogy a Benchmark a TNMM-et és a cost-plus módszert párhuzamosan teszteli, és az 1,19 a TNMM-futtatás eredménye. Ha a Local File a cost-plus-t tekinti elsődlegesnek, a Benchmark-nak ezt kellene alátámasztania — emberi felülvizsgálat szükséges.",
-          "requires_human_review": true,
-          "rule_id": "OECD_TPG_2022.para_2.59",
-          "legal_references": [
-            "OECD_TPG_2022.para_2.59",
-            "45_2025_NGM.section_7(1)"
-          ],
-          "prompt_version": "benchmark_v1"
-        }
-      },
-      {
-        "error_id": "inv01-mgmt-fee-invoice-date-mismatch",
-        "description": "A Q4 management fee számla (HIG-MGMT-2024-Q4) kiállítási dátuma 2024. október 1., miközben a HIG-MGMT-2024-002 szerződés 4. §-a szerint a számlázás 'minden negyedév végén' történik (Q4 esetén: 2024. december 31.). A számla 91 nappal korábban lett kiállítva, mint a szerződéses határidő.",
-        "severity": "medium",
-        "locations": [
-          {
-            "filename": "HIG_Invoices_2024.pdf",
-            "line_numbers": [null]
-          },
-          {
             "filename": "HIG_Contracts_2024.pdf",
-            "line_numbers": [null]
+            "line_numbers": [
+              1,
+              2
+            ]
           }
         ],
-        "evidence": "Számla kiállítása: 2024-10-01 vs. szerződéses számlázási dátum: 2024-12-31 (4. §)",
+        "evidence": null,
         "attribution": {
-          "agent_id": "invoice_agent",
-          "doc_type_scope": "invoice",
-          "confidence": 0.91,
+          "agent_id": "contract_agent",
+          "doc_type_scope": "contract",
+          "confidence": 0.68,
           "evidence_chunks": [
             {
-              "filename": "HIG_Invoices_2024.pdf",
-              "page": 4,
-              "chunk_index": 0,
-              "quote": "Kiállítás dátuma: 2024. október 1.",
-              "char_start": 3210,
-              "char_end": 3248,
+              "filename": "HIG_Contracts_2024.pdf",
+              "page": 1,
+              "chunk_index": 3,
+              "quote": "A Gyártó a jelen szerződés alapján nyújtott gyártási szolgáltatásokért díjazásra jogosult, amelynek mértéke az adott elszámolási időszakra ju",
+              "char_start": 1462,
+              "char_end": 1841,
               "source_kind": "document"
             },
             {
               "filename": "HIG_Contracts_2024.pdf",
-              "page": 3,
-              "chunk_index": 1,
-              "quote": "A számlák kiállításának időpontjai: március 31., június 30., szeptember 30. és december 31.",
-              "char_start": 2140,
-              "char_end": 2236,
+              "page": 2,
+              "chunk_index": 4,
+              "quote": "A Cost Base az alábbi költségelemeket foglalja magában: (i) közvetlen anyagköltség (alumíniumtuskó, ötvözők, segédanyagok), (ii) közvetlen bérköltség és bérjárulékok",
+              "char_start": 2636,
+              "char_end": 3574,
               "source_kind": "document"
             }
           ],
-          "reasoning": "A management fee szerződés 4. §-a egyértelműen rögzíti, hogy a Q4-es számla kiállítása december 31-én esedékes. A HIG-MGMT-2024-Q4 számlán szereplő 2024. október 1-jei kiállítási dátum azt jelenti, hogy a számla a Q4 szolgáltatási időszak megkezdésekor (nem annak végén) lett kiállítva, ami sérti a teljesítés-alapú számlázás elvét (Áfa tv. 58. §) és a szerződéses feltételt.",
-          "uncertainty_notes": "Lehetséges, hogy az előre számlázás egyedi üzleti megfontolásból (cashflow, csoportszintű politika) történt, és a felek erről megállapodtak. Ilyen kiegészítő megállapodás a corpus-ban nem volt fellelrhető.",
+          "reasoning": "A HIG-MFG-2024-001 szerz\\u0151d\\u00e9s 3. \\u00a7-a (chunk c3) azt \\u00e1ll\\u00edtja, hogy 'A Gyártó a jelen szerz\\u0151d\\u00e9s alapján nyújtott gyártási szolgáltatásokért díjazásra jogosult, amelynek mértéke az adott elszámolási időszakra ju[tó]' – azonban a konkrét mérték nem kerül megnevezésre. A 2. oldalon (chunk c4) a Cost Base elemei felsorolásra kerülnek: 'közvetlen anyagköltség (alumíniumtuskó, ötvözők, segédanyagok), (ii) közvetlen bérköltség és bérjárulékok'. Az OECD Transfer Pricing Guidelines 2.45. bekezd\\u00e9se a cost-plus módszert írja le, amely megköveteli a konkrét markup ráta meghatározását. A 45/2025. NGM rendelet 6. § (3) szintén előírja, hogy a transfer price konkrét, mérhető alapon kell, hogy meghatározódjon.\"",
+          "uncertainty_notes": "A keresési eredmények nem tartalmazták a díjazási szakasz teljes szövegét. Lehetséges, hogy a markup ráta vagy a cost-plus formula a 3. § egy később következő részében szerepel, amely nem került lekérésre. Az 'elszámolási időszakra jutó' kifejezés is homályos – nem világos, hogy ez negyedéves, havi vagy éves alapon történik-e.\"",
           "requires_human_review": true,
-          "rule_id": "HU_VAT_Act_CXXVII_2007.section_58",
+          "rule_id": "45_2025_NGM_rendelet.section_6",
           "legal_references": [
-            "OECD_TPG_2022.para_7.14",
-            "HU_VAT_Act_CXXVII_2007.section_58"
+            "OECD_TPG_2022.Ch_II.2.45"
           ],
-          "prompt_version": "invoice_v1"
+          "prompt_version": "contract_v1"
         }
-      }
-    ],
-    "benchmark_risks": [
+      },
       {
-        "risk_id": "bench01-berry-ratio-above-iqr",
-        "metric": "berry_ratio",
-        "observed_value": 1.19,
-        "benchmark_range": [1.05, 1.10],
-        "severity": "critical",
-        "rationale": "A HIG Manufacturing Kft. Berry-rátája (1,19) az összehasonlítható minta interkvartilis tartományának felső határa (Q3 = 1,10) felett van. A Benchmark tanulmány 5. fejezetének következtetése ezzel szemben azt állítja, hogy az érték az IQR-be esik — ez matematikailag téves, és az egész árazási megfelelőség-következtetést érvényteleníti.",
+        "error_id": "90593f83-2022-4ff2-991a-200526dabaa0",
+        "description": "A licencszerződés díjazása kettős feltételre épül: az éves nettó árbevétel 2,0%-a, de legalább 50.000.000 Ft évente. A 2024. adóévre vonatkozó éves licencdíj 50.000.000 Ft-ban kerül rögzítésre. Azonban a szerződés nem tartalmazza az éves nettó árbevétel konkrét előrejelzéseit vagy a 2,0% küszöb eléréséhez szükséges árbevételi szintet. Ez potenciális konzisztencia-kockázatot jelent, ha az aktuális árbevétel alapján számított díj eltér a rögzített 50 millió Ft-tól.",
+        "severity": "medium",
         "locations": [
           {
-            "filename": "HIG_Benchmark_2024.pdf",
-            "line_numbers": [null]
+            "filename": "HIG_Contracts_2024.pdf",
+            "line_numbers": null
           }
         ],
-        "attribution": {
-          "agent_id": "benchmark_agent",
-          "doc_type_scope": "benchmark_study",
-          "confidence": 0.98,
-          "evidence_chunks": [
-            {
-              "filename": "HIG_Benchmark_2024.pdf",
-              "page": 22,
-              "chunk_index": 0,
-              "quote": "A HIG Manufacturing Kft. Berry-rátája az interkvartilis tartományba esik, ezért az alkalmazott árazás szokásos piaci árnak minősül.",
-              "char_start": 15640,
-              "char_end": 15784,
-              "source_kind": "document"
-            },
-            {
-              "filename": "HIG_Benchmark_2024.pdf",
-              "page": 18,
-              "chunk_index": 2,
-              "quote": "IQR: Q1 = 1,05; Q3 = 1,10; mediána: 1,07",
-              "char_start": 12840,
-              "char_end": 12884,
-              "source_kind": "document"
-            },
-            {
-              "filename": "HIG_Benchmark_2024.pdf",
-              "page": 14,
-              "chunk_index": 1,
-              "quote": "a HIG Manufacturing Kft. 2024. évi tényleges Berry-rátája … 1,19",
-              "char_start": 9840,
-              "char_end": 9902,
-              "source_kind": "document"
-            }
-          ],
-          "reasoning": "A Benchmark tanulmány IQR-je [1,05; 1,10]. A tesztelt fél Berry-rátája 1,19, ami 1,10 > Q3 feltétel miatt az IQR FELETT van, nem belül. A tanulmány 5. fejezetének következtetése ('az interkvartilis tartományba esik') matematikailag téves. Az OECD TPG 3.57 és 3.62. bekezdése szerint az IQR-en kívüli pozíció esetén az árazás automatikusan nem felel meg a szokásos piaci ár elvének; indoklás vagy kiigazítás szükséges.",
-          "uncertainty_notes": "A Berry-ráta számításának alapja (teljes vs. tesztelt tevékenység) befolyásolhatja az eredményt. Emberi review szükséges a minta összetételének és a számítás alapjának ellenőrzéséhez.",
-          "requires_human_review": true,
-          "rule_id": "OECD_TPG_2022.para_3.57",
-          "legal_references": [
-            "OECD_TPG_2022.para_3.57",
-            "OECD_TPG_2022.para_3.62",
-            "45_2025_NGM.section_8(3)"
-          ],
-          "prompt_version": "benchmark_v1"
-        }
-      }
-    ],
-    "missing_elements": [
-      {
-        "element_id": "lf01-management-fee-benefit-test-missing",
-        "description": "A Local File 4.2. fejezete (Ügylet 2 – Menedzsmentszolgáltatási díj) nem tartalmaz hasznossági tesztet (benefit test). Nem azonosítja, hogy a fogadó fél számára a szolgáltatás mérhető gazdasági előnnyel jár-e, és hogy azt független féltől is megvásárolta volna-e.",
-        "expected_in": "HIG_LocalFile_2024_FAULTY.pdf",
-        "required_by": "OECD TPG 7.6–7.8; 45/2025. (XII. 23.) NGM rendelet 6. § (3) bek.",
-        "severity": "high",
-        "attribution": {
-          "agent_id": "local_file_agent",
-          "doc_type_scope": "local_file",
-          "confidence": 0.89,
-          "evidence_chunks": [
-            {
-              "filename": "HIG_LocalFile_2024_FAULTY.pdf",
-              "page": 18,
-              "chunk_index": 0,
-              "quote": "Az anyavállalat csoportszintű menedzsment támogatást nyújt a Társaság részére.",
-              "char_start": 12640,
-              "char_end": 12716,
-              "source_kind": "document"
-            },
-            {
-              "filename": "45_2025_NGM.pdf",
-              "page": 3,
-              "chunk_index": 1,
-              "quote": "6. § (3) Az adózó köteles igazolni, hogy a kapott szolgáltatás a számára mérhető gazdasági előnnyel járt, és amelyet független féltől is megvásárolt volna.",
-              "char_start": 2104,
-              "char_end": 2286,
-              "source_kind": "legal"
-            }
-          ],
-          "reasoning": "A Local File 4.2. fejezete csupán általánosan utal a menedzsment támogatásra, és nem tartalmaz (1) konkrét szolgáltatáskategóriákat, (2) piaci értékbecslést, (3) explicit hasznossági teszt eredményt. Az OECD TPG 7.6–7.8. és a 45/2025. NGM rendelet 6. § (3) bekezdése szerint a benefit test elvégzése kötelező; anélkül a díj levonhatósága adóhatósági vizsgálatban kétségbe vonható.",
-          "uncertainty_notes": "Nem zárható ki, hogy a benefit test egy más fejezetben vagy mellékletben szerepel — emberi review szükséges a teljes Local File átvizsgálásához.",
-          "requires_human_review": true,
-          "rule_id": "OECD_TPG_2022.para_7.6-7.8",
-          "legal_references": [
-            "OECD_TPG_2022.para_7.6-7.8",
-            "45_2025_NGM.section_6(3)"
-          ],
-          "prompt_version": "local_file_v1"
-        }
-      },
-      {
-        "element_id": "lf02-dempe-analysis-missing",
-        "description": "A Local File 4.3. fejezete (Ügylet 3 – Licencdíj) nem tartalmaz DEMPE-elemzést. Az immateriális javakkal kapcsolatos ügyleteknél az OECD BEPS 8–10. akciópontja alapján kötelező azonosítani, melyik entitás végzi a fejlesztést, fokozást, fenntartást, védelmet és hasznosítást, és ennek alapján ki jogosult a kapcsolódó hozamra.",
-        "expected_in": "HIG_LocalFile_2024_FAULTY.pdf",
-        "required_by": "OECD TPG Ch. 6, para. 6.32–6.56; BEPS Actions 8–10; 45/2025. NGM rendelet 6. § (4) bek.",
-        "severity": "high",
-        "attribution": {
-          "agent_id": "local_file_agent",
-          "doc_type_scope": "local_file",
-          "confidence": 0.91,
-          "evidence_chunks": [
-            {
-              "filename": "HIG_LocalFile_2024_FAULTY.pdf",
-              "page": 22,
-              "chunk_index": 0,
-              "quote": "a licencdíj a know-how használatának ellenértéke.",
-              "char_start": 15840,
-              "char_end": 15890,
-              "source_kind": "document"
-            },
-            {
-              "filename": "45_2025_NGM.pdf",
-              "page": 3,
-              "chunk_index": 2,
-              "quote": "6. § (4) Az immateriális javakra vonatkozó ügyleteknél be kell mutatni az egyes DEMPE-funkciók vállalatok közötti elosztását.",
-              "char_start": 2310,
-              "char_end": 2450,
-              "source_kind": "legal"
-            }
-          ],
-          "reasoning": "A Local File 4.3. fejezete a licencdíjat egyetlen mondatban tárgyalja ('a licencdíj a know-how használatának ellenértéke'), és nem elemzi, melyik entitás végzi a DEMPE-funkciókat (Development, Enhancement, Maintenance, Protection, Exploitation). Az OECD TPG 6. fejezete és a 45/2025. NGM rendelet 6. § (4) bekezdése szerint immateriális javakkal kapcsolatos ügyleteknél a DEMPE-elemzés elvégzése kötelező; anélkül a licencdíj piaci megfelelősége nem igazolható.",
-          "uncertainty_notes": "A DEMPE-elemzés esetleg a Master File-ban szerepel — emberi review szükséges a csoportszintű dokumentáció átvizsgálásához.",
-          "requires_human_review": true,
-          "rule_id": "OECD_TPG_2022.Ch_VI",
-          "legal_references": [
-            "OECD_TPG_2022.para_6.32-6.56",
-            "BEPS_Actions_8-10",
-            "45_2025_NGM.section_6(4)"
-          ],
-          "prompt_version": "local_file_v1"
-        }
-      },
-      {
-        "element_id": "mgmt01-management-fee-contract-no-performance-criteria",
-        "description": "A management fee szerződés (HIG-MGMT-2024-002) 2. §-a a szolgáltatás tartalmát kizárólag általánosan írja le ('csoportszintű stratégiai és koordinációs támogatást nyújt'), mérhető teljesítési kritériumok, konkrét deliverable-ök és minőségi elvárások nélkül. Az ilyen általános leírás az OECD TPG 7.14–7.15. bekezdése szerint nem elegendő a szokásos piaci ár elvének igazolásához.",
-        "expected_in": "HIG_Contracts_2024.pdf",
-        "required_by": "OECD TPG 7.6–7.8, 7.14–7.15; 45/2025. NGM rendelet 6. § (3) bek.",
-        "severity": "high",
+        "evidence": null,
         "attribution": {
           "agent_id": "contract_agent",
           "doc_type_scope": "contract",
@@ -427,54 +119,609 @@
           "evidence_chunks": [
             {
               "filename": "HIG_Contracts_2024.pdf",
-              "page": 2,
-              "chunk_index": 0,
-              "quote": "csoportszintű stratégiai és koordinációs támogatást nyújt az Igénybe vevő részére",
-              "char_start": 840,
-              "char_end": 924,
+              "page": 7,
+              "chunk_index": 23,
+              "quote": "gyévi nettó árbevételének 2,0% -a (kettő százaléka), de legalább 50.000.000 Ft (ötvenmillió forint) évenként. A 2024. adóévre vonatkozó éves licencdíj összege: 50.000.000 Ft (ötvenmillió forint).",
+              "char_start": 15531,
+              "char_end": 16495,
               "source_kind": "document"
-            },
-            {
-              "filename": "45_2025_NGM.pdf",
-              "page": 3,
-              "chunk_index": 0,
-              "quote": "6. § (3) Az adózó köteles igazolni, hogy a kapott szolgáltatás a számára mérhető gazdasági előnnyel járt…",
-              "char_start": 2104,
-              "char_end": 2210,
-              "source_kind": "legal"
             }
           ],
-          "reasoning": "A management fee szerződés 2. §-ában nem szerepelnek konkrét szolgáltatáskategóriák (pl. IT-infrastruktúra, jogi támogatás, pénzügyi kontrolling), negyedéves deliverable-ök, mérhetővé tett teljesítési feltételek, sem az Igénybe vevőnél realizálódó mérhető előny leírása. Az OECD TPG 7.14–7.15. bekezdése szerint az ilyen általános leírás adóhatósági vizsgálatban nem elegendő; a díj levonhatósága kétségbe vonható.",
-          "uncertainty_notes": "Lehetséges, hogy egy külön service level agreement (SLA) melléklet részletezi a szolgáltatásokat — ilyen a corpus-ban nem volt elérhető.",
+          "reasoning": "A HIG_Contracts_2024.pdf 7. oldalán (chunk c23) a licencdíj meghatározása: 'gyévi nettó árbevételének 2,0% -a (kettő százaléka), de legalább 50.000.000 Ft (ötvenmillió forint) évenként. A 2024. adóévre vonatkozó éves licencdíj összege: 50.000.000 Ft (ötvenmillió forint).' Ez azt jelenti, hogy a 2024. évre a minimum díj (50 millió Ft) kerül alkalmazásra. Az OECD Transfer Pricing Guidelines 6.1. bekezd\\u00e9se szerint a royalty díjak meghatározásánál az összehasonlítható független tranzakciók alapján kell eljárni. A szerződés nem tartalmazza az árbevételi előrejelzéseket, amelyek alapján ellenőrizhető lenne, hogy a 2,0% vagy a 50 millió Ft minimum kerül-e alkalmazásra. Ez az adóhatóság számára nehézzé teszi az arm's length jelleg ellenőrzését.\"",
+          "uncertainty_notes": "A licencszerződés teljes szövege nem került lekérésre, ezért lehetséges, hogy az árbevételi előrejelzések vagy a díjszámítás részletei egy másik szakaszban szerepelnek. A 'gyévi' kifejezés valószínűleg 'évi' helyesírási hiba, amely azonban nem érinti a díjazás lényegét. Az is lehetséges, hogy a 2024. évre vonatkozó 50 millió Ft-os rögzítés egy előzetes megállapodás, amely később az aktuális árbevétel alapján módosulhat.\"",
           "requires_human_review": true,
-          "rule_id": "OECD_TPG_2022.para_7.14-7.15",
+          "rule_id": "45_2025_NGM_rendelet.section_6",
           "legal_references": [
-            "OECD_TPG_2022.para_7.6-7.8",
-            "OECD_TPG_2022.para_7.14-7.15",
-            "45_2025_NGM.section_6(3)"
+            "OECD_TPG_2022.Ch_VI.6.1"
           ],
           "prompt_version": "contract_v1"
         }
+      },
+      {
+        "error_id": "8c645895-822b-44b2-8b54-d02d931ebfa1",
+        "description": "A HIG-MFG-2024-1201 számla kiállítójának (KIÁLLÍTÓ) német közösségi adószáma (DE123456789) érvénytelen. Az EU VIES nyilvántartásban nem található meg ez az adószám.",
+        "severity": "high",
+        "locations": [
+          {
+            "filename": "HIG_Invoices_2024.pdf",
+            "line_numbers": []
+          }
+        ],
+        "evidence": null,
+        "attribution": {
+          "agent_id": "invoice_agent",
+          "doc_type_scope": "invoice",
+          "confidence": 0.95,
+          "evidence_chunks": [
+            {
+              "filename": "HIG_Invoices_2024.pdf",
+              "page": 2,
+              "chunk_index": 2,
+              "quote": "60314 Frankfurt am Main, Németország\nKözösségi adószám: DE123456789",
+              "char_start": 1674,
+              "char_end": 2638,
+              "source_kind": "document"
+            }
+          ],
+          "reasoning": "A HIG_Invoices_2024.pdf 2. oldalán szereplő számla (HIG-MFG-2024-1201) kiállítójának közösségi adószáma DE123456789. Az EU VIES API-val végzett ellenőrzés (verify_tax_number) során az adószám érvénytelen (is_valid: false) eredményt adott. Az intercompany számlák esetén a kiállító és befogadó adószámának érvényessége alapvető követelmény az adóhatósági vizsgálatban. Érvénytelen adószám esetén a számla hitelességét és a tranzakció dokumentálásának megfelelőségét kétségbe lehet vonni.\",\n  \"requires_human_review\": true,\n  \"rule_id\": \"EU_VAT_DIRECTIVE_2006_112_EC.Art_226\",\n  \"legal_references\": [\"EU_VAT_DIRECTIVE_2006_112_EC.Art_226\", \"HU_Act_LXXXI_1996.Sec_169\"],\n  \"uncertainty_notes\": \"Az adószám formátuma helyes (DE + 9 számjegy), de az EU VIES nyilvántartásban nem található. Lehetséges, hogy az adószám tipográfiai hiba, vagy a német cég nem regisztrált az EU VAT rendszerben. Szükséges a kiállító cég valódi adószámának ellenőrzése.\"\n}",
+          "uncertainty_notes": null,
+          "requires_human_review": true,
+          "rule_id": null,
+          "legal_references": [],
+          "prompt_version": "invoice_v1"
+        }
+      },
+      {
+        "error_id": "6cbeed61-31e1-48bd-b0b0-05dacca01cf5",
+        "description": "A HIG Manufacturing Kft. és HIG Holding GmbH közötti gyártási szolgáltatási szerződés 2023. december 15-én lett aláírva és 2024. január 1-jétől 2024. december 31-ig tart. Azonban a számlák 2024. december hónapra vonatkoznak, amely a szerződés lejárata után esik. A szerződés automatikus meghosszabbítása 60 napos felmondási szándék hiányában történik, de a dokumentumok nem tartalmazzák a meghosszabbítás megerősítésének bizonyítékát.",
+        "severity": "medium",
+        "locations": [
+          {
+            "filename": "HIG_Contracts_2024.pdf",
+            "line_numbers": [
+              5
+            ]
+          },
+          {
+            "filename": "HIG_Invoices_2024.pdf",
+            "line_numbers": [
+              1
+            ]
+          }
+        ],
+        "evidence": "A szerződés 2024. december 31-én lejár, de a számlák 2024. decemberre vonatkoznak.",
+        "attribution": {
+          "agent_id": "cross_doc_consistency_agent",
+          "doc_type_scope": "cross_document",
+          "confidence": 0.65,
+          "evidence_chunks": [
+            {
+              "filename": "HIG_Contracts_2024.pdf",
+              "page": 5,
+              "chunk_index": 17,
+              "quote": "p hatályba és 2024. december 31. napján jár le. A megállapodás automatikusan meghosszabbodik egy évvel, ha a lejáratot megelőző 60 napon belül egyik Fél sem jelent be írásbeli felmondási szándékot.",
+              "char_start": 11595,
+              "char_end": 12512,
+              "source_kind": "document"
+            },
+            {
+              "filename": "HIG_Invoices_2024.pdf",
+              "page": 1,
+              "chunk_index": 1,
+              "quote": "ődéses gyártási szolgáltatás – 2024. december (Ref: HIG-MFG-2024-001)",
+              "char_start": 0,
+              "char_end": 904,
+              "source_kind": "document"
+            }
+          ],
+          "reasoning": "A szerződés 2024. december 31-én lejár, és az automatikus meghosszabbítás feltétele, hogy 60 nappal a lejárat előtt egyik fél sem jelent be felmondási szándékot. A számlák azonban 2024. decemberre vonatkoznak, amely a szerződés lejárata után esik. Bár a szerződés szövege lehetővé teszi az automatikus meghosszabbítást, a dokumentumok nem tartalmazzák a meghosszabbítás megerősítésének bizonyítékát, amely a 45/2025. NGM rendelet 6. § szerinti dokumentálási kötelezettség teljesítéséhez szükséges lenne. Ez potenciális dokumentálási hiányosságot jelent.\"",
+          "uncertainty_notes": "A szerződés szövege lehetővé teszi az automatikus meghosszabbítást, de nem világos, hogy a december havi számlázás a meghosszabbított szerződés alapján történt-e, vagy a szerződés lejárata után. Az automatikus meghosszabbítás feltételei teljesültek-e, azt a dokumentumok nem igazolják.\"",
+          "requires_human_review": true,
+          "rule_id": "NGM_45_2025.section_6",
+          "legal_references": [
+            "45/2025. (XII. 23.) NGM rendelet 6. §",
+            "OECD_TPG_2022.Ch_I.D"
+          ],
+          "prompt_version": "cross_doc_consistency_v1"
+        }
+      },
+      {
+        "error_id": "845af3a7-83e9-423c-9e21-3a411017ce4e",
+        "description": "A Local File 6. oldalán a gyártási díj 8,0%-os haszonkulccsal (Cost Plus Method – CPM) kerül meghatározásra, amely 614.300 db × 1.383 Ft/db = 850 millió Ft-ot eredményez. Azonban a számlák 2024. évi tényleges gyártási díjat (Cost Base × 1,08) 850 millió Ft-ként mutatnak, amely 8%-os felárnak felel meg. A Local File nem tartalmazza a Cost Base konkrét értékét, így az 1.383 Ft/db egységár és az 850 millió Ft végösszeg közötti kapcsolat nem egyértelmű.",
+        "severity": "high",
+        "locations": [
+          {
+            "filename": "HIG_LocalFile_2024_FAULTY.pdf",
+            "line_numbers": [
+              6
+            ]
+          },
+          {
+            "filename": "HIG_Invoices_2024.pdf",
+            "line_numbers": [
+              4
+            ]
+          }
+        ],
+        "evidence": "Local File: 614.300 db × 1.383 Ft/db = 850 millió Ft (8,0% haszonkulcs). Számlák: Cost Base × 1,08 = 850 millió Ft.",
+        "attribution": {
+          "agent_id": "cross_doc_consistency_agent",
+          "doc_type_scope": "cross_document",
+          "confidence": 0.75,
+          "evidence_chunks": [
+            {
+              "filename": "HIG_LocalFile_2024_FAULTY.pdf",
+              "page": 6,
+              "chunk_index": 11,
+              "quote": "áma 614.300 db Átlagos egységár 1.383 Ft/db Alkalmazótt transzferár-módszer Költség-plusz módszer (Cost Plus Method – CPM) Haszonkulcs (Mark-up on Total Cost) 8,0%",
+              "char_start": 6895,
+              "char_end": 7518,
+              "source_kind": "document"
+            },
+            {
+              "filename": "HIG_Invoices_2024.pdf",
+              "page": 4,
+              "chunk_index": 7,
+              "quote": "2024. évi tényleges gyártási díj (Cost Base × 1,08) 850 000 000 Végleges elszámolás",
+              "char_start": 5364,
+              "char_end": 6300,
+              "source_kind": "document"
+            }
+          ],
+          "reasoning": "A Local File a CPM módszert alkalmazza 8,0%-os haszonkulccsal, és az egységár 1.383 Ft/db. A számlák szintén 8%-os felárral (Cost Base × 1,08) számolnak, amely konzisztens. Azonban a Local File nem tartalmazza a Cost Base konkrét értékét, amely szükséges lenne a szokásos piaci ár (arm's length price) ellenőrzéséhez. A 45/2025. NGM rendelet 6. § szerinti dokumentálási kötelezettség teljesítéséhez a Cost Base részletezése szükséges.\"",
+          "uncertainty_notes": "Az 1.383 Ft/db egységár és a 850 millió Ft végösszeg közötti matematikai kapcsolat nem egyértelmű a Local File alapján. A Cost Base értéke nem szerepel a dokumentumban, amely a szokásos piaci ár ellenőrzésének akadálya.\"",
+          "requires_human_review": true,
+          "rule_id": "NGM_45_2025.section_6",
+          "legal_references": [
+            "45/2025. (XII. 23.) NGM rendelet 6. §",
+            "OECD_TPG_2022.Ch_II.A"
+          ],
+          "prompt_version": "cross_doc_consistency_v1"
+        }
+      },
+      {
+        "error_id": "46a6b117-8ef6-4478-bec7-5172292ecfa3",
+        "description": "A Local File 7. oldalán a menedzsment díj a csoportszintű árbevétel-arányos allokációs kulcs alapján kerül meghatározásra, amely 2024-ben 6,49% volt. Azonban a számlák (HIG-MGMT-2024-002) 120 millió Ft negyedéves részleteket mutatnak (120 millió Ft / 4 = 30 millió Ft), amely éves szinten 120 millió Ft-ot jelent. A Local File eredménykimutatása 120 millió Ft menedzsment díjat mutat, amely konzisztens a számlákkal. Azonban a 6,49%-os allokációs kulcs alapján számítótt érték nem egyezik meg a 120 millió Ft-tal, ha a HIG Manufacturing Kft. árbevétele nem ismert.",
+        "severity": "medium",
+        "locations": [
+          {
+            "filename": "HIG_LocalFile_2024_FAULTY.pdf",
+            "line_numbers": [
+              7,
+              12
+            ]
+          },
+          {
+            "filename": "HIG_Invoices_2024.pdf",
+            "line_numbers": [
+              2
+            ]
+          }
+        ],
+        "evidence": "Local File: 6,49%-os allokációs kulcs. Számlák: 120 millió Ft éves menedzsment díj.",
+        "attribution": {
+          "agent_id": "cross_doc_consistency_agent",
+          "doc_type_scope": "cross_document",
+          "confidence": 0.7,
+          "evidence_chunks": [
+            {
+              "filename": "HIG_LocalFile_2024_FAULTY.pdf",
+              "page": 7,
+              "chunk_index": 13,
+              "quote": "edően nyújtott irányítási, szervezési és adminisztratív jellegű szolgáltatások ellenértéke. A díj mértéke a csoportszintű árbevétel-arányos allokációs kulcs alapján kerül meghatározásra, amelynek értéke a 2024-es adóévben 6,49% volt.",
+              "char_start": 8296,
+              "char_end": 9279,
+              "source_kind": "document"
+            },
+            {
+              "filename": "HIG_Invoices_2024.pdf",
+              "page": 2,
+              "chunk_index": 3,
+              "quote": "ENDŐ: 30 000 000 Ft Fizetési mód: Bankatutalás Fizetési határidő: 2024. október 31. Megjegyzés: Szerződéses alap: HIG-MGMT-2024-002. Negyedéves részlet: 120.000.000 Ft / 4 = 30.000.000 Ft.",
+              "char_start": 1674,
+              "char_end": 2673,
+              "source_kind": "document"
+            }
+          ],
+          "reasoning": "A Local File a menedzsment díjat a csoportszintű árbevétel-arányos allokációs kulcs alapján határozza meg (6,49%), amely az OECD TPG 7.6–7.8. bekezdésének megfelelő módszer. A számlák 120 millió Ft éves menedzsment díjat mutatnak (30 millió Ft negyedévente). Azonban a Local File nem tartalmazza a HIG Manufacturing Kft. 2024. évi árbevételét, amely szükséges lenne a 6,49%-os kulcs alkalmazásának ellenőrzéséhez. Az allokációs kulcs és a tényleges díj közötti kapcsolat nem dokumentált.\"",
+          "uncertainty_notes": "A 6,49%-os allokációs kulcs alapján számított érték nem egyértelmű a Local File alapján, mivel az árbevétel konkrét értéke nem szerepel. Az allokációs kulcs és a 120 millió Ft díj közötti kapcsolat dokumentálása szükséges.\"",
+          "requires_human_review": true,
+          "rule_id": "NGM_45_2025.section_6",
+          "legal_references": [
+            "45/2025. (XII. 23.) NGM rendelet 6. §",
+            "OECD_TPG_2022.Ch_VII.D"
+          ],
+          "prompt_version": "cross_doc_consistency_v1"
+        }
+      },
+      {
+        "error_id": "dfc701a7-4659-4664-af7e-1de7739f173a",
+        "description": "A Master File 4. oldalán rögzítés szerint a bejegyzett védjegyek, szabadalmaztatott gyártási eljárások és know-how dokumentáció mind az Anyavállalat (HIG Holding GmbH) könyveiben szerepelnek, és a leányvállalatok a szellemi tulajdont licenciaszerződések alapján jogosultak használni. A szerződések (HIG_Contracts_2024.pdf) azonban rögzítések szerint a HIG Manufacturing Kft. a licencelt szellemi tulajdonon módosítást nem végezhet, azt nem fejlesztheti, nem adaptálhatja. Azonban a Local File 9. oldalán azt állítás, hogy a Társaság \"saját piacelemzési és költségkalkulációs kompetenciájára támaszkodik\", amely potenciális ellentmondás a licenc korlátozásokkal.",
+        "severity": "medium",
+        "locations": [
+          {
+            "filename": "HIG_Masterfile_2024.pdf",
+            "line_numbers": [
+              4
+            ]
+          },
+          {
+            "filename": "HIG_Contracts_2024.pdf",
+            "line_numbers": [
+              7
+            ]
+          },
+          {
+            "filename": "HIG_LocalFile_2024_FAULTY.pdf",
+            "line_numbers": [
+              9
+            ]
+          }
+        ],
+        "evidence": "Master File: IP az Anyavállalat könyveiben. Szerződések: Licencvevő nem módosíthat. Local File: Saját kompetencia.",
+        "attribution": {
+          "agent_id": "cross_doc_consistency_agent",
+          "doc_type_scope": "cross_document",
+          "confidence": 0.65,
+          "evidence_chunks": [
+            {
+              "filename": "HIG_Masterfile_2024.pdf",
+              "page": 4,
+              "chunk_index": 12,
+              "quote": "ejegyzett védjegyek, a szabadalmaztatott gyártási eljárások és a know-how dokumentáció mind az Anyavállalat könyveiben szerepelnek. A leányvállalatok a szellemi tulajdont az Anyavállalattal kötött licenciaszerződések alapján jogosultak használni.",
+              "char_start": 6909,
+              "char_end": 7159,
+              "source_kind": "document"
+            },
+            {
+              "filename": "HIG_Contracts_2024.pdf",
+              "page": 7,
+              "chunk_index": 25,
+              "quote": "Licencvevő nem jogosult a licencelt szellemi tulajdonon módosítást végezni, azt fejleszteni, adaptálni vagy más szellemi alkotásokba integrálni.",
+              "char_start": 17088,
+              "char_end": 17794,
+              "source_kind": "document"
+            },
+            {
+              "filename": "HIG_LocalFile_2024_FAULTY.pdf",
+              "page": 9,
+              "chunk_index": 18,
+              "quote": "yőri pénzügyi és kontrolling csapat érdemi javaslatokat dolgoz ki, amelyek alapvetően megh atározzák a végső transzferárakat. Az értékesítési árak kialakítása során a Társaság saját piacelemzési és költségkalkulációs kompetenciájára támaszkodik.",
+              "char_start": 12113,
+              "char_end": 12909,
+              "source_kind": "document"
+            },
+            {
+              "filename": "HIG_Contracts_2024.pdf",
+              "page": 8,
+              "chunk_index": 26,
+              "quote": "HIG Manufacturing Kft. – Csoporton belüli szerződések 2024 | BIZALMAS Oldal 8 / 9 A Licencadó szavatol azért, hogy a licencelt szellemi tulajdon felett rendelkezési joggal bír, és a licenc megadása harmadik felek jogait nem sérti.",
+              "char_start": 18556,
+              "char_end": 19515,
+              "source_kind": "document"
+            }
+          ],
+          "reasoning": "A Master File egyértelműen rögzíti, hogy az IP az Anyavállalat tulajdona, és a leányvállalatok licenciaszerződések alapján jogosultak használni. A szerződések szigorú korlátozásokat tartalmaznak: a licencvevő nem módosíthat, nem fejleszthet, nem adaptálhat. Azonban a Local File azt állítja, hogy a Társaság \\\"saját piacelemzési és költségkalkulációs kompetenciájára támaszkodik\\\", amely potenciálisan ellentmond a licenc korlátozásainak. Ez a funkcionális profil meghatározásához szükséges tisztázás, mivel az OECD TPG 1.40–1.50. bekezdése szerint a funkciók, eszközök és kockázatok alapján kell meghatározni a transfer pricing módszert.\"",
+          "uncertainty_notes": "A \\\"saját piacelemzési és költségkalkulációs kompetencia\\\" kifejezés értelmezése nem egyértelmű. Lehet, hogy ez csak az Anyavállalat által meghatározott specifikációk keretein belüli operatív kompetenciára utal, vagy lehet, hogy valóban önálló fejlesztési tevékenységet jelent. A szerződések szövege azonban egyértelműen tiltja a módosítást és fejlesztést.\"",
+          "requires_human_review": true,
+          "rule_id": "OECD_TPG_2022.Ch_VI",
+          "legal_references": [
+            "OECD_TPG_2022.Ch_VI",
+            "OECD_TPG_2022.Ch_I.D"
+          ],
+          "prompt_version": "cross_doc_consistency_v1"
+        }
+      },
+      {
+        "error_id": "63f2f79b-0792-4d47-a090-013ec0c73705",
+        "description": "A Benchmark tanulmány (HIG-BENCH-2024-001) a 2021–2023 időszak adatait használja (három pénzügyi év súlyozatlan átlaga), amely az OECD Irányelvek 3.75–3.76. bekezdésének megfelel. Azonban a jelenlegi szerződés 2023. december 15-én lett aláírva és 2024. január 1-jétől 2024. december 31-ig tart. Ez azt jelenti, hogy a benchmark tanulmány a szerződés aláírása előtti időszakra vonatkozik, amely potenciálisan nem tárgyalja a 2024. évi tranzakciókat. A 45/2025. NGM rendelet 7–8. § szerint a benchmark tanulmánynak a vizsgált időszakra vonatkoznia kell.",
+        "severity": "high",
+        "locations": [
+          {
+            "filename": "HIG_Benchmark_2024.pdf",
+            "line_numbers": [
+              3
+            ]
+          },
+          {
+            "filename": "HIG_Contracts_2024.pdf",
+            "line_numbers": [
+              6
+            ]
+          }
+        ],
+        "evidence": "Benchmark: 2021–2023. Szerződés: 2024. január 1. – december 31.",
+        "attribution": {
+          "agent_id": "cross_doc_consistency_agent",
+          "doc_type_scope": "cross_document",
+          "confidence": 0.8,
+          "evidence_chunks": [
+            {
+              "filename": "HIG_Benchmark_2024.pdf",
+              "page": 3,
+              "chunk_index": 5,
+              "quote": "A vizsgált időszak: 2021–2023 (három pénzügyi év súlyozatlan átlaga), összehangban az OECD Irányelvek 3.75 –3.",
+              "char_start": 3559,
+              "char_end": 3916,
+              "source_kind": "document"
+            },
+            {
+              "filename": "HIG_Contracts_2024.pdf",
+              "page": 6,
+              "chunk_index": 19,
+              "quote": "A jelen megállapodást a Felek elolvasták, tartalmát értelmezték, és mint akaratukkal mindenben megegyezőt 2023. december 15. napján aláírták.",
+              "char_start": 13528,
+              "char_end": 14475,
+              "source_kind": "document"
+            }
+          ],
+          "reasoning": "A Benchmark tanulmány a 2021–2023 időszakra vonatkozik, amely az OECD TPG 3.75–3.76. bekezdésének megfelelő gyakorlat. Azonban a szerződés 2023. december 15-én lett aláírva és 2024. január 1-től 2024. december 31-ig tart. Ez azt jelenti, hogy a benchmark tanulmány a szerződés aláírása előtti időszakra vonatkozik. A 45/2025. NGM rendelet 7–8. § szerint a benchmark tanulmánynak a vizsgált adóévhez (2024) kapcsolódnia kell. Az OECD TPG 3.75. bekezdése szerint a benchmark tanulmánynak az aktuális vagy közelmúltbeli adatokat kell tartalmaznia, amely a 2021–2023 adatok esetén már 1-3 évvel régebbi.\"",
+          "uncertainty_notes": "Az OECD TPG 3.75–3.76. bekezdése lehetővé teszi a közelmúltbeli adatok használatát, de a 2021–2023 adatok a 2024. évi tranzakciók értékeléséhez már elavultnak tekinthetők. A benchmark tanulmánynak ideálisan a 2023–2024 vagy 2024 adatokat kellene tartalmaznia.\"",
+          "requires_human_review": true,
+          "rule_id": "NGM_45_2025.section_7",
+          "legal_references": [
+            "45/2025. (XII. 23.) NGM rendelet 7–8. §",
+            "OECD_TPG_2022.Ch_III.D"
+          ],
+          "prompt_version": "cross_doc_consistency_v1"
+        }
       }
     ],
-    "overall_risk": "critical",
-    "summary": "6/6 ágnes sikeresen lefutott; 5 konzisztencia-, 1 benchmark- és 3 teljességi megállapítás. 4 kritikus súlyú finding: a Berry-ráta (1,19) az IQR felső határa (1,10) felett van, de a Benchmark téves következtetéssel szokásos piaci árnak minősíti; háromirányú licencdíj-összegeltérés (szerződés és számla: 50 MFt vs. Local File: 45 MFt); a funkcionális elemzés korlátozott kockázatú profillal ellentétes stratégiai döntési jogköröket rendel a HIG Manufacturing Kft.-hez.",
+    "benchmark_risks": [],
+    "missing_elements": [
+      {
+        "element_id": "b9edbca1-d07e-4f44-b30d-d6bc389258c8",
+        "description": "A Fődokumentum 5.1. fejezete (Konszolidált pénzügyi teljesítmény) csak fejléc szintjén szerepel, a tényleges konszolidált pénzügyi adatok (bevétel, EBITDA, nyereség, eszközök, kötelezettségek) azonban nem kerülnek bemutatásra. Az OECD Transzferár Irányelvek V. fejezete és a 45/2025. NGM rendelet 4. § (1) bekezdés b) pontja szerint a Fődokumentumnak tartalmaznia kell a csoport konszolidált pénzügyi kimutatásait vagy azokra való hivatkozást a tényleges adatokkal.",
+        "expected_in": "HIG_Masterfile_2024.pdf, 5. fejezet (Pénzügyi és adózási helyzet), 5.1. alszakasz",
+        "required_by": "OECD Transfer Pricing Guidelines Chapter V; 45/2025. (XII. 23.) NGM rendelet 4. § (1) b)",
+        "severity": "high",
+        "attribution": {
+          "agent_id": "master_file_agent",
+          "doc_type_scope": "master_file",
+          "confidence": 0.75,
+          "evidence_chunks": [
+            {
+              "filename": "HIG_Masterfile_2024.pdf",
+              "page": 10,
+              "chunk_index": 29,
+              "quote": "5.1. Konszolidált pénzügyi teljesítmény / A HIG-csoport 2024-es üzleti évben a következő k",
+              "char_start": 19332,
+              "char_end": 20309,
+              "source_kind": "document"
+            },
+            {
+              "filename": "HIG_Masterfile_2024.pdf",
+              "page": 12,
+              "chunk_index": 37,
+              "quote": "évi auditált pénzügyi kimutatásain és a Csoport konszolidált pénzügyi kimutatásain alapulnak",
+              "char_start": 24379,
+              "char_end": 24911,
+              "source_kind": "document"
+            }
+          ],
+          "reasoning": "A Fődokumentum 5.1. fejezete fejlécként szerepel, de a szöveg abruptul véget ér (\"a következő k...\"), és a tényleges konszolidált pénzügyi adatok nem követik. Az OECD TPG V. fejezete és a 45/2025. NGM rendelet 4. § (1) b) pontja szerint a Fődokumentumnak tartalmaznia kell a csoport konszolidált pénzügyi kimutatásait vagy azokra való konkrét hivatkozást a tényleges számadatokkal. A dokumentum csak arra utal, hogy az adatok auditált kimutatásokon alapulnak, de nem közli azokat. Ez a hiányosság megnehezíti a transzferár-politika értékelését és a csoport pénzügyi helyzetének megértését.",
+          "uncertainty_notes": "A chunk szövege csonka, amely lehet a dokumentum formázási hibája vagy az OCR/szövegkinyerés hibája. Lehetséges, hogy a tényleges adatok a dokumentumban szerepelnek, de a szövegkinyerés nem érte el őket. Az emberi felülvizsgáló ellenőrizze az eredeti PDF-et, hogy valóban hiányzik-e a 5.1. szakasz tartalma, vagy csak a szövegkinyerés volt hiányos.\"",
+          "requires_human_review": true,
+          "rule_id": "45_2025_NGM.4_1_b",
+          "legal_references": [
+            "OECD_TPG_2022.Ch_V",
+            "HU_Act_LXXXI_1996.31_B",
+            "45_2025_NGM.4_1"
+          ],
+          "prompt_version": "master_file_v1"
+        }
+      },
+      {
+        "element_id": "c0da2ae8-0604-4732-aefe-bf05c7c49fec",
+        "description": "A HIG-MGMT-2024-002 számú csoporton belüli szolgáltatási megállapodás (Management Fee) nem tartalmazza a díj konkrét összegét vagy számítási képletét. A szerződés csupán azt rögzíti, hogy a Szolgáltató 'csoportszintű stratégiai és koordinációs támogatást' nyújt, de a díj mértéke nem kerül meghatározásra.",
+        "expected_in": "HIG_Contracts_2024.pdf – Management Fee Service Agreement (HIG-MGMT-2024-002)",
+        "required_by": "45/2025. NGM rendelet 6. § (3) és az OECD Transfer Pricing Guidelines 7.55–7.62. bekezdések",
+        "severity": "high",
+        "attribution": {
+          "agent_id": "contract_agent",
+          "doc_type_scope": "contract",
+          "confidence": 0.75,
+          "evidence_chunks": [
+            {
+              "filename": "HIG_Contracts_2024.pdf",
+              "page": 4,
+              "chunk_index": 12,
+              "quote": "CSOPORTON BELÜLI SZOLGÁLTATÁSI MEGÁLLAPODÁS / Intragroup Service Agreement (Management Fee) / Szerződésszám: HIG-MGMT-2024-002 / Hatályos: 2024. január 1. – 2024",
+              "char_start": 8528,
+              "char_end": 9472,
+              "source_kind": "document"
+            },
+            {
+              "filename": "HIG_Contracts_2024.pdf",
+              "page": 4,
+              "chunk_index": 13,
+              "quote": "A jelen megállapodás alapján a Szolgáltató csoportszintű stratégiai és koordinációs támogatást nyújt az Igénybe vevő részére.",
+              "char_start": 8528,
+              "char_end": 9507,
+              "source_kind": "document"
+            },
+            {
+              "filename": "HIG_Contracts_2024.pdf",
+              "page": 5,
+              "chunk_index": 15,
+              "quote": "A Szolgáltató a díjat negyedévente számlázza az Igénybe vevőnek.",
+              "char_start": 10847,
+              "char_end": 11794,
+              "source_kind": "document"
+            }
+          ],
+          "reasoning": "A HIG_Contracts_2024.pdf dokumentum 4. oldalán (chunk c12) a szerződés azonosítása: 'CSOPORTON BELÜLI SZOLGÁLTATÁSI MEGÁLLAPODÁS / Intragroup Service Agreement (Management Fee) / Szerződésszám: HIG-MGMT-2024-002 / Hatályos: 2024. január 1. – 2024'. Az ugyanezen dokumentum 4. oldalán (chunk c13) a szerződés tárgya: 'A jelen megállapodás alapján a Szolgáltató csoportszintű stratégiai és koordinációs támogatást nyújt az Igénybe vevő részére.' Az 5. oldalon (chunk c15) a számlázási feltételek: 'A Szolgáltató a díjat negyedévente számlázza az Igénybe vevőnek.' Azonban a keresési eredmények között nem jelenik meg a díj konkrét összege vagy számítási módja. Az OECD Transfer Pricing Guidelines 7.55–7.62. bekezdései és a 45/2025. NGM rendelet 6. § (3) bekezdése előírják, hogy a csoporton belüli szolgáltatások díjazása konkrét, mérhető alapon kell, hogy történjen. A vág, általános 'stratégiai és koordinációs támogatás' leírása, amely nem tartalmaz konkrét teljesítménykritériumokat vagy mérhetőséget, nem felel meg az arm's length elvnek és a magyar adójogi követelményeknek.\"",
+          "uncertainty_notes": "A keresési eredmények nem tartalmazták a management fee szerződés díjazási szakaszát (3. §). Lehetséges, hogy a díj mértéke a dokumentum egy olyan részében szerepel, amely nem került lekérésre. Az 'Igénybe vevő' és 'Szolgáltató' pontos azonosítása szintén nem teljes – a chunk c13 csak az 'Igénybe vevő' képviselőjét nevezi meg (dr. Kovács András), de a Szolgáltató teljes neve nem jelenik meg ebben a fragmentumban.\"",
+          "requires_human_review": true,
+          "rule_id": "45_2025_NGM_rendelet.section_6",
+          "legal_references": [
+            "OECD_TPG_2022.Ch_VII.7.55",
+            "OECD_TPG_2022.Ch_VII.7.62"
+          ],
+          "prompt_version": "contract_v1"
+        }
+      },
+      {
+        "element_id": "e7d58b37-2123-42cd-9970-227e40244489",
+        "description": "A HIG-MFG-2024-ANNUAL számla 3. oldalán az Éves licencdíj sor (HIG-LIC-2024-003) nem teljes: az egységár, nettó összeg, ÁFA% és brúttó összeg adatai hiányzanak vagy csonkak. Az adatok nélkül a számla nem ellenőrizhető.",
+        "expected_in": "HIG-MFG-2024-ANNUAL számla",
+        "required_by": "2007. évi CXXVII. törvény (ÁFA törvény) 169. § - számla tartalmi követelményei",
+        "severity": "high",
+        "attribution": {
+          "agent_id": "invoice_agent",
+          "doc_type_scope": "invoice",
+          "confidence": 0.85,
+          "evidence_chunks": [
+            {
+              "filename": "HIG_Invoices_2024.pdf",
+              "page": 3,
+              "chunk_index": 5,
+              "quote": "Megnevezés Menny. Egységár (Ft) Nettó (Ft) ÁFA% ÁFA (Ft) Bruttó (Ft) Éves licencdíj – gyártási know-how, védjegyek és szabadalmak (Ref: HIG-LIC-2024-003) 1 év 50 00",
+              "char_start": 3598,
+              "char_end": 4563,
+              "source_kind": "document"
+            }
+          ],
+          "reasoning": "A HIG_Invoices_2024.pdf 3. oldal\\u00e1n a licencd\\u00edj t\\u00e9tel sor\\u00e1ban az egys\\u00e9g\\u00e1r \\u00e9s a p\\u00e9nznem csak r\\u00e9szben l\\u00e1that\\u00f3 (\\\"50 00\\\"), a nett\\u00f3 \\u00f6sszeg, \\u00c1FA sz\\u00e1zal\\u00e9k \\u00e9s br\\u00fatt\\u00f3 \\u00f6sszeg teljesen hi\\u00e1nyzik. A 2007. \\u00e9vi CXXVII. t\\u00f6rv\\u00e9ny 169. \\u00a7 szerint a sz\\u00e1ml\\u00e1nak tartalmaznia kell az egyes t\\u00e9telek nett\\u00f3 \\u00e9s br\\u00fatt\\u00f3 \\u00e9rt\\u00e9k\\u00e9t, valamint az alkalmazott \\u00c1FA-kulcsot. Az intercompany sz\\u00e1mla eset\\u00e9ben ez k\\u00fcl\\u00f6n\\u00f6sen fontos az arm's length ellen\\u0151rz\\u00e9s szempontj\\u00e1b\\u00f3l.\",\n  \"requires_human_review\": true,\n  \"rule_id\": \"HU_Act_CXXVII_2007.Sec_169\",\n  \"legal_references\": [\"HU_Act_CXXVII_2007.Sec_169\", \"OECD_TPG_2022.Ch_IV\"],\n  \"uncertainty_notes\": \"A dokumentum csonk\\u00e1s lehet a PDF-b\\u0151l val\\u00f3 kiv\\u00e1g\\u00e1s miatt. Sz\\u00fcks\\u00e9ges az eredeti sz\\u00e1mla teljes megtekint\\u00e9se.\"\n}",
+          "uncertainty_notes": null,
+          "requires_human_review": true,
+          "rule_id": null,
+          "legal_references": [],
+          "prompt_version": "invoice_v1"
+        }
+      },
+      {
+        "element_id": "ec2454fb-470f-4ec2-b2ab-e205d1659f87",
+        "description": "A HIG-MFG-2024-ANNUAL számla (3. oldal) befogadó (BEFOGADÓ) rovatában a kiállítás dátuma és teljesítés dátuma nem olvasható vagy hiányzik. Az intercompany számlák esetén a pontos dátumok kötelezőek az adóhatósági dokumentáláshoz.",
+        "expected_in": "HIG-MFG-2024-ANNUAL számla fejléce",
+        "required_by": "2007. évi CXXVII. törvény (ÁFA törvény) 169. § - számla tartalmi követelményei",
+        "severity": "medium",
+        "attribution": {
+          "agent_id": "invoice_agent",
+          "doc_type_scope": "invoice",
+          "confidence": 0.8,
+          "evidence_chunks": [
+            {
+              "filename": "HIG_Invoices_2024.pdf",
+              "page": 2,
+              "chunk_index": 4,
+              "quote": "Kiállítás dátuma Teljesítés dátuma\nSzámlaszám:",
+              "char_start": 2441,
+              "char_end": 2796,
+              "source_kind": "document"
+            }
+          ],
+          "reasoning": "A HIG_Invoices_2024.pdf 2. oldalán a befogadó rovatában a \\\"Kiállítás dátuma\\\" és \\\"Teljesítés dátuma\\\" mezők üresek vagy az adatok nem olvashatók. A 2007. évi CXXVII. törvény 169. § szerint a számlán fel kell tüntetni a kiállítás és teljesítés dátumát. Intercompany tranzakciók esetén ezek az adatok kritikusak az adóév helyes meghatározásához és a transfer pricing dokumentáció összeállításához.\",\n  \"requires_human_review\": true,\n  \"rule_id\": \"HU_Act_CXXVII_2007.Sec_169\",\n  \"legal_references\": [\"HU_Act_CXXVII_2007.Sec_169\", \"45_2025_NGM_rendelet.Sec_4\"],\n  \"uncertainty_notes\": \"A dátumok a PDF-ben nem olvashatók, de lehetséges, hogy az eredeti dokumentumban jelen vannak. Az elektronikus számla megjegyzése szerint papír alapú aláírást nem tartalmaz, így az eredeti fájl ellenőrzése szükséges.\"\n}",
+          "uncertainty_notes": null,
+          "requires_human_review": true,
+          "rule_id": null,
+          "legal_references": [],
+          "prompt_version": "invoice_v1"
+        }
+      },
+      {
+        "element_id": "0e5e41cc-b591-4968-a8d3-b240b4eb9875",
+        "description": "A Local File eredménykimutatása (7.1. fejezet) 45 millió Ft licencdíjat mutat az \"egyéb ráfordítások\" között, amely az Anyavállalat (HIG Holding GmbH) felé fizetendő. Azonban a Local File nem tartalmazza a licencdíj számításának alapját, a licencelt szellemi tulajdon körét, vagy a szokásos piaci ár (arm's length price) indoklását. A szerződések (HIG_Contracts_2024.pdf) rögzítések szerint a licencvevő nem jogosult a licencelt szellemi tulajdonon módosítást végezni, de a licencdíj mértékét nem tartalmazza.",
+        "expected_in": "Local File 6. fejezet (Összehasonlíthatósági elemzés és módszerválasztás)",
+        "required_by": "45/2025. (XII. 23.) NGM rendelet 6. §, OECD TPG Ch. VI",
+        "severity": "high",
+        "attribution": {
+          "agent_id": "cross_doc_consistency_agent",
+          "doc_type_scope": "cross_document",
+          "confidence": 0.85,
+          "evidence_chunks": [
+            {
+              "filename": "HIG_LocalFile_2024_FAULTY.pdf",
+              "page": 12,
+              "chunk_index": 23,
+              "quote": "és egyéb személyi ktg. 94.000.000 VI. Értéksökkenési leírás 64.500.000 VII. Egyéb ráfordítások (management fee + licencdíj) 165.000.000 ebből: management fee (HIG Holding GmbH) 120.000.000 ebből: licencdíj (HIG Holding GmbH) 45.000.000",
+              "char_start": 15974,
+              "char_end": 16654,
+              "source_kind": "document"
+            },
+            {
+              "filename": "HIG_Contracts_2024.pdf",
+              "page": 7,
+              "chunk_index": 25,
+              "quote": "Licencvevő nem jogosult a licencelt szellemi tulajdonon módosítást végezni, azt fejleszteni, adaptálni vagy más szellemi alkotásokba integrálni.",
+              "char_start": 17088,
+              "char_end": 17794,
+              "source_kind": "document"
+            }
+          ],
+          "reasoning": "A Local File eredménykimutatása 45 millió Ft licencdíjat mutat, amely az Anyavállalat felé fizetendő. Azonban a Local File 6. fejezete (Összehasonlíthatósági elemzés és módszerválasztás) nem tartalmazza a licencdíj szokásos piaci árának indoklását. Az OECD TPG VI. fejezete (Intangibles) és a 45/2025. NGM rendelet 6. § szerint a licencdíj szokásos piaci árának dokumentálása kötelező. A szerződések szövege nem tartalmazza a licencdíj mértékét sem, amely a dokumentálási kötelezettség teljesítésének akadálya.\"",
+          "uncertainty_notes": "A licencdíj 45 millió Ft-nak tűnik ésszerűnek a 850 millió Ft gyártási díjhoz képest (5,3%), de a szokásos piaci ár indoklása hiányzik. A szerződések szövege nem tartalmazza a licencdíj mértékét, amely a dokumentálás hiányosságát jelzi.\"",
+          "requires_human_review": true,
+          "rule_id": "NGM_45_2025.section_6",
+          "legal_references": [
+            "45/2025. (XII. 23.) NGM rendelet 6. §",
+            "OECD_TPG_2022.Ch_VI"
+          ],
+          "prompt_version": "cross_doc_consistency_v1"
+        }
+      }
+    ],
+    "overall_risk": "medium",
+    "summary": "6/6 agents succeeded; 9 consistency, 0 benchmark, 5 completeness findings.",
     "agent_runs": [
       {
         "agent_id": "master_file_agent",
         "doc_type_scope": "master_file",
         "prompt_version": "master_file_v1",
-        "model": "claude-sonnet-4-6-mock",
-        "started_at": "2026-05-09T10:00:01.000000Z",
-        "finished_at": "2026-05-09T10:00:04.000000Z",
-        "tool_calls": 4,
-        "input_tokens": 11200,
-        "output_tokens": 640,
-        "cache_read_tokens": 7800,
-        "cache_creation_tokens": 3400,
+        "model": "claude-haiku-4-5-20251001",
+        "started_at": "2026-05-09T02:11:43.617282Z",
+        "finished_at": "2026-05-09T02:13:00.920308Z",
+        "tool_calls": 17,
+        "input_tokens": 29425,
+        "output_tokens": 2832,
+        "cache_read_tokens": 43477,
+        "cache_creation_tokens": 18380,
         "consistency_errors": [],
         "benchmark_risks": [],
-        "missing_elements": [],
+        "missing_elements": [
+          {
+            "element_id": "b9edbca1-d07e-4f44-b30d-d6bc389258c8",
+            "description": "A Fődokumentum 5.1. fejezete (Konszolidált pénzügyi teljesítmény) csak fejléc szintjén szerepel, a tényleges konszolidált pénzügyi adatok (bevétel, EBITDA, nyereség, eszközök, kötelezettségek) azonban nem kerülnek bemutatásra. Az OECD Transzferár Irányelvek V. fejezete és a 45/2025. NGM rendelet 4. § (1) bekezdés b) pontja szerint a Fődokumentumnak tartalmaznia kell a csoport konszolidált pénzügyi kimutatásait vagy azokra való hivatkozást a tényleges adatokkal.",
+            "expected_in": "HIG_Masterfile_2024.pdf, 5. fejezet (Pénzügyi és adózási helyzet), 5.1. alszakasz",
+            "required_by": "OECD Transfer Pricing Guidelines Chapter V; 45/2025. (XII. 23.) NGM rendelet 4. § (1) b)",
+            "severity": "high",
+            "attribution": {
+              "agent_id": "master_file_agent",
+              "doc_type_scope": "master_file",
+              "confidence": 0.75,
+              "evidence_chunks": [
+                {
+                  "filename": "HIG_Masterfile_2024.pdf",
+                  "page": 10,
+                  "chunk_index": 29,
+                  "quote": "5.1. Konszolidált pénzügyi teljesítmény / A HIG-csoport 2024-es üzleti évben a következő k",
+                  "char_start": 19332,
+                  "char_end": 20309,
+                  "source_kind": "document"
+                },
+                {
+                  "filename": "HIG_Masterfile_2024.pdf",
+                  "page": 12,
+                  "chunk_index": 37,
+                  "quote": "évi auditált pénzügyi kimutatásain és a Csoport konszolidált pénzügyi kimutatásain alapulnak",
+                  "char_start": 24379,
+                  "char_end": 24911,
+                  "source_kind": "document"
+                }
+              ],
+              "reasoning": "A Fődokumentum 5.1. fejezete fejlécként szerepel, de a szöveg abruptul véget ér (\"a következő k...\"), és a tényleges konszolidált pénzügyi adatok nem követik. Az OECD TPG V. fejezete és a 45/2025. NGM rendelet 4. § (1) b) pontja szerint a Fődokumentumnak tartalmaznia kell a csoport konszolidált pénzügyi kimutatásait vagy azokra való konkrét hivatkozást a tényleges számadatokkal. A dokumentum csak arra utal, hogy az adatok auditált kimutatásokon alapulnak, de nem közli azokat. Ez a hiányosság megnehezíti a transzferár-politika értékelését és a csoport pénzügyi helyzetének megértését.",
+              "uncertainty_notes": "A chunk szövege csonka, amely lehet a dokumentum formázási hibája vagy az OCR/szövegkinyerés hibája. Lehetséges, hogy a tényleges adatok a dokumentumban szerepelnek, de a szövegkinyerés nem érte el őket. Az emberi felülvizsgáló ellenőrizze az eredeti PDF-et, hogy valóban hiányzik-e a 5.1. szakasz tartalma, vagy csak a szövegkinyerés volt hiányos.\"",
+              "requires_human_review": true,
+              "rule_id": "45_2025_NGM.4_1_b",
+              "legal_references": [
+                "OECD_TPG_2022.Ch_V",
+                "HU_Act_LXXXI_1996.31_B",
+                "45_2025_NGM.4_1"
+              ],
+              "prompt_version": "master_file_v1"
+            }
+          }
+        ],
         "status": "ok",
         "error": null
       },
@@ -482,135 +729,17 @@
         "agent_id": "local_file_agent",
         "doc_type_scope": "local_file",
         "prompt_version": "local_file_v1",
-        "model": "claude-sonnet-4-6-mock",
-        "started_at": "2026-05-09T10:00:04.000000Z",
-        "finished_at": "2026-05-09T10:00:10.000000Z",
-        "tool_calls": 7,
-        "input_tokens": 13800,
-        "output_tokens": 1240,
-        "cache_read_tokens": 9200,
-        "cache_creation_tokens": 4600,
-        "consistency_errors": [
-          {
-            "error_id": "lf03-functional-profile-contradiction",
-            "description": "A Local File 5. fejezete (Funkcionális elemzés) azt állítja, hogy a HIG Manufacturing Kft. részt vesz a beszállítói kiválasztásban, önállóan dönt a termelési kapacitás bővítéséről, és aktívan közreműködik az árstratégia kialakításában. Ez közvetlen ellentmondásban áll a Master File 1.3. fejezetében és a Local File 2.1. fejezetében rögzített 'korlátozott kockázatú szerződéses gyártó' profillal, ahol az ilyen döntési jogkörök kizárólag az Anyavállalatnál koncentrálódnak.",
-            "severity": "critical",
-            "locations": [
-              {
-                "filename": "HIG_LocalFile_2024_FAULTY.pdf",
-                "line_numbers": [null]
-              },
-              {
-                "filename": "HIG_Masterfile_2024.pdf",
-                "line_numbers": [null]
-              }
-            ],
-            "evidence": "Local File 5. fejezet vs. Master File 1.3. fejezet és Local File 2.1. fejezet",
-            "attribution": {
-              "agent_id": "local_file_agent",
-              "doc_type_scope": "local_file",
-              "confidence": 0.96,
-              "evidence_chunks": [
-                {
-                  "filename": "HIG_LocalFile_2024_FAULTY.pdf",
-                  "page": 25,
-                  "chunk_index": 2,
-                  "quote": "részt vesz a beszállítói kiválasztásban, önállóan dönt a termelési kapacitás bővítéséről, és aktívan közreműködik az árstratégia kialakításában",
-                  "char_start": 18420,
-                  "char_end": 18578,
-                  "source_kind": "document"
-                },
-                {
-                  "filename": "HIG_Masterfile_2024.pdf",
-                  "page": 7,
-                  "chunk_index": 1,
-                  "quote": "A HIG Manufacturing Kft. üzleti és pénzügyi kockázatprofilja korlátozott… az Anyavállalat irányítja",
-                  "char_start": 5210,
-                  "char_end": 5312,
-                  "source_kind": "document"
-                }
-              ],
-              "reasoning": "A Local File 5. fejezet funkcionális elemzése stratégiai döntési jogköröket rendel a HIG Manufacturing Kft.-hez (beszállítói kiválasztás, kapacitásbővítés, árstratégia). Ezzel közvetlen ellentmondásban áll ugyanazon Local File 2.1. fejezete ('önálló stratégiai döntéshozatali jogköre korlátozott') és a Master File 1.3. fejezete ('korlátozott kockázatú… Anyavállalat irányítja'). Az OECD TPG 1.51–1.106 szerinti funkcionális elemzés konzisztenciája kötelező feltétel.",
-              "uncertainty_notes": "Nem zárható ki, hogy az 5. fejezet szövegezése félreérthető és operatív (nem stratégiai) döntési jogköröket jelent. Emberi szakértői felülvizsgálat szükséges.",
-              "requires_human_review": true,
-              "rule_id": "OECD_TPG_2022.Ch_I.D.1",
-              "legal_references": [
-                "OECD_TPG_2022.para_1.51-1.106",
-                "OECD_TPG_2022.para_1.60",
-                "45_2025_NGM.section_4(2)"
-              ],
-              "prompt_version": "local_file_v1"
-            }
-          }
-        ],
+        "model": "claude-haiku-4-5-20251001",
+        "started_at": "2026-05-09T02:13:00.920611Z",
+        "finished_at": "2026-05-09T02:13:54.271827Z",
+        "tool_calls": 11,
+        "input_tokens": 16689,
+        "output_tokens": 2691,
+        "cache_read_tokens": 0,
+        "cache_creation_tokens": 12934,
+        "consistency_errors": [],
         "benchmark_risks": [],
-        "missing_elements": [
-          {
-            "element_id": "lf01-management-fee-benefit-test-missing",
-            "description": "A Local File 4.2. fejezete (Ügylet 2 – Menedzsmentszolgáltatási díj) nem tartalmaz hasznossági tesztet (benefit test). Nem azonosítja, hogy a fogadó fél számára a szolgáltatás mérhető gazdasági előnnyel jár-e, és hogy azt független féltől is megvásárolta volna-e.",
-            "expected_in": "HIG_LocalFile_2024_FAULTY.pdf",
-            "required_by": "OECD TPG 7.6–7.8; 45/2025. (XII. 23.) NGM rendelet 6. § (3) bek.",
-            "severity": "high",
-            "attribution": {
-              "agent_id": "local_file_agent",
-              "doc_type_scope": "local_file",
-              "confidence": 0.89,
-              "evidence_chunks": [
-                {
-                  "filename": "HIG_LocalFile_2024_FAULTY.pdf",
-                  "page": 18,
-                  "chunk_index": 0,
-                  "quote": "Az anyavállalat csoportszintű menedzsment támogatást nyújt a Társaság részére.",
-                  "char_start": 12640,
-                  "char_end": 12716,
-                  "source_kind": "document"
-                }
-              ],
-              "reasoning": "A Local File 4.2. fejezete csupán általánosan utal a menedzsment támogatásra, és nem tartalmaz konkrét szolgáltatáskategóriákat, piaci értékbecslést, vagy explicit hasznossági teszt eredményt. Az OECD TPG 7.6–7.8. és a 45/2025. NGM rendelet 6. § (3) bekezdése szerint a benefit test elvégzése kötelező.",
-              "uncertainty_notes": "Nem zárható ki, hogy a benefit test egy más fejezetben vagy mellékletben szerepel — emberi review szükséges.",
-              "requires_human_review": true,
-              "rule_id": "OECD_TPG_2022.para_7.6-7.8",
-              "legal_references": [
-                "OECD_TPG_2022.para_7.6-7.8",
-                "45_2025_NGM.section_6(3)"
-              ],
-              "prompt_version": "local_file_v1"
-            }
-          },
-          {
-            "element_id": "lf02-dempe-analysis-missing",
-            "description": "A Local File 4.3. fejezete (Ügylet 3 – Licencdíj) nem tartalmaz DEMPE-elemzést. Az immateriális javakkal kapcsolatos ügyleteknél az OECD BEPS 8–10. akciópontja alapján kötelező azonosítani, melyik entitás végzi a fejlesztést, fokozást, fenntartást, védelmet és hasznosítást.",
-            "expected_in": "HIG_LocalFile_2024_FAULTY.pdf",
-            "required_by": "OECD TPG Ch. 6, para. 6.32–6.56; BEPS Actions 8–10; 45/2025. NGM rendelet 6. § (4) bek.",
-            "severity": "high",
-            "attribution": {
-              "agent_id": "local_file_agent",
-              "doc_type_scope": "local_file",
-              "confidence": 0.91,
-              "evidence_chunks": [
-                {
-                  "filename": "HIG_LocalFile_2024_FAULTY.pdf",
-                  "page": 22,
-                  "chunk_index": 0,
-                  "quote": "a licencdíj a know-how használatának ellenértéke.",
-                  "char_start": 15840,
-                  "char_end": 15890,
-                  "source_kind": "document"
-                }
-              ],
-              "reasoning": "A Local File 4.3. fejezete a licencdíjat egyetlen mondatban tárgyalja, és nem elemzi a DEMPE-funkciókat. Az OECD TPG 6. fejezete és a 45/2025. NGM rendelet 6. § (4) bekezdése szerint immateriális javakkal kapcsolatos ügyleteknél a DEMPE-elemzés elvégzése kötelező.",
-              "uncertainty_notes": "A DEMPE-elemzés esetleg a Master File-ban szerepel — emberi review szükséges.",
-              "requires_human_review": true,
-              "rule_id": "OECD_TPG_2022.Ch_VI",
-              "legal_references": [
-                "OECD_TPG_2022.para_6.32-6.56",
-                "BEPS_Actions_8-10",
-                "45_2025_NGM.section_6(4)"
-              ],
-              "prompt_version": "local_file_v1"
-            }
-          }
-        ],
+        "missing_elements": [],
         "status": "ok",
         "error": null
       },
@@ -618,117 +747,16 @@
         "agent_id": "benchmark_agent",
         "doc_type_scope": "benchmark_study",
         "prompt_version": "benchmark_v1",
-        "model": "claude-sonnet-4-6-mock",
-        "started_at": "2026-05-09T10:00:10.000000Z",
-        "finished_at": "2026-05-09T10:00:15.000000Z",
-        "tool_calls": 6,
-        "input_tokens": 12400,
-        "output_tokens": 980,
-        "cache_read_tokens": 8600,
-        "cache_creation_tokens": 3800,
-        "consistency_errors": [
-          {
-            "error_id": "bench02-method-mismatch-costplus-vs-tnmm",
-            "description": "A Local File a gyártási ügyletnél cost-plus módszert alkalmaz 8%-os haszonkulccsal (Berry-ráta implikált értéke: 1,08). A Benchmark tanulmány ugyanakkor TNMM-et alkalmaz Berry-rátával, és a tesztelt fél Berry-rátáját 1,19-ben állapítja meg. A két érték (1,08 vs. 1,19) nem konzisztens.",
-            "severity": "medium",
-            "locations": [
-              {
-                "filename": "HIG_Benchmark_2024.pdf",
-                "line_numbers": [null]
-              },
-              {
-                "filename": "HIG_LocalFile_2024_FAULTY.pdf",
-                "line_numbers": [null]
-              }
-            ],
-            "evidence": "Local File cost-plus 8% → Berry-ráta 1,08 vs. Benchmark TNMM Berry-ráta 1,19",
-            "attribution": {
-              "agent_id": "benchmark_agent",
-              "doc_type_scope": "benchmark_study",
-              "confidence": 0.87,
-              "evidence_chunks": [
-                {
-                  "filename": "HIG_LocalFile_2024_FAULTY.pdf",
-                  "page": 18,
-                  "chunk_index": 2,
-                  "quote": "A Társaság elsődleges transzferár-módszerként a Cost-Plus módszert alkalmazza 8%-os haszonkulccsal.",
-                  "char_start": 12840,
-                  "char_end": 12966,
-                  "source_kind": "document"
-                },
-                {
-                  "filename": "HIG_Benchmark_2024.pdf",
-                  "page": 14,
-                  "chunk_index": 1,
-                  "quote": "a HIG Manufacturing Kft. 2024. évi tényleges Berry-rátája … 1,19",
-                  "char_start": 9840,
-                  "char_end": 9902,
-                  "source_kind": "document"
-                }
-              ],
-              "reasoning": "Ha a Local File cost-plus 8%-os haszonkulcsot alkalmaz, akkor a tesztelt fél Berry-rátája matematikailag 1 + 0,08 = 1,08. A Benchmark azonban 1,19-es Berry-rátát mutat a tesztelt félre, ami ~19%-os implikált cost-plus haszonkulcsnak felel meg. Az OECD TPG 2.59. bekezdése szerint a módszer és a tesztelt eredmény konzisztenciája kötelező.",
-              "uncertainty_notes": "Lehetséges, hogy a Benchmark a TNMM-et és a cost-plus módszert párhuzamosan teszteli. Emberi felülvizsgálat szükséges.",
-              "requires_human_review": true,
-              "rule_id": "OECD_TPG_2022.para_2.59",
-              "legal_references": [
-                "OECD_TPG_2022.para_2.59",
-                "45_2025_NGM.section_7(1)"
-              ],
-              "prompt_version": "benchmark_v1"
-            }
-          }
-        ],
-        "benchmark_risks": [
-          {
-            "risk_id": "bench01-berry-ratio-above-iqr",
-            "metric": "berry_ratio",
-            "observed_value": 1.19,
-            "benchmark_range": [1.05, 1.10],
-            "severity": "critical",
-            "rationale": "A HIG Manufacturing Kft. Berry-rátája (1,19) az összehasonlítható minta interkvartilis tartományának felső határa (Q3 = 1,10) felett van. A Benchmark tanulmány 5. fejezetének következtetése ezzel szemben azt állítja, hogy az érték az IQR-be esik — ez matematikailag téves.",
-            "locations": [
-              {
-                "filename": "HIG_Benchmark_2024.pdf",
-                "line_numbers": [null]
-              }
-            ],
-            "attribution": {
-              "agent_id": "benchmark_agent",
-              "doc_type_scope": "benchmark_study",
-              "confidence": 0.98,
-              "evidence_chunks": [
-                {
-                  "filename": "HIG_Benchmark_2024.pdf",
-                  "page": 22,
-                  "chunk_index": 0,
-                  "quote": "A HIG Manufacturing Kft. Berry-rátája az interkvartilis tartományba esik, ezért az alkalmazott árazás szokásos piaci árnak minősül.",
-                  "char_start": 15640,
-                  "char_end": 15784,
-                  "source_kind": "document"
-                },
-                {
-                  "filename": "HIG_Benchmark_2024.pdf",
-                  "page": 18,
-                  "chunk_index": 2,
-                  "quote": "IQR: Q1 = 1,05; Q3 = 1,10; mediána: 1,07",
-                  "char_start": 12840,
-                  "char_end": 12884,
-                  "source_kind": "document"
-                }
-              ],
-              "reasoning": "A Benchmark tanulmány IQR-je [1,05; 1,10]. A tesztelt fél Berry-rátája 1,19, ami 1,19 > 1,10 = Q3 feltétel miatt az IQR FELETT van. A tanulmány 5. fejezetének következtetése matematikailag téves; adóhatósági vizsgálatban az IQR-en kívüli pozíció indoklása szükséges.",
-              "uncertainty_notes": "A Berry-ráta számításának alapja (teljes vs. tesztelt tevékenység) befolyásolhatja az eredményt. Emberi review szükséges a minta összetételének ellenőrzéséhez.",
-              "requires_human_review": true,
-              "rule_id": "OECD_TPG_2022.para_3.57",
-              "legal_references": [
-                "OECD_TPG_2022.para_3.57",
-                "OECD_TPG_2022.para_3.62",
-                "45_2025_NGM.section_8(3)"
-              ],
-              "prompt_version": "benchmark_v1"
-            }
-          }
-        ],
+        "model": "claude-haiku-4-5-20251001",
+        "started_at": "2026-05-09T02:13:54.272215Z",
+        "finished_at": "2026-05-09T02:15:01.020918Z",
+        "tool_calls": 10,
+        "input_tokens": 18179,
+        "output_tokens": 2824,
+        "cache_read_tokens": 14901,
+        "cache_creation_tokens": 15234,
+        "consistency_errors": [],
+        "benchmark_risks": [],
         "missing_elements": [],
         "status": "ok",
         "error": null
@@ -737,61 +765,143 @@
         "agent_id": "contract_agent",
         "doc_type_scope": "contract",
         "prompt_version": "contract_v1",
-        "model": "claude-sonnet-4-6-mock",
-        "started_at": "2026-05-09T10:00:15.000000Z",
-        "finished_at": "2026-05-09T10:00:20.000000Z",
-        "tool_calls": 6,
-        "input_tokens": 11600,
-        "output_tokens": 920,
-        "cache_read_tokens": 8000,
-        "cache_creation_tokens": 3600,
+        "model": "claude-haiku-4-5-20251001",
+        "started_at": "2026-05-09T02:15:01.021211Z",
+        "finished_at": "2026-05-09T02:16:48.787633Z",
+        "tool_calls": 14,
+        "input_tokens": 31832,
+        "output_tokens": 8444,
+        "cache_read_tokens": 63177,
+        "cache_creation_tokens": 16545,
         "consistency_errors": [
           {
-            "error_id": "lic01-royalty-amount-contract-vs-localfile",
-            "description": "A licencszerződés (HIG-LIC-2024-003) 3. §-a az éves licencdíjat 50 000 000 Ft-ban rögzíti. A Local File 7.1. fejezetében lekönyvelt összeg 45 000 000 Ft (2,0% × 2 250 000 000 Ft = 45 000 000 Ft). Az 5 000 000 Ft-os eltérés (11,1%) nem magyarázott.",
-            "severity": "critical",
+            "error_id": "67bff6c8-25f8-481c-8d67-f6d09134fff8",
+            "description": "A HIG-MGMT-2024-002 szerződés szolgáltatás-leírása nem elég konkrét az arm's length elv ellenőrzéséhez. A szerződés csupán 'csoportszintű stratégiai és koordinációs támogatást' említ, de nem sorolja fel a konkrét tevékenységeket, teljesítménykritériumokat vagy az eredmények mérhetőségét. Ez ellentmond az OECD Transfer Pricing Guidelines követelményeinek, amely szerint a csoporton belüli szolgáltatások leírásának elég konkrétnek kell lennie ahhoz, hogy az adhatóság ellenőrizni tudja az arm's length jelleget.",
+            "severity": "high",
             "locations": [
               {
                 "filename": "HIG_Contracts_2024.pdf",
-                "line_numbers": [null]
-              },
-              {
-                "filename": "HIG_LocalFile_2024_FAULTY.pdf",
-                "line_numbers": [null]
+                "line_numbers": [
+                  4
+                ]
               }
             ],
-            "evidence": "Licencszerződés 3. § (50 MFt) vs. Local File 7.1. fejezet (45 MFt)",
+            "evidence": null,
             "attribution": {
               "agent_id": "contract_agent",
               "doc_type_scope": "contract",
-              "confidence": 0.94,
+              "confidence": 0.72,
               "evidence_chunks": [
                 {
                   "filename": "HIG_Contracts_2024.pdf",
-                  "page": 6,
-                  "chunk_index": 1,
-                  "quote": "A 2024. adóévre vonatkozó éves licencdíj összege: 50 000 000 Ft (ötvenmillió forint)",
-                  "char_start": 4210,
-                  "char_end": 4298,
+                  "page": 4,
+                  "chunk_index": 14,
+                  "quote": "A felek rögzítik, hogy a jelen megállapodás szerinti szolgáltatások jellege csoportszintű koordinációs és irányítási természetű; a konkrét tevékenységek és azok eredménye a csoport szintjén, összevontan értékelendő.",
+                  "char_start": 9273,
+                  "char_end": 10067,
                   "source_kind": "document"
                 },
                 {
-                  "filename": "HIG_LocalFile_2024_FAULTY.pdf",
-                  "page": 32,
-                  "chunk_index": 0,
-                  "quote": "licencdíj (HIG Holding GmbH): 45 000 000 Ft",
-                  "char_start": 22640,
-                  "char_end": 22710,
+                  "filename": "HIG_Contracts_2024.pdf",
+                  "page": 4,
+                  "chunk_index": 13,
+                  "quote": "A jelen megállapodás alapján a Szolgáltató csoportszintű stratégiai és koordinációs támogatást nyújt az Igénybe vevő részére.",
+                  "char_start": 8528,
+                  "char_end": 9507,
                   "source_kind": "document"
                 }
               ],
-              "reasoning": "A licencszerződés 3. §-a fix 50 000 000 Ft-os éves licencdíjat állapít meg. A Local File 7.1. fejezete 45 000 000 Ft-ot könyvel el (2% × 2 250 000 000 = 45 000 000). Az 5 000 000 Ft eltérés (11,1%) nem magyarázott; az OECD TPG 1.10. bekezdése szerint a tényleges magatartásnak és a szerződéses feltételeknek összhangban kell lenniük.",
-              "uncertainty_notes": "Lehetséges, hogy a szerződésben rögzített 50 MFt minimum-díj alkalmazandó, és a Local File-ban hibás összeg szerepel. Könyvelési kivonatok emberi vizsgálata szükséges.",
+              "reasoning": "A szerz\\u0151d\\u00e9s 2. \\u00a7-a (chunk c13) csup\\u00e1n azt r\\u00f6gz\\u00edti, hogy 'a Szolg\\u00e1ltat\\u00f3 csoportszint\\u0171 strat\\u00e9giai \\u00e9s koordin\\u00e1ci\\u00f3s t\\u00e1mogat\\u00e1st ny\\u00fajt'. A 4. \\u00a7 (chunk c14) pedig azt \\u00e1ll\\u00edtja, hogy 'a konkr\\u00e9t tev\\u00e9kenys\\u00e9gek \\u00e9s azok eredm\\u00e9nye a csoport szintj\\u00e9n, \\u00f6sszevontan \\u00e9rt\\u00e9kelend\\u0151'. Ez az \\u00f6sszevont \\u00e9rt\\u00e9kel\\u00e9s azonban nem helyettes\\u00edti a konkr\\u00e9t teljes\\u00edtm\\u00e9nykrit\\u00e9riumok hi\\u00e1ny\\u00e1t. Az OECD Transfer Pricing Guidelines 7.1. bekezd\\u00e9se szerint a csoporton bel\\u00fcli szolg\\u00e1ltat\\u00e1sok \\u00e9rt\\u00e9kel\\u00e9s\\u00e9hez konkr\\u00e9t, m\\u00e9rhet\\u0151 alapok sz\\u00fcks\\u00e9gesek. A 45/2025. NGM rendelet 6. \\u00a7 (3) is el\\u0151\\u00edrja, hogy a kapcsolt \\u00fcgylet \\u00e9rt\\u00e9kel\\u00e9s\\u00e9hez az adhat\\u00f3s\\u00e1gnak ellen\\u0151rizhet\\u0151 alapok sz\\u00fcks\\u00e9gesek.\"",
+              "uncertainty_notes": "A szerz\\u0151d\\u00e9s teljes sz\\u00f6vege nem ker\\u00fclt lekérésre, ezért lehetséges, hogy a 2. \\u00a7 vagy egy m\\u00e1sik szakasz r\\u00e9szletesebb le\\u00edr\\u00e1st tartalmaz. Az 'összevontan értékelendő' kifejezés azt sugallja, hogy a felek szándékosan nem k\\u00edv\\u00e1nnak egyedi teljesítménykrit\\u00e9riumokat meghat\\u00e1rozni, amely azonban az arm's length elv ellen\\u0151rz\\u00e9s\\u00e9t neh\\u00e9zz\\u00e9 teszi.\"",
               "requires_human_review": true,
-              "rule_id": "OECD_TPG_2022.para_1.10",
+              "rule_id": "45_2025_NGM_rendelet.section_6",
               "legal_references": [
-                "OECD_TPG_2022.para_1.10",
-                "45_2025_NGM.section_3"
+                "OECD_TPG_2022.Ch_I.1.1",
+                "OECD_TPG_2022.Ch_VII.7.1"
+              ],
+              "prompt_version": "contract_v1"
+            }
+          },
+          {
+            "error_id": "597110b3-6ff3-4497-9690-1600040a57cf",
+            "description": "A HIG-MFG-2024-001 számú gyártási keretszerződés (Contract Manufacturing Framework Agreement) a díjazás mértékét 'az adott elszámolási időszakra ju[tó]' díjként definiálja, de a konkrét számítási módszer vagy a Cost Base-hez kapcsolódó markup/cost-plus ráta nem teljes mértékben világos a lekért fragmentumokból. A szerződés ugyan felsorolja a Cost Base elemeit (közvetlen anyagköltség, bérköltség), de a markup mértéke nem jelenik meg az elérhető szövegben.",
+            "severity": "medium",
+            "locations": [
+              {
+                "filename": "HIG_Contracts_2024.pdf",
+                "line_numbers": [
+                  1,
+                  2
+                ]
+              }
+            ],
+            "evidence": null,
+            "attribution": {
+              "agent_id": "contract_agent",
+              "doc_type_scope": "contract",
+              "confidence": 0.68,
+              "evidence_chunks": [
+                {
+                  "filename": "HIG_Contracts_2024.pdf",
+                  "page": 1,
+                  "chunk_index": 3,
+                  "quote": "A Gyártó a jelen szerződés alapján nyújtott gyártási szolgáltatásokért díjazásra jogosult, amelynek mértéke az adott elszámolási időszakra ju",
+                  "char_start": 1462,
+                  "char_end": 1841,
+                  "source_kind": "document"
+                },
+                {
+                  "filename": "HIG_Contracts_2024.pdf",
+                  "page": 2,
+                  "chunk_index": 4,
+                  "quote": "A Cost Base az alábbi költségelemeket foglalja magában: (i) közvetlen anyagköltség (alumíniumtuskó, ötvözők, segédanyagok), (ii) közvetlen bérköltség és bérjárulékok",
+                  "char_start": 2636,
+                  "char_end": 3574,
+                  "source_kind": "document"
+                }
+              ],
+              "reasoning": "A HIG-MFG-2024-001 szerz\\u0151d\\u00e9s 3. \\u00a7-a (chunk c3) azt \\u00e1ll\\u00edtja, hogy 'A Gyártó a jelen szerz\\u0151d\\u00e9s alapján nyújtott gyártási szolgáltatásokért díjazásra jogosult, amelynek mértéke az adott elszámolási időszakra ju[tó]' – azonban a konkrét mérték nem kerül megnevezésre. A 2. oldalon (chunk c4) a Cost Base elemei felsorolásra kerülnek: 'közvetlen anyagköltség (alumíniumtuskó, ötvözők, segédanyagok), (ii) közvetlen bérköltség és bérjárulékok'. Az OECD Transfer Pricing Guidelines 2.45. bekezd\\u00e9se a cost-plus módszert írja le, amely megköveteli a konkrét markup ráta meghatározását. A 45/2025. NGM rendelet 6. § (3) szintén előírja, hogy a transfer price konkrét, mérhető alapon kell, hogy meghatározódjon.\"",
+              "uncertainty_notes": "A keresési eredmények nem tartalmazták a díjazási szakasz teljes szövegét. Lehetséges, hogy a markup ráta vagy a cost-plus formula a 3. § egy később következő részében szerepel, amely nem került lekérésre. Az 'elszámolási időszakra jutó' kifejezés is homályos – nem világos, hogy ez negyedéves, havi vagy éves alapon történik-e.\"",
+              "requires_human_review": true,
+              "rule_id": "45_2025_NGM_rendelet.section_6",
+              "legal_references": [
+                "OECD_TPG_2022.Ch_II.2.45"
+              ],
+              "prompt_version": "contract_v1"
+            }
+          },
+          {
+            "error_id": "90593f83-2022-4ff2-991a-200526dabaa0",
+            "description": "A licencszerződés díjazása kettős feltételre épül: az éves nettó árbevétel 2,0%-a, de legalább 50.000.000 Ft évente. A 2024. adóévre vonatkozó éves licencdíj 50.000.000 Ft-ban kerül rögzítésre. Azonban a szerződés nem tartalmazza az éves nettó árbevétel konkrét előrejelzéseit vagy a 2,0% küszöb eléréséhez szükséges árbevételi szintet. Ez potenciális konzisztencia-kockázatot jelent, ha az aktuális árbevétel alapján számított díj eltér a rögzített 50 millió Ft-tól.",
+            "severity": "medium",
+            "locations": [
+              {
+                "filename": "HIG_Contracts_2024.pdf",
+                "line_numbers": null
+              }
+            ],
+            "evidence": null,
+            "attribution": {
+              "agent_id": "contract_agent",
+              "doc_type_scope": "contract",
+              "confidence": 0.85,
+              "evidence_chunks": [
+                {
+                  "filename": "HIG_Contracts_2024.pdf",
+                  "page": 7,
+                  "chunk_index": 23,
+                  "quote": "gyévi nettó árbevételének 2,0% -a (kettő százaléka), de legalább 50.000.000 Ft (ötvenmillió forint) évenként. A 2024. adóévre vonatkozó éves licencdíj összege: 50.000.000 Ft (ötvenmillió forint).",
+                  "char_start": 15531,
+                  "char_end": 16495,
+                  "source_kind": "document"
+                }
+              ],
+              "reasoning": "A HIG_Contracts_2024.pdf 7. oldalán (chunk c23) a licencdíj meghatározása: 'gyévi nettó árbevételének 2,0% -a (kettő százaléka), de legalább 50.000.000 Ft (ötvenmillió forint) évenként. A 2024. adóévre vonatkozó éves licencdíj összege: 50.000.000 Ft (ötvenmillió forint).' Ez azt jelenti, hogy a 2024. évre a minimum díj (50 millió Ft) kerül alkalmazásra. Az OECD Transfer Pricing Guidelines 6.1. bekezd\\u00e9se szerint a royalty díjak meghatározásánál az összehasonlítható független tranzakciók alapján kell eljárni. A szerződés nem tartalmazza az árbevételi előrejelzéseket, amelyek alapján ellenőrizhető lenne, hogy a 2,0% vagy a 50 millió Ft minimum kerül-e alkalmazásra. Ez az adóhatóság számára nehézzé teszi az arm's length jelleg ellenőrzését.\"",
+              "uncertainty_notes": "A licencszerződés teljes szövege nem került lekérésre, ezért lehetséges, hogy az árbevételi előrejelzések vagy a díjszámítás részletei egy másik szakaszban szerepelnek. A 'gyévi' kifejezés valószínűleg 'évi' helyesírási hiba, amely azonban nem érinti a díjazás lényegét. Az is lehetséges, hogy a 2024. évre vonatkozó 50 millió Ft-os rögzítés egy előzetes megállapodás, amely később az aktuális árbevétel alapján módosulhat.\"",
+              "requires_human_review": true,
+              "rule_id": "45_2025_NGM_rendelet.section_6",
+              "legal_references": [
+                "OECD_TPG_2022.Ch_VI.6.1"
               ],
               "prompt_version": "contract_v1"
             }
@@ -800,34 +910,51 @@
         "benchmark_risks": [],
         "missing_elements": [
           {
-            "element_id": "mgmt01-management-fee-contract-no-performance-criteria",
-            "description": "A management fee szerződés (HIG-MGMT-2024-002) 2. §-a a szolgáltatás tartalmát kizárólag általánosan írja le ('csoportszintű stratégiai és koordinációs támogatást nyújt'), mérhető teljesítési kritériumok, konkrét deliverable-ök és minőségi elvárások nélkül.",
-            "expected_in": "HIG_Contracts_2024.pdf",
-            "required_by": "OECD TPG 7.6–7.8, 7.14–7.15; 45/2025. NGM rendelet 6. § (3) bek.",
+            "element_id": "c0da2ae8-0604-4732-aefe-bf05c7c49fec",
+            "description": "A HIG-MGMT-2024-002 számú csoporton belüli szolgáltatási megállapodás (Management Fee) nem tartalmazza a díj konkrét összegét vagy számítási képletét. A szerződés csupán azt rögzíti, hogy a Szolgáltató 'csoportszintű stratégiai és koordinációs támogatást' nyújt, de a díj mértéke nem kerül meghatározásra.",
+            "expected_in": "HIG_Contracts_2024.pdf – Management Fee Service Agreement (HIG-MGMT-2024-002)",
+            "required_by": "45/2025. NGM rendelet 6. § (3) és az OECD Transfer Pricing Guidelines 7.55–7.62. bekezdések",
             "severity": "high",
             "attribution": {
               "agent_id": "contract_agent",
               "doc_type_scope": "contract",
-              "confidence": 0.85,
+              "confidence": 0.75,
               "evidence_chunks": [
                 {
                   "filename": "HIG_Contracts_2024.pdf",
-                  "page": 2,
-                  "chunk_index": 0,
-                  "quote": "csoportszintű stratégiai és koordinációs támogatást nyújt az Igénybe vevő részére",
-                  "char_start": 840,
-                  "char_end": 924,
+                  "page": 4,
+                  "chunk_index": 12,
+                  "quote": "CSOPORTON BELÜLI SZOLGÁLTATÁSI MEGÁLLAPODÁS / Intragroup Service Agreement (Management Fee) / Szerződésszám: HIG-MGMT-2024-002 / Hatályos: 2024. január 1. – 2024",
+                  "char_start": 8528,
+                  "char_end": 9472,
+                  "source_kind": "document"
+                },
+                {
+                  "filename": "HIG_Contracts_2024.pdf",
+                  "page": 4,
+                  "chunk_index": 13,
+                  "quote": "A jelen megállapodás alapján a Szolgáltató csoportszintű stratégiai és koordinációs támogatást nyújt az Igénybe vevő részére.",
+                  "char_start": 8528,
+                  "char_end": 9507,
+                  "source_kind": "document"
+                },
+                {
+                  "filename": "HIG_Contracts_2024.pdf",
+                  "page": 5,
+                  "chunk_index": 15,
+                  "quote": "A Szolgáltató a díjat negyedévente számlázza az Igénybe vevőnek.",
+                  "char_start": 10847,
+                  "char_end": 11794,
                   "source_kind": "document"
                 }
               ],
-              "reasoning": "A management fee szerződés 2. §-ában nem szerepelnek konkrét szolgáltatáskategóriák, negyedéves deliverable-ök, mérhetővé tett teljesítési feltételek. Az OECD TPG 7.14–7.15. bekezdése szerint az ilyen általános leírás adóhatósági vizsgálatban nem elegendő.",
-              "uncertainty_notes": "Lehetséges, hogy egy SLA melléklet részletezi a szolgáltatásokat — ilyen a corpus-ban nem volt elérhető.",
+              "reasoning": "A HIG_Contracts_2024.pdf dokumentum 4. oldalán (chunk c12) a szerződés azonosítása: 'CSOPORTON BELÜLI SZOLGÁLTATÁSI MEGÁLLAPODÁS / Intragroup Service Agreement (Management Fee) / Szerződésszám: HIG-MGMT-2024-002 / Hatályos: 2024. január 1. – 2024'. Az ugyanezen dokumentum 4. oldalán (chunk c13) a szerződés tárgya: 'A jelen megállapodás alapján a Szolgáltató csoportszintű stratégiai és koordinációs támogatást nyújt az Igénybe vevő részére.' Az 5. oldalon (chunk c15) a számlázási feltételek: 'A Szolgáltató a díjat negyedévente számlázza az Igénybe vevőnek.' Azonban a keresési eredmények között nem jelenik meg a díj konkrét összege vagy számítási módja. Az OECD Transfer Pricing Guidelines 7.55–7.62. bekezdései és a 45/2025. NGM rendelet 6. § (3) bekezdése előírják, hogy a csoporton belüli szolgáltatások díjazása konkrét, mérhető alapon kell, hogy történjen. A vág, általános 'stratégiai és koordinációs támogatás' leírása, amely nem tartalmaz konkrét teljesítménykritériumokat vagy mérhetőséget, nem felel meg az arm's length elvnek és a magyar adójogi követelményeknek.\"",
+              "uncertainty_notes": "A keresési eredmények nem tartalmazták a management fee szerződés díjazási szakaszát (3. §). Lehetséges, hogy a díj mértéke a dokumentum egy olyan részében szerepel, amely nem került lekérésre. Az 'Igénybe vevő' és 'Szolgáltató' pontos azonosítása szintén nem teljes – a chunk c13 csak az 'Igénybe vevő' képviselőjét nevezi meg (dr. Kovács András), de a Szolgáltató teljes neve nem jelenik meg ebben a fragmentumban.\"",
               "requires_human_review": true,
-              "rule_id": "OECD_TPG_2022.para_7.14-7.15",
+              "rule_id": "45_2025_NGM_rendelet.section_6",
               "legal_references": [
-                "OECD_TPG_2022.para_7.6-7.8",
-                "OECD_TPG_2022.para_7.14-7.15",
-                "45_2025_NGM.section_6(3)"
+                "OECD_TPG_2022.Ch_VII.7.55",
+                "OECD_TPG_2022.Ch_VII.7.62"
               ],
               "prompt_version": "contract_v1"
             }
@@ -840,122 +967,111 @@
         "agent_id": "invoice_agent",
         "doc_type_scope": "invoice",
         "prompt_version": "invoice_v1",
-        "model": "claude-sonnet-4-6-mock",
-        "started_at": "2026-05-09T10:00:20.000000Z",
-        "finished_at": "2026-05-09T10:00:24.000000Z",
-        "tool_calls": 5,
-        "input_tokens": 10800,
-        "output_tokens": 860,
-        "cache_read_tokens": 7400,
-        "cache_creation_tokens": 3400,
+        "model": "claude-haiku-4-5-20251001",
+        "started_at": "2026-05-09T02:16:48.788006Z",
+        "finished_at": "2026-05-09T02:18:28.561141Z",
+        "tool_calls": 20,
+        "input_tokens": 53051,
+        "output_tokens": 5307,
+        "cache_read_tokens": 105394,
+        "cache_creation_tokens": 32232,
         "consistency_errors": [
           {
-            "error_id": "inv01-mgmt-fee-invoice-date-mismatch",
-            "description": "A Q4 management fee számla (HIG-MGMT-2024-Q4) kiállítási dátuma 2024. október 1., miközben a HIG-MGMT-2024-002 szerződés 4. §-a szerint a számlázás 'minden negyedév végén' történik (Q4 esetén: 2024. december 31.). A számla 91 nappal korábban lett kiállítva.",
-            "severity": "medium",
+            "error_id": "8c645895-822b-44b2-8b54-d02d931ebfa1",
+            "description": "A HIG-MFG-2024-1201 számla kiállítójának (KIÁLLÍTÓ) német közösségi adószáma (DE123456789) érvénytelen. Az EU VIES nyilvántartásban nem található meg ez az adószám.",
+            "severity": "high",
             "locations": [
               {
                 "filename": "HIG_Invoices_2024.pdf",
-                "line_numbers": [null]
-              },
-              {
-                "filename": "HIG_Contracts_2024.pdf",
-                "line_numbers": [null]
+                "line_numbers": []
               }
             ],
-            "evidence": "Számla kiállítása: 2024-10-01 vs. szerződéses számlázási dátum: 2024-12-31 (4. §)",
+            "evidence": null,
             "attribution": {
               "agent_id": "invoice_agent",
               "doc_type_scope": "invoice",
-              "confidence": 0.91,
+              "confidence": 0.95,
               "evidence_chunks": [
                 {
                   "filename": "HIG_Invoices_2024.pdf",
-                  "page": 4,
-                  "chunk_index": 0,
-                  "quote": "Kiállítás dátuma: 2024. október 1.",
-                  "char_start": 3210,
-                  "char_end": 3248,
-                  "source_kind": "document"
-                },
-                {
-                  "filename": "HIG_Contracts_2024.pdf",
-                  "page": 3,
-                  "chunk_index": 1,
-                  "quote": "A számlák kiállításának időpontjai: március 31., június 30., szeptember 30. és december 31.",
-                  "char_start": 2140,
-                  "char_end": 2236,
+                  "page": 2,
+                  "chunk_index": 2,
+                  "quote": "60314 Frankfurt am Main, Németország\nKözösségi adószám: DE123456789",
+                  "char_start": 1674,
+                  "char_end": 2638,
                   "source_kind": "document"
                 }
               ],
-              "reasoning": "A management fee szerződés 4. §-a egyértelműen rögzíti, hogy a Q4-es számla kiállítása december 31-én esedékes. A HIG-MGMT-2024-Q4 számlán szereplő 2024. október 1-jei kiállítási dátum sérti a teljesítés-alapú számlázás elvét (Áfa tv. 58. §) és a szerződéses feltételt.",
-              "uncertainty_notes": "Lehetséges, hogy az előre számlázás csoportszintű politikából adódik — ilyen kiegészítő megállapodás a corpus-ban nem volt fellelhető.",
+              "reasoning": "A HIG_Invoices_2024.pdf 2. oldalán szereplő számla (HIG-MFG-2024-1201) kiállítójának közösségi adószáma DE123456789. Az EU VIES API-val végzett ellenőrzés (verify_tax_number) során az adószám érvénytelen (is_valid: false) eredményt adott. Az intercompany számlák esetén a kiállító és befogadó adószámának érvényessége alapvető követelmény az adóhatósági vizsgálatban. Érvénytelen adószám esetén a számla hitelességét és a tranzakció dokumentálásának megfelelőségét kétségbe lehet vonni.\",\n  \"requires_human_review\": true,\n  \"rule_id\": \"EU_VAT_DIRECTIVE_2006_112_EC.Art_226\",\n  \"legal_references\": [\"EU_VAT_DIRECTIVE_2006_112_EC.Art_226\", \"HU_Act_LXXXI_1996.Sec_169\"],\n  \"uncertainty_notes\": \"Az adószám formátuma helyes (DE + 9 számjegy), de az EU VIES nyilvántartásban nem található. Lehetséges, hogy az adószám tipográfiai hiba, vagy a német cég nem regisztrált az EU VAT rendszerben. Szükséges a kiállító cég valódi adószámának ellenőrzése.\"\n}",
+              "uncertainty_notes": null,
               "requires_human_review": true,
-              "rule_id": "HU_VAT_Act_CXXVII_2007.section_58",
-              "legal_references": [
-                "OECD_TPG_2022.para_7.14",
-                "HU_VAT_Act_CXXVII_2007.section_58"
-              ],
-              "prompt_version": "invoice_v1"
-            }
-          },
-          {
-            "error_id": "inv02-royalty-invoice-vs-localfile",
-            "description": "A licencdíj számla (HIG-LIC-2024-001) nettó összege 50 000 000 Ft, míg a Local File 4.3. fejezetében számított összeg 2% × 2 250 000 000 = 45 000 000 Ft. Az 5 000 000 Ft eltérés (11,1%) háromirányú inkonzisztenciát alkot: szerződés (50 MFt), számla (50 MFt), Local File (45 MFt).",
-            "severity": "critical",
-            "locations": [
-              {
-                "filename": "HIG_Invoices_2024.pdf",
-                "line_numbers": [null]
-              },
-              {
-                "filename": "HIG_LocalFile_2024_FAULTY.pdf",
-                "line_numbers": [null]
-              },
-              {
-                "filename": "HIG_Contracts_2024.pdf",
-                "line_numbers": [null]
-              }
-            ],
-            "evidence": "Licencdíj számla (50 MFt) vs. Local File 4.3. fejezet (45 MFt); összefügg a LIC-01 szerződéses hibával.",
-            "attribution": {
-              "agent_id": "invoice_agent",
-              "doc_type_scope": "invoice",
-              "confidence": 0.93,
-              "evidence_chunks": [
-                {
-                  "filename": "HIG_Invoices_2024.pdf",
-                  "page": 7,
-                  "chunk_index": 0,
-                  "quote": "Nettó összeg: 50 000 000 Ft",
-                  "char_start": 5840,
-                  "char_end": 5878,
-                  "source_kind": "document"
-                },
-                {
-                  "filename": "HIG_LocalFile_2024_FAULTY.pdf",
-                  "page": 22,
-                  "chunk_index": 1,
-                  "quote": "2% × 2 250 000 000 = 45 000 000 Ft",
-                  "char_start": 16210,
-                  "char_end": 16250,
-                  "source_kind": "document"
-                }
-              ],
-              "reasoning": "A licencdíj számla 50 000 000 Ft-ot tartalmaz. A Local File 4.3. fejezetének számítása szerint a licencdíj 45 000 000 Ft. A 11,1%-os eltérés háromirányú inkonzisztenciát alkot a szerződéssel (50 MFt), a számlával (50 MFt) és a Local File-lal (45 MFt). Az OECD TPG 1.10. bekezdése szerint egységes képet kell mutatnia.",
-              "uncertainty_notes": "Ha a minimum-díjklauzula aktívvá vált, a Local File-t is javítani kell. Könyvelési bizonylatok emberi felülvizsgálata szükséges.",
-              "requires_human_review": true,
-              "rule_id": "OECD_TPG_2022.para_1.10",
-              "legal_references": [
-                "OECD_TPG_2022.para_1.10",
-                "45_2025_NGM.section_3"
-              ],
+              "rule_id": null,
+              "legal_references": [],
               "prompt_version": "invoice_v1"
             }
           }
         ],
         "benchmark_risks": [],
-        "missing_elements": [],
+        "missing_elements": [
+          {
+            "element_id": "e7d58b37-2123-42cd-9970-227e40244489",
+            "description": "A HIG-MFG-2024-ANNUAL számla 3. oldalán az Éves licencdíj sor (HIG-LIC-2024-003) nem teljes: az egységár, nettó összeg, ÁFA% és brúttó összeg adatai hiányzanak vagy csonkak. Az adatok nélkül a számla nem ellenőrizhető.",
+            "expected_in": "HIG-MFG-2024-ANNUAL számla",
+            "required_by": "2007. évi CXXVII. törvény (ÁFA törvény) 169. § - számla tartalmi követelményei",
+            "severity": "high",
+            "attribution": {
+              "agent_id": "invoice_agent",
+              "doc_type_scope": "invoice",
+              "confidence": 0.85,
+              "evidence_chunks": [
+                {
+                  "filename": "HIG_Invoices_2024.pdf",
+                  "page": 3,
+                  "chunk_index": 5,
+                  "quote": "Megnevezés Menny. Egységár (Ft) Nettó (Ft) ÁFA% ÁFA (Ft) Bruttó (Ft) Éves licencdíj – gyártási know-how, védjegyek és szabadalmak (Ref: HIG-LIC-2024-003) 1 év 50 00",
+                  "char_start": 3598,
+                  "char_end": 4563,
+                  "source_kind": "document"
+                }
+              ],
+              "reasoning": "A HIG_Invoices_2024.pdf 3. oldal\\u00e1n a licencd\\u00edj t\\u00e9tel sor\\u00e1ban az egys\\u00e9g\\u00e1r \\u00e9s a p\\u00e9nznem csak r\\u00e9szben l\\u00e1that\\u00f3 (\\\"50 00\\\"), a nett\\u00f3 \\u00f6sszeg, \\u00c1FA sz\\u00e1zal\\u00e9k \\u00e9s br\\u00fatt\\u00f3 \\u00f6sszeg teljesen hi\\u00e1nyzik. A 2007. \\u00e9vi CXXVII. t\\u00f6rv\\u00e9ny 169. \\u00a7 szerint a sz\\u00e1ml\\u00e1nak tartalmaznia kell az egyes t\\u00e9telek nett\\u00f3 \\u00e9s br\\u00fatt\\u00f3 \\u00e9rt\\u00e9k\\u00e9t, valamint az alkalmazott \\u00c1FA-kulcsot. Az intercompany sz\\u00e1mla eset\\u00e9ben ez k\\u00fcl\\u00f6n\\u00f6sen fontos az arm's length ellen\\u0151rz\\u00e9s szempontj\\u00e1b\\u00f3l.\",\n  \"requires_human_review\": true,\n  \"rule_id\": \"HU_Act_CXXVII_2007.Sec_169\",\n  \"legal_references\": [\"HU_Act_CXXVII_2007.Sec_169\", \"OECD_TPG_2022.Ch_IV\"],\n  \"uncertainty_notes\": \"A dokumentum csonk\\u00e1s lehet a PDF-b\\u0151l val\\u00f3 kiv\\u00e1g\\u00e1s miatt. Sz\\u00fcks\\u00e9ges az eredeti sz\\u00e1mla teljes megtekint\\u00e9se.\"\n}",
+              "uncertainty_notes": null,
+              "requires_human_review": true,
+              "rule_id": null,
+              "legal_references": [],
+              "prompt_version": "invoice_v1"
+            }
+          },
+          {
+            "element_id": "ec2454fb-470f-4ec2-b2ab-e205d1659f87",
+            "description": "A HIG-MFG-2024-ANNUAL számla (3. oldal) befogadó (BEFOGADÓ) rovatában a kiállítás dátuma és teljesítés dátuma nem olvasható vagy hiányzik. Az intercompany számlák esetén a pontos dátumok kötelezőek az adóhatósági dokumentáláshoz.",
+            "expected_in": "HIG-MFG-2024-ANNUAL számla fejléce",
+            "required_by": "2007. évi CXXVII. törvény (ÁFA törvény) 169. § - számla tartalmi követelményei",
+            "severity": "medium",
+            "attribution": {
+              "agent_id": "invoice_agent",
+              "doc_type_scope": "invoice",
+              "confidence": 0.8,
+              "evidence_chunks": [
+                {
+                  "filename": "HIG_Invoices_2024.pdf",
+                  "page": 2,
+                  "chunk_index": 4,
+                  "quote": "Kiállítás dátuma Teljesítés dátuma\nSzámlaszám:",
+                  "char_start": 2441,
+                  "char_end": 2796,
+                  "source_kind": "document"
+                }
+              ],
+              "reasoning": "A HIG_Invoices_2024.pdf 2. oldalán a befogadó rovatában a \\\"Kiállítás dátuma\\\" és \\\"Teljesítés dátuma\\\" mezők üresek vagy az adatok nem olvashatók. A 2007. évi CXXVII. törvény 169. § szerint a számlán fel kell tüntetni a kiállítás és teljesítés dátumát. Intercompany tranzakciók esetén ezek az adatok kritikusak az adóév helyes meghatározásához és a transfer pricing dokumentáció összeállításához.\",\n  \"requires_human_review\": true,\n  \"rule_id\": \"HU_Act_CXXVII_2007.Sec_169\",\n  \"legal_references\": [\"HU_Act_CXXVII_2007.Sec_169\", \"45_2025_NGM_rendelet.Sec_4\"],\n  \"uncertainty_notes\": \"A dátumok a PDF-ben nem olvashatók, de lehetséges, hogy az eredeti dokumentumban jelen vannak. Az elektronikus számla megjegyzése szerint papír alapú aláírást nem tartalmaz, így az eredeti fájl ellenőrzése szükséges.\"\n}",
+              "uncertainty_notes": null,
+              "requires_human_review": true,
+              "rule_id": null,
+              "legal_references": [],
+              "prompt_version": "invoice_v1"
+            }
+          }
+        ],
         "status": "ok",
         "error": null
       },
@@ -963,17 +1079,355 @@
         "agent_id": "cross_doc_consistency_agent",
         "doc_type_scope": "cross_document",
         "prompt_version": "cross_doc_consistency_v1",
-        "model": "claude-sonnet-4-6-mock",
-        "started_at": "2026-05-09T10:00:24.000000Z",
-        "finished_at": "2026-05-09T10:00:28.000000Z",
-        "tool_calls": 6,
-        "input_tokens": 14200,
-        "output_tokens": 1080,
-        "cache_read_tokens": 9800,
-        "cache_creation_tokens": 4400,
-        "consistency_errors": [],
+        "model": "claude-haiku-4-5-20251001",
+        "started_at": "2026-05-09T02:18:28.561497Z",
+        "finished_at": "2026-05-09T02:20:23.659807Z",
+        "tool_calls": 17,
+        "input_tokens": 39199,
+        "output_tokens": 9637,
+        "cache_read_tokens": 112310,
+        "cache_creation_tokens": 15290,
+        "consistency_errors": [
+          {
+            "error_id": "6cbeed61-31e1-48bd-b0b0-05dacca01cf5",
+            "description": "A HIG Manufacturing Kft. és HIG Holding GmbH közötti gyártási szolgáltatási szerződés 2023. december 15-én lett aláírva és 2024. január 1-jétől 2024. december 31-ig tart. Azonban a számlák 2024. december hónapra vonatkoznak, amely a szerződés lejárata után esik. A szerződés automatikus meghosszabbítása 60 napos felmondási szándék hiányában történik, de a dokumentumok nem tartalmazzák a meghosszabbítás megerősítésének bizonyítékát.",
+            "severity": "medium",
+            "locations": [
+              {
+                "filename": "HIG_Contracts_2024.pdf",
+                "line_numbers": [
+                  5
+                ]
+              },
+              {
+                "filename": "HIG_Invoices_2024.pdf",
+                "line_numbers": [
+                  1
+                ]
+              }
+            ],
+            "evidence": "A szerződés 2024. december 31-én lejár, de a számlák 2024. decemberre vonatkoznak.",
+            "attribution": {
+              "agent_id": "cross_doc_consistency_agent",
+              "doc_type_scope": "cross_document",
+              "confidence": 0.65,
+              "evidence_chunks": [
+                {
+                  "filename": "HIG_Contracts_2024.pdf",
+                  "page": 5,
+                  "chunk_index": 17,
+                  "quote": "p hatályba és 2024. december 31. napján jár le. A megállapodás automatikusan meghosszabbodik egy évvel, ha a lejáratot megelőző 60 napon belül egyik Fél sem jelent be írásbeli felmondási szándékot.",
+                  "char_start": 11595,
+                  "char_end": 12512,
+                  "source_kind": "document"
+                },
+                {
+                  "filename": "HIG_Invoices_2024.pdf",
+                  "page": 1,
+                  "chunk_index": 1,
+                  "quote": "ődéses gyártási szolgáltatás – 2024. december (Ref: HIG-MFG-2024-001)",
+                  "char_start": 0,
+                  "char_end": 904,
+                  "source_kind": "document"
+                }
+              ],
+              "reasoning": "A szerződés 2024. december 31-én lejár, és az automatikus meghosszabbítás feltétele, hogy 60 nappal a lejárat előtt egyik fél sem jelent be felmondási szándékot. A számlák azonban 2024. decemberre vonatkoznak, amely a szerződés lejárata után esik. Bár a szerződés szövege lehetővé teszi az automatikus meghosszabbítást, a dokumentumok nem tartalmazzák a meghosszabbítás megerősítésének bizonyítékát, amely a 45/2025. NGM rendelet 6. § szerinti dokumentálási kötelezettség teljesítéséhez szükséges lenne. Ez potenciális dokumentálási hiányosságot jelent.\"",
+              "uncertainty_notes": "A szerződés szövege lehetővé teszi az automatikus meghosszabbítást, de nem világos, hogy a december havi számlázás a meghosszabbított szerződés alapján történt-e, vagy a szerződés lejárata után. Az automatikus meghosszabbítás feltételei teljesültek-e, azt a dokumentumok nem igazolják.\"",
+              "requires_human_review": true,
+              "rule_id": "NGM_45_2025.section_6",
+              "legal_references": [
+                "45/2025. (XII. 23.) NGM rendelet 6. §",
+                "OECD_TPG_2022.Ch_I.D"
+              ],
+              "prompt_version": "cross_doc_consistency_v1"
+            }
+          },
+          {
+            "error_id": "845af3a7-83e9-423c-9e21-3a411017ce4e",
+            "description": "A Local File 6. oldalán a gyártási díj 8,0%-os haszonkulccsal (Cost Plus Method – CPM) kerül meghatározásra, amely 614.300 db × 1.383 Ft/db = 850 millió Ft-ot eredményez. Azonban a számlák 2024. évi tényleges gyártási díjat (Cost Base × 1,08) 850 millió Ft-ként mutatnak, amely 8%-os felárnak felel meg. A Local File nem tartalmazza a Cost Base konkrét értékét, így az 1.383 Ft/db egységár és az 850 millió Ft végösszeg közötti kapcsolat nem egyértelmű.",
+            "severity": "high",
+            "locations": [
+              {
+                "filename": "HIG_LocalFile_2024_FAULTY.pdf",
+                "line_numbers": [
+                  6
+                ]
+              },
+              {
+                "filename": "HIG_Invoices_2024.pdf",
+                "line_numbers": [
+                  4
+                ]
+              }
+            ],
+            "evidence": "Local File: 614.300 db × 1.383 Ft/db = 850 millió Ft (8,0% haszonkulcs). Számlák: Cost Base × 1,08 = 850 millió Ft.",
+            "attribution": {
+              "agent_id": "cross_doc_consistency_agent",
+              "doc_type_scope": "cross_document",
+              "confidence": 0.75,
+              "evidence_chunks": [
+                {
+                  "filename": "HIG_LocalFile_2024_FAULTY.pdf",
+                  "page": 6,
+                  "chunk_index": 11,
+                  "quote": "áma 614.300 db Átlagos egységár 1.383 Ft/db Alkalmazótt transzferár-módszer Költség-plusz módszer (Cost Plus Method – CPM) Haszonkulcs (Mark-up on Total Cost) 8,0%",
+                  "char_start": 6895,
+                  "char_end": 7518,
+                  "source_kind": "document"
+                },
+                {
+                  "filename": "HIG_Invoices_2024.pdf",
+                  "page": 4,
+                  "chunk_index": 7,
+                  "quote": "2024. évi tényleges gyártási díj (Cost Base × 1,08) 850 000 000 Végleges elszámolás",
+                  "char_start": 5364,
+                  "char_end": 6300,
+                  "source_kind": "document"
+                }
+              ],
+              "reasoning": "A Local File a CPM módszert alkalmazza 8,0%-os haszonkulccsal, és az egységár 1.383 Ft/db. A számlák szintén 8%-os felárral (Cost Base × 1,08) számolnak, amely konzisztens. Azonban a Local File nem tartalmazza a Cost Base konkrét értékét, amely szükséges lenne a szokásos piaci ár (arm's length price) ellenőrzéséhez. A 45/2025. NGM rendelet 6. § szerinti dokumentálási kötelezettség teljesítéséhez a Cost Base részletezése szükséges.\"",
+              "uncertainty_notes": "Az 1.383 Ft/db egységár és a 850 millió Ft végösszeg közötti matematikai kapcsolat nem egyértelmű a Local File alapján. A Cost Base értéke nem szerepel a dokumentumban, amely a szokásos piaci ár ellenőrzésének akadálya.\"",
+              "requires_human_review": true,
+              "rule_id": "NGM_45_2025.section_6",
+              "legal_references": [
+                "45/2025. (XII. 23.) NGM rendelet 6. §",
+                "OECD_TPG_2022.Ch_II.A"
+              ],
+              "prompt_version": "cross_doc_consistency_v1"
+            }
+          },
+          {
+            "error_id": "46a6b117-8ef6-4478-bec7-5172292ecfa3",
+            "description": "A Local File 7. oldalán a menedzsment díj a csoportszintű árbevétel-arányos allokációs kulcs alapján kerül meghatározásra, amely 2024-ben 6,49% volt. Azonban a számlák (HIG-MGMT-2024-002) 120 millió Ft negyedéves részleteket mutatnak (120 millió Ft / 4 = 30 millió Ft), amely éves szinten 120 millió Ft-ot jelent. A Local File eredménykimutatása 120 millió Ft menedzsment díjat mutat, amely konzisztens a számlákkal. Azonban a 6,49%-os allokációs kulcs alapján számítótt érték nem egyezik meg a 120 millió Ft-tal, ha a HIG Manufacturing Kft. árbevétele nem ismert.",
+            "severity": "medium",
+            "locations": [
+              {
+                "filename": "HIG_LocalFile_2024_FAULTY.pdf",
+                "line_numbers": [
+                  7,
+                  12
+                ]
+              },
+              {
+                "filename": "HIG_Invoices_2024.pdf",
+                "line_numbers": [
+                  2
+                ]
+              }
+            ],
+            "evidence": "Local File: 6,49%-os allokációs kulcs. Számlák: 120 millió Ft éves menedzsment díj.",
+            "attribution": {
+              "agent_id": "cross_doc_consistency_agent",
+              "doc_type_scope": "cross_document",
+              "confidence": 0.7,
+              "evidence_chunks": [
+                {
+                  "filename": "HIG_LocalFile_2024_FAULTY.pdf",
+                  "page": 7,
+                  "chunk_index": 13,
+                  "quote": "edően nyújtott irányítási, szervezési és adminisztratív jellegű szolgáltatások ellenértéke. A díj mértéke a csoportszintű árbevétel-arányos allokációs kulcs alapján kerül meghatározásra, amelynek értéke a 2024-es adóévben 6,49% volt.",
+                  "char_start": 8296,
+                  "char_end": 9279,
+                  "source_kind": "document"
+                },
+                {
+                  "filename": "HIG_Invoices_2024.pdf",
+                  "page": 2,
+                  "chunk_index": 3,
+                  "quote": "ENDŐ: 30 000 000 Ft Fizetési mód: Bankatutalás Fizetési határidő: 2024. október 31. Megjegyzés: Szerződéses alap: HIG-MGMT-2024-002. Negyedéves részlet: 120.000.000 Ft / 4 = 30.000.000 Ft.",
+                  "char_start": 1674,
+                  "char_end": 2673,
+                  "source_kind": "document"
+                }
+              ],
+              "reasoning": "A Local File a menedzsment díjat a csoportszintű árbevétel-arányos allokációs kulcs alapján határozza meg (6,49%), amely az OECD TPG 7.6–7.8. bekezdésének megfelelő módszer. A számlák 120 millió Ft éves menedzsment díjat mutatnak (30 millió Ft negyedévente). Azonban a Local File nem tartalmazza a HIG Manufacturing Kft. 2024. évi árbevételét, amely szükséges lenne a 6,49%-os kulcs alkalmazásának ellenőrzéséhez. Az allokációs kulcs és a tényleges díj közötti kapcsolat nem dokumentált.\"",
+              "uncertainty_notes": "A 6,49%-os allokációs kulcs alapján számított érték nem egyértelmű a Local File alapján, mivel az árbevétel konkrét értéke nem szerepel. Az allokációs kulcs és a 120 millió Ft díj közötti kapcsolat dokumentálása szükséges.\"",
+              "requires_human_review": true,
+              "rule_id": "NGM_45_2025.section_6",
+              "legal_references": [
+                "45/2025. (XII. 23.) NGM rendelet 6. §",
+                "OECD_TPG_2022.Ch_VII.D"
+              ],
+              "prompt_version": "cross_doc_consistency_v1"
+            }
+          },
+          {
+            "error_id": "dfc701a7-4659-4664-af7e-1de7739f173a",
+            "description": "A Master File 4. oldalán rögzítés szerint a bejegyzett védjegyek, szabadalmaztatott gyártási eljárások és know-how dokumentáció mind az Anyavállalat (HIG Holding GmbH) könyveiben szerepelnek, és a leányvállalatok a szellemi tulajdont licenciaszerződések alapján jogosultak használni. A szerződések (HIG_Contracts_2024.pdf) azonban rögzítések szerint a HIG Manufacturing Kft. a licencelt szellemi tulajdonon módosítást nem végezhet, azt nem fejlesztheti, nem adaptálhatja. Azonban a Local File 9. oldalán azt állítás, hogy a Társaság \"saját piacelemzési és költségkalkulációs kompetenciájára támaszkodik\", amely potenciális ellentmondás a licenc korlátozásokkal.",
+            "severity": "medium",
+            "locations": [
+              {
+                "filename": "HIG_Masterfile_2024.pdf",
+                "line_numbers": [
+                  4
+                ]
+              },
+              {
+                "filename": "HIG_Contracts_2024.pdf",
+                "line_numbers": [
+                  7
+                ]
+              },
+              {
+                "filename": "HIG_LocalFile_2024_FAULTY.pdf",
+                "line_numbers": [
+                  9
+                ]
+              }
+            ],
+            "evidence": "Master File: IP az Anyavállalat könyveiben. Szerződések: Licencvevő nem módosíthat. Local File: Saját kompetencia.",
+            "attribution": {
+              "agent_id": "cross_doc_consistency_agent",
+              "doc_type_scope": "cross_document",
+              "confidence": 0.65,
+              "evidence_chunks": [
+                {
+                  "filename": "HIG_Masterfile_2024.pdf",
+                  "page": 4,
+                  "chunk_index": 12,
+                  "quote": "ejegyzett védjegyek, a szabadalmaztatott gyártási eljárások és a know-how dokumentáció mind az Anyavállalat könyveiben szerepelnek. A leányvállalatok a szellemi tulajdont az Anyavállalattal kötött licenciaszerződések alapján jogosultak használni.",
+                  "char_start": 6909,
+                  "char_end": 7159,
+                  "source_kind": "document"
+                },
+                {
+                  "filename": "HIG_Contracts_2024.pdf",
+                  "page": 7,
+                  "chunk_index": 25,
+                  "quote": "Licencvevő nem jogosult a licencelt szellemi tulajdonon módosítást végezni, azt fejleszteni, adaptálni vagy más szellemi alkotásokba integrálni.",
+                  "char_start": 17088,
+                  "char_end": 17794,
+                  "source_kind": "document"
+                },
+                {
+                  "filename": "HIG_LocalFile_2024_FAULTY.pdf",
+                  "page": 9,
+                  "chunk_index": 18,
+                  "quote": "yőri pénzügyi és kontrolling csapat érdemi javaslatokat dolgoz ki, amelyek alapvetően megh atározzák a végső transzferárakat. Az értékesítési árak kialakítása során a Társaság saját piacelemzési és költségkalkulációs kompetenciájára támaszkodik.",
+                  "char_start": 12113,
+                  "char_end": 12909,
+                  "source_kind": "document"
+                },
+                {
+                  "filename": "HIG_Contracts_2024.pdf",
+                  "page": 8,
+                  "chunk_index": 26,
+                  "quote": "HIG Manufacturing Kft. – Csoporton belüli szerződések 2024 | BIZALMAS Oldal 8 / 9 A Licencadó szavatol azért, hogy a licencelt szellemi tulajdon felett rendelkezési joggal bír, és a licenc megadása harmadik felek jogait nem sérti.",
+                  "char_start": 18556,
+                  "char_end": 19515,
+                  "source_kind": "document"
+                }
+              ],
+              "reasoning": "A Master File egyértelműen rögzíti, hogy az IP az Anyavállalat tulajdona, és a leányvállalatok licenciaszerződések alapján jogosultak használni. A szerződések szigorú korlátozásokat tartalmaznak: a licencvevő nem módosíthat, nem fejleszthet, nem adaptálhat. Azonban a Local File azt állítja, hogy a Társaság \\\"saját piacelemzési és költségkalkulációs kompetenciájára támaszkodik\\\", amely potenciálisan ellentmond a licenc korlátozásainak. Ez a funkcionális profil meghatározásához szükséges tisztázás, mivel az OECD TPG 1.40–1.50. bekezdése szerint a funkciók, eszközök és kockázatok alapján kell meghatározni a transfer pricing módszert.\"",
+              "uncertainty_notes": "A \\\"saját piacelemzési és költségkalkulációs kompetencia\\\" kifejezés értelmezése nem egyértelmű. Lehet, hogy ez csak az Anyavállalat által meghatározott specifikációk keretein belüli operatív kompetenciára utal, vagy lehet, hogy valóban önálló fejlesztési tevékenységet jelent. A szerződések szövege azonban egyértelműen tiltja a módosítást és fejlesztést.\"",
+              "requires_human_review": true,
+              "rule_id": "OECD_TPG_2022.Ch_VI",
+              "legal_references": [
+                "OECD_TPG_2022.Ch_VI",
+                "OECD_TPG_2022.Ch_I.D"
+              ],
+              "prompt_version": "cross_doc_consistency_v1"
+            }
+          },
+          {
+            "error_id": "63f2f79b-0792-4d47-a090-013ec0c73705",
+            "description": "A Benchmark tanulmány (HIG-BENCH-2024-001) a 2021–2023 időszak adatait használja (három pénzügyi év súlyozatlan átlaga), amely az OECD Irányelvek 3.75–3.76. bekezdésének megfelel. Azonban a jelenlegi szerződés 2023. december 15-én lett aláírva és 2024. január 1-jétől 2024. december 31-ig tart. Ez azt jelenti, hogy a benchmark tanulmány a szerződés aláírása előtti időszakra vonatkozik, amely potenciálisan nem tárgyalja a 2024. évi tranzakciókat. A 45/2025. NGM rendelet 7–8. § szerint a benchmark tanulmánynak a vizsgált időszakra vonatkoznia kell.",
+            "severity": "high",
+            "locations": [
+              {
+                "filename": "HIG_Benchmark_2024.pdf",
+                "line_numbers": [
+                  3
+                ]
+              },
+              {
+                "filename": "HIG_Contracts_2024.pdf",
+                "line_numbers": [
+                  6
+                ]
+              }
+            ],
+            "evidence": "Benchmark: 2021–2023. Szerződés: 2024. január 1. – december 31.",
+            "attribution": {
+              "agent_id": "cross_doc_consistency_agent",
+              "doc_type_scope": "cross_document",
+              "confidence": 0.8,
+              "evidence_chunks": [
+                {
+                  "filename": "HIG_Benchmark_2024.pdf",
+                  "page": 3,
+                  "chunk_index": 5,
+                  "quote": "A vizsgált időszak: 2021–2023 (három pénzügyi év súlyozatlan átlaga), összehangban az OECD Irányelvek 3.75 –3.",
+                  "char_start": 3559,
+                  "char_end": 3916,
+                  "source_kind": "document"
+                },
+                {
+                  "filename": "HIG_Contracts_2024.pdf",
+                  "page": 6,
+                  "chunk_index": 19,
+                  "quote": "A jelen megállapodást a Felek elolvasták, tartalmát értelmezték, és mint akaratukkal mindenben megegyezőt 2023. december 15. napján aláírták.",
+                  "char_start": 13528,
+                  "char_end": 14475,
+                  "source_kind": "document"
+                }
+              ],
+              "reasoning": "A Benchmark tanulmány a 2021–2023 időszakra vonatkozik, amely az OECD TPG 3.75–3.76. bekezdésének megfelelő gyakorlat. Azonban a szerződés 2023. december 15-én lett aláírva és 2024. január 1-től 2024. december 31-ig tart. Ez azt jelenti, hogy a benchmark tanulmány a szerződés aláírása előtti időszakra vonatkozik. A 45/2025. NGM rendelet 7–8. § szerint a benchmark tanulmánynak a vizsgált adóévhez (2024) kapcsolódnia kell. Az OECD TPG 3.75. bekezdése szerint a benchmark tanulmánynak az aktuális vagy közelmúltbeli adatokat kell tartalmaznia, amely a 2021–2023 adatok esetén már 1-3 évvel régebbi.\"",
+              "uncertainty_notes": "Az OECD TPG 3.75–3.76. bekezdése lehetővé teszi a közelmúltbeli adatok használatát, de a 2021–2023 adatok a 2024. évi tranzakciók értékeléséhez már elavultnak tekinthetők. A benchmark tanulmánynak ideálisan a 2023–2024 vagy 2024 adatokat kellene tartalmaznia.\"",
+              "requires_human_review": true,
+              "rule_id": "NGM_45_2025.section_7",
+              "legal_references": [
+                "45/2025. (XII. 23.) NGM rendelet 7–8. §",
+                "OECD_TPG_2022.Ch_III.D"
+              ],
+              "prompt_version": "cross_doc_consistency_v1"
+            }
+          }
+        ],
         "benchmark_risks": [],
-        "missing_elements": [],
+        "missing_elements": [
+          {
+            "element_id": "0e5e41cc-b591-4968-a8d3-b240b4eb9875",
+            "description": "A Local File eredménykimutatása (7.1. fejezet) 45 millió Ft licencdíjat mutat az \"egyéb ráfordítások\" között, amely az Anyavállalat (HIG Holding GmbH) felé fizetendő. Azonban a Local File nem tartalmazza a licencdíj számításának alapját, a licencelt szellemi tulajdon körét, vagy a szokásos piaci ár (arm's length price) indoklását. A szerződések (HIG_Contracts_2024.pdf) rögzítések szerint a licencvevő nem jogosult a licencelt szellemi tulajdonon módosítást végezni, de a licencdíj mértékét nem tartalmazza.",
+            "expected_in": "Local File 6. fejezet (Összehasonlíthatósági elemzés és módszerválasztás)",
+            "required_by": "45/2025. (XII. 23.) NGM rendelet 6. §, OECD TPG Ch. VI",
+            "severity": "high",
+            "attribution": {
+              "agent_id": "cross_doc_consistency_agent",
+              "doc_type_scope": "cross_document",
+              "confidence": 0.85,
+              "evidence_chunks": [
+                {
+                  "filename": "HIG_LocalFile_2024_FAULTY.pdf",
+                  "page": 12,
+                  "chunk_index": 23,
+                  "quote": "és egyéb személyi ktg. 94.000.000 VI. Értéksökkenési leírás 64.500.000 VII. Egyéb ráfordítások (management fee + licencdíj) 165.000.000 ebből: management fee (HIG Holding GmbH) 120.000.000 ebből: licencdíj (HIG Holding GmbH) 45.000.000",
+                  "char_start": 15974,
+                  "char_end": 16654,
+                  "source_kind": "document"
+                },
+                {
+                  "filename": "HIG_Contracts_2024.pdf",
+                  "page": 7,
+                  "chunk_index": 25,
+                  "quote": "Licencvevő nem jogosult a licencelt szellemi tulajdonon módosítást végezni, azt fejleszteni, adaptálni vagy más szellemi alkotásokba integrálni.",
+                  "char_start": 17088,
+                  "char_end": 17794,
+                  "source_kind": "document"
+                }
+              ],
+              "reasoning": "A Local File eredménykimutatása 45 millió Ft licencdíjat mutat, amely az Anyavállalat felé fizetendő. Azonban a Local File 6. fejezete (Összehasonlíthatósági elemzés és módszerválasztás) nem tartalmazza a licencdíj szokásos piaci árának indoklását. Az OECD TPG VI. fejezete (Intangibles) és a 45/2025. NGM rendelet 6. § szerint a licencdíj szokásos piaci árának dokumentálása kötelező. A szerződések szövege nem tartalmazza a licencdíj mértékét sem, amely a dokumentálási kötelezettség teljesítésének akadálya.\"",
+              "uncertainty_notes": "A licencdíj 45 millió Ft-nak tűnik ésszerűnek a 850 millió Ft gyártási díjhoz képest (5,3%), de a szokásos piaci ár indoklása hiányzik. A szerződések szövege nem tartalmazza a licencdíj mértékét, amely a dokumentálás hiányosságát jelzi.\"",
+              "requires_human_review": true,
+              "rule_id": "NGM_45_2025.section_6",
+              "legal_references": [
+                "45/2025. (XII. 23.) NGM rendelet 6. §",
+                "OECD_TPG_2022.Ch_VI"
+              ],
+              "prompt_version": "cross_doc_consistency_v1"
+            }
+          }
+        ],
         "status": "ok",
         "error": null
       }
@@ -981,8 +1435,8 @@
   },
   "error": null,
   "meta": {
-    "request_id": "d4e5f6a7-b8c9-0123-def0-123456789abc",
-    "timestamp": "2026-05-09T10:00:28.000000Z",
+    "request_id": "a98bb57a-217a-4e77-889c-1eff4e5e1f1b",
+    "timestamp": "2026-05-09T02:20:23.660331Z",
     "api_version": "v1"
   }
 }
