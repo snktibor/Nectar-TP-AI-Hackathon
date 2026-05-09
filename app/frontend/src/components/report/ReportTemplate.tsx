@@ -69,10 +69,17 @@ const SEVERITY_COLOR: Record<BackendRiskSeverity, string> = {
 }
 
 const SEVERITY_LABEL: Record<BackendRiskSeverity, string> = {
+<<<<<<< HEAD
   critical: 'Critical',
   high: 'High',
   medium: 'Medium',
   low: 'Low',
+=======
+  critical: 'Kritikus',
+  high: 'Magas',
+  medium: 'Közepes',
+  low: 'Alacsony',
+>>>>>>> 3a8508588991892f7a5b814a4f47fe8bb0700865
 }
 
 const SEVERITY_ORDER: BackendRiskSeverity[] = ['critical', 'high', 'medium', 'low']
@@ -396,8 +403,13 @@ function countBySeverity(
 
 function formatLineNumbers(lines: number[] | null | undefined): string {
   if (!lines || lines.length === 0) return '—'
+<<<<<<< HEAD
   if (lines.length === 1) return `line ${lines[0]}`
   return `lines ${lines[0]}–${lines[lines.length - 1]}`
+=======
+  if (lines.length === 1) return `${lines[0]}. sor`
+  return `${lines[0]}–${lines[lines.length - 1]}. sor`
+>>>>>>> 3a8508588991892f7a5b814a4f47fe8bb0700865
 }
 
 // ---------------------------------------------------------------------------
@@ -416,12 +428,21 @@ function SectionHeader({ index, title }: { index: string; title: string }) {
   )
 }
 
+<<<<<<< HEAD
 function PageFooter({ sessionId }: { sessionId: string }) {
   return (
     <View style={styles.pageFooter} fixed>
       <Text>REDLINE PHANTOM · Session {sessionId.slice(0, 8)}</Text>
       <Text
         render={({ pageNumber, totalPages }) => `Page ${pageNumber} of ${totalPages}`}
+=======
+function PageFooter() {
+  return (
+    <View style={styles.pageFooter} fixed>
+      <Text>REDLINE PHANTOM · Transzferár megfelelőségi audit</Text>
+      <Text
+        render={({ pageNumber, totalPages }) => `${pageNumber}. oldal / ${totalPages}`}
+>>>>>>> 3a8508588991892f7a5b814a4f47fe8bb0700865
       />
     </View>
   )
@@ -445,9 +466,15 @@ function FindingItem({
       </View>
       <Text style={styles.findingDescription}>{finding.description}</Text>
       <View style={styles.referenceBlock}>
+<<<<<<< HEAD
         <Text style={styles.referenceLabel}>Reference</Text>
         {finding.locations.length === 0 ? (
           <Text style={styles.empty}>No source citation provided.</Text>
+=======
+        <Text style={styles.referenceLabel}>Hivatkozás</Text>
+        {finding.locations.length === 0 ? (
+          <Text style={styles.empty}>Nincs forráshivatkozás megadva.</Text>
+>>>>>>> 3a8508588991892f7a5b814a4f47fe8bb0700865
         ) : (
           finding.locations.map((loc, idx) => (
             <Text key={`${loc.filename}-${idx}`} style={styles.referenceItem}>
@@ -476,7 +503,10 @@ export default function ReportTemplate({
 }: ReportTemplateProps): JSX.Element {
   const counts = countBySeverity(report.consistency_errors)
   const generatedAt = formatDate(report.generated_at)
+<<<<<<< HEAD
   const sessionLabel = report.session_id
+=======
+>>>>>>> 3a8508588991892f7a5b814a4f47fe8bb0700865
 
   // Pre-sort consistency errors by severity (Critical → Low) for the report.
   const severityRank: Record<BackendRiskSeverity, number> = {
@@ -496,13 +526,20 @@ export default function ReportTemplate({
 
   return (
     <Document
+<<<<<<< HEAD
       title="Transfer Pricing Compliance Report"
       author="REDLINE PHANTOM"
       subject={`Audit ${report.audit_task_id}`}
+=======
+      title="Transzferár Megfelelőségi Jelentés"
+      author="REDLINE PHANTOM"
+      subject="Transzferár megfelelőségi audit"
+>>>>>>> 3a8508588991892f7a5b814a4f47fe8bb0700865
     >
       {/* ---------- Cover ---------- */}
       <Page size="A4" style={styles.cover}>
         <View style={styles.coverAccentBar} />
+<<<<<<< HEAD
         <Text style={styles.coverEyebrow}>Confidential · Tax Advisory</Text>
         <Text style={styles.coverTitle}>
           Transfer Pricing{'\n'}Compliance Report
@@ -510,10 +547,20 @@ export default function ReportTemplate({
         <Text style={styles.coverSubtitle}>
           Cross-document consistency, completeness, and benchmark validation —
           aligned with 32/2017 NGM rendelet and NAV audit expectations.
+=======
+        <Text style={styles.coverEyebrow}>Bizalmas · Adótanácsadás</Text>
+        <Text style={styles.coverTitle}>
+          Transzferár{'\n'}Megfelelőségi Jelentés
+        </Text>
+        <Text style={styles.coverSubtitle}>
+          Kereszt-dokumentum konzisztencia, teljesség és benchmark ellenőrzés —
+          a 32/2017 NGM rendelet és a NAV audit elvárásai szerint.
+>>>>>>> 3a8508588991892f7a5b814a4f47fe8bb0700865
         </Text>
 
         <View style={styles.coverMetaRow}>
           <View style={styles.coverMetaCol}>
+<<<<<<< HEAD
             <Text style={styles.coverMetaLabel}>Session ID</Text>
             <Text style={styles.coverMetaValue}>{sessionLabel}</Text>
           </View>
@@ -527,6 +574,21 @@ export default function ReportTemplate({
           </View>
           <View style={styles.coverMetaCol}>
             <Text style={styles.coverMetaLabel}>Overall Risk</Text>
+=======
+            <Text style={styles.coverMetaLabel}>Generálva</Text>
+            <Text style={styles.coverMetaValue}>{generatedAt}</Text>
+          </View>
+          <View style={styles.coverMetaCol}>
+            <Text style={styles.coverMetaLabel}>Megállapítások</Text>
+            <Text style={styles.coverMetaValue}>
+              {report.consistency_errors.length +
+                report.benchmark_risks.length +
+                report.missing_elements.length}
+            </Text>
+          </View>
+          <View style={styles.coverMetaCol}>
+            <Text style={styles.coverMetaLabel}>Teljes kockázat</Text>
+>>>>>>> 3a8508588991892f7a5b814a4f47fe8bb0700865
             <Text
               style={[
                 styles.coverMetaValue,
@@ -539,23 +601,37 @@ export default function ReportTemplate({
         </View>
 
         <View style={styles.coverFooter}>
+<<<<<<< HEAD
           <Text>REDLINE PHANTOM · Multi-Agent TP Auditor</Text>
           <Text>Prepared by Kerek Barackok · PwC Hungary AI Hackathon 2026</Text>
+=======
+          <Text>REDLINE PHANTOM · Multi-ügynökös TP Auditor</Text>
+          <Text>Készítette: Kerek Barackok · PwC Magyarország AI Hackathon 2026</Text>
+>>>>>>> 3a8508588991892f7a5b814a4f47fe8bb0700865
         </View>
       </Page>
 
       {/* ---------- Body ---------- */}
       <Page size="A4" style={styles.page}>
         {/* 1. Executive Summary */}
+<<<<<<< HEAD
         <SectionHeader index="01" title="Executive Summary" />
         <View style={styles.callout}>
           <Text style={styles.calloutLabel}>AI Audit Synthesis</Text>
           <Text style={styles.calloutBody}>
             {report.summary?.trim() || 'No summary was produced for this audit.'}
+=======
+        <SectionHeader index="01" title="Vezetői összefoglaló" />
+        <View style={styles.callout}>
+          <Text style={styles.calloutLabel}>AI audit szintézis</Text>
+          <Text style={styles.calloutBody}>
+            {report.summary?.trim() || 'Nem készült összefoglaló ehhez az audithoz.'}
+>>>>>>> 3a8508588991892f7a5b814a4f47fe8bb0700865
           </Text>
         </View>
 
         {/* 2. Risk Dashboard */}
+<<<<<<< HEAD
         <SectionHeader index="02" title="Risk Dashboard" />
         <View style={styles.table}>
           <View style={styles.tableHeaderRow}>
@@ -564,6 +640,16 @@ export default function ReportTemplate({
             <Text style={[styles.th, styles.tdRight]}>Benchmark</Text>
             <Text style={[styles.th, styles.tdRight]}>Missing</Text>
             <Text style={[styles.th, styles.tdRight]}>Total</Text>
+=======
+        <SectionHeader index="02" title="Kockázati áttekintés" />
+        <View style={styles.table}>
+          <View style={styles.tableHeaderRow}>
+            <Text style={styles.th}>Súlyosság</Text>
+            <Text style={[styles.th, styles.tdRight]}>Konzisztencia</Text>
+            <Text style={[styles.th, styles.tdRight]}>Benchmark</Text>
+            <Text style={[styles.th, styles.tdRight]}>Hiányzó</Text>
+            <Text style={[styles.th, styles.tdRight]}>Összesen</Text>
+>>>>>>> 3a8508588991892f7a5b814a4f47fe8bb0700865
           </View>
           {SEVERITY_ORDER.map(
             (sev, idx, arr) => {
@@ -598,10 +684,17 @@ export default function ReportTemplate({
         </View>
 
         {/* 3. Detailed Findings */}
+<<<<<<< HEAD
         <SectionHeader index="03" title="Detailed Findings" />
         {sortedFindings.length === 0 ? (
           <Text style={styles.empty}>
             No cross-document consistency errors were detected.
+=======
+        <SectionHeader index="03" title="Részletes megállapítások" />
+        {sortedFindings.length === 0 ? (
+          <Text style={styles.empty}>
+            Nem található kereszt-dokumentum konzisztencia hiba.
+>>>>>>> 3a8508588991892f7a5b814a4f47fe8bb0700865
           </Text>
         ) : (
           sortedFindings.map((f, idx) => (
@@ -610,21 +703,43 @@ export default function ReportTemplate({
         )}
 
         {/* 4. Entity Network */}
+<<<<<<< HEAD
         <SectionHeader index="04" title="Entity Network" />
         {entities.length === 0 ? (
           <Text style={styles.empty}>
             No entity graph was attached to this report.
+=======
+        <SectionHeader index="04" title="Entitás hálózat" />
+        {entities.length === 0 ? (
+          <Text style={styles.empty}>
+            Nincs entitás gráf csatolva ehhez a jelentéshez.
+>>>>>>> 3a8508588991892f7a5b814a4f47fe8bb0700865
           </Text>
         ) : (
           <View style={[styles.table, { borderLeftWidth: 0, borderRightWidth: 0 }]}>
             <View style={styles.tableHeaderRow}>
+<<<<<<< HEAD
               <Text style={[styles.th, { flex: 2 }]}>Entity</Text>
               <Text style={[styles.th, { flex: 2 }]}>Jurisdiction · Tax ID</Text>
               <Text style={[styles.th, styles.tdRight]}>Verification</Text>
+=======
+              <Text style={[styles.th, { flex: 2 }]}>Entitás</Text>
+              <Text style={[styles.th, { flex: 2 }]}>Joghatóság · Adószám</Text>
+              <Text style={[styles.th, styles.tdRight]}>Ellenőrzés</Text>
+>>>>>>> 3a8508588991892f7a5b814a4f47fe8bb0700865
             </View>
             {entities.map((node) => {
               const verification = verificationByName.get(node.name.toLowerCase())
               const status = verification?.status ?? 'UNKNOWN'
+<<<<<<< HEAD
+=======
+              const statusLabel =
+                status === 'VALID'
+                  ? 'ÉRVÉNYES'
+                  : status === 'INVALID'
+                  ? 'ÉRVÉNYTELEN'
+                  : 'ISMERETLEN'
+>>>>>>> 3a8508588991892f7a5b814a4f47fe8bb0700865
               const statusColor =
                 status === 'VALID'
                   ? SEVERITY_COLOR.low
@@ -638,7 +753,11 @@ export default function ReportTemplate({
                     {(node.jurisdiction ?? '—') + ' · ' + (node.tax_id ?? '—')}
                   </Text>
                   <Text style={[styles.entityStatus, { color: statusColor }]}>
+<<<<<<< HEAD
                     {status}
+=======
+                    {statusLabel}
+>>>>>>> 3a8508588991892f7a5b814a4f47fe8bb0700865
                     {verification ? ` · ${verification.source}` : ''}
                   </Text>
                 </View>
@@ -647,7 +766,11 @@ export default function ReportTemplate({
           </View>
         )}
 
+<<<<<<< HEAD
         <PageFooter sessionId={sessionLabel} />
+=======
+        <PageFooter />
+>>>>>>> 3a8508588991892f7a5b814a4f47fe8bb0700865
       </Page>
     </Document>
   )
