@@ -1,9 +1,10 @@
-import { FileUp, Loader2 } from 'lucide-react'
+import { FileUp, Loader2, Sparkles } from 'lucide-react'
 import type {
   BackendAuditStatusResponse,
   WorkspacePhase,
 } from '../lib/backendAudit'
 import { formatStageLabel } from '../lib/backendAudit'
+import AnalyticsDashboard from './AnalyticsDashboard'
 
 interface AnalysisReadyViewProps {
   readonly phase: WorkspacePhase
@@ -86,15 +87,44 @@ export default function AnalysisReadyView({
   const isFailed = phase === 'failed'
   const isReady = phase === 'ready'
 
+  // ---------------------------------------------------------------------------
+  // State 3: Audit completed — replace gauge with the AnalyticsDashboard.
+  // ---------------------------------------------------------------------------
+  if (isCompleted) {
+    return (
+      <section className="flex h-full min-h-0 flex-col overflow-y-auto rounded-2xl border border-gray-100 bg-white p-6 shadow-md animate-phantom-fade-in [scrollbar-gutter:stable] sm:p-8">
+        <header className="mb-6 flex flex-wrap items-center justify-between gap-3 animate-phantom-fade-in-down">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <span className="inline-flex h-7 items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 text-xs font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-200">
+                <Sparkles className="h-3.5 w-3.5" />
+                Audit kész
+              </span>
+            </div>
+            <h2 className="mt-2 text-xl font-semibold text-gray-900">Elemzési Áttekintés</h2>
+            <p className="mt-1 text-sm leading-6 text-gray-500">
+              Multi-ágens audit eredmények — befektetői szintű kockázati áttekintés.
+            </p>
+          </div>
+        </header>
+
+        <div className="animate-phantom-fade-in-up">
+          <AnalyticsDashboard />
+        </div>
+      </section>
+    )
+  }
+
+  // ---------------------------------------------------------------------------
+  // States 1 & 2: Idle/Ready or Running — keep the circular gauge layout.
+  // ---------------------------------------------------------------------------
   const gaugePercent = (() => {
-    if (isCompleted) return 100
     if (isRunning && auditStatus) return Math.max(5, Math.min(99, auditStatus.progress))
     if (isReady) return 100
     return 0
   })()
 
   const headline = (() => {
-    if (isCompleted) return 'Audit kész'
     if (isRunning) return auditStatus ? formatStageLabel(auditStatus.stage) : 'Audit indítás'
     if (isFailed) return 'Audit hiba'
     if (isReady) return 'Auditálásra kész'
@@ -102,7 +132,6 @@ export default function AnalysisReadyView({
   })()
 
   const subline = (() => {
-    if (isCompleted) return 'Nyisd meg a Dokumentumok fület a fájlonkénti megállapításokhoz.'
     if (isRunning) return 'Az ügynökök elemzik a dokumentumcsomagot…'
     if (isFailed) return auditError ?? 'Ismeretlen hiba történt.'
     if (isReady) return 'Mind az 5 kötelező kategória osztályozva. Indítsd a beolvasást.'
