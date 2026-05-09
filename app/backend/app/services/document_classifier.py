@@ -32,7 +32,7 @@ def _load_ruleset() -> dict:
         return json.load(f)
 
 
-def classify_document(sample_text: str) -> ClassificationResult:
+def classify_document(sample_text: str, filename: str | None = None) -> ClassificationResult:
     """Classify document type by matching keyword signals against sample text.
 
     Uses the ruleset's highest-match-count strategy with priority tiebreak.
@@ -49,6 +49,23 @@ def classify_document(sample_text: str) -> ClassificationResult:
     text_lower = sample_text.lower()
     fallback_type = rules["fallback_type"]
     fallback_label = categories.get(fallback_type, {}).get("label", "Other")
+
+    if filename:
+        filename_lower = filename.lower()
+        for override in rules.get("filename_overrides", []):
+            contains_any: list[str] = override.get("contains_any", [])
+            matched_token = next((token for token in contains_any if token.lower() in filename_lower), None)
+            if matched_token is None:
+                continue
+
+            forced_type = override.get("force_type", fallback_type)
+            forced_label = categories.get(forced_type, {}).get("label", forced_type)
+            return ClassificationResult(
+                doc_type=forced_type,
+                label=forced_label,
+                confidence=float(override.get("confidence", 0.95)),
+                matched_keywords=[f"filename:{matched_token}"],
+            )
 
     scored: list[tuple[int, int, str, str, list[str], int]] = []
     for cat_key, cat_config in categories.items():

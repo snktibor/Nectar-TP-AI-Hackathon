@@ -25,7 +25,7 @@ Multi-agent system analyzing Master File, Local File, contracts, invoices, and b
 
 ## Rulesets (Deterministic Baseline)
 These JSON rulesets MUST be used as the single source of truth for classification and scoring:
-- `document_classification.json` — implemented document type identification (master_file, local_file, contract, invoice, benchmark, etc.)
+- `document_classification.json` — implemented document type identification (master_file, local_file, contract, invoice, benchmark, etc.), including filename overrides for generated/system reports
 - `tp_method_classification.json` — planned TP method detection (CUP, RPM, CPM, TNMM, PSM)
 - `severity_scoring.json` — planned finding severity levels (critical/high/medium/low)
 - `nav_risk_categories.json` — planned NAV audit triggers and penalty categories
@@ -70,6 +70,7 @@ Source references are non-negotiable — unsourced findings are invalid.
 - `GET /health` — health probe.
 - `POST /api/v1/documents/upload` — simple document metadata upload.
 - `GET /api/v1/documents/{session_id}` — session document listing.
+- `GET /api/v1/documents/{session_id}/file/{filename}` — inline original file retrieval for browser/PDF viewing with byte-range response support.
 - `POST /api/v1/documents/ingest` — batch parse, classify, chunk, and vectorize PDF/DOCX files.
 - `POST /api/v1/audits/start` — start mock audit job.
 - `GET /api/v1/audits/status/{audit_task_id}` — poll mock job status.

@@ -312,6 +312,16 @@
     "sample_pages": 5,
     "case_insensitive": true,
     "confidence_saturation": 6,
-    "second_lead_margin": 2
+    "second_lead_margin": 2,
+    "filename_overrides": [
+      {
+        "contains_any": [
+          "redlinephantom_tp_report",
+          "tp_report_"
+        ],
+        "force_type": "other",
+        "confidence": 0.95
+      }
+    ]
   }
 }

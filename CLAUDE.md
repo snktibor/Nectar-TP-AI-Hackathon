@@ -1,7 +1,5 @@
 # REDLINE PHANTOM — AI Harness Root Instructions
 
-c
-
 ## Project Identity
 
 **REDLINE PHANTOM** — Transfer Pricing Documentation Consistency Auditor.
@@ -52,7 +50,9 @@ Implemented classification and planned scoring use JSON rulesets in `app/backend
 
 - Batch PDF/DOCX ingest through `POST /api/v1/documents/ingest`.
 - pypdf/python-docx parsing, ruleset classification, chunking, and ChromaDB indexing.
-- React `DocumentIngestor` enforces a strict 5-document intake per run and validates required category coverage (`master_file`, `local_file`, `contract`, `benchmark_study`, `invoice`) with explicit failure reasons.
+- React `DocumentIngestor` enforces a strict 5-document intake per run, validates required category coverage (`master_file`, `local_file`, `contract`, `benchmark_study`, `invoice`), and supports targeted/bulk replacement for missing or duplicated required categories.
+- Document file retrieval supports inline browser viewing with byte-range responses for faster PDF rendering.
+- Frontend PDF evidence viewer prioritizes the target citation page first and applies quote highlighting as best-effort.
 - Frontend audit flow is actively wired to `/api/v1/audits/start`, `/status/{id}`, and `/results/{id}` with polling lifecycle handling.
 - `AnalysisWorkspace` renders backend-driven findings, per-agent runs, and telemetry tabs.
 - `phantomDesign` frontend design system with Tailwind `phantom` tokens.

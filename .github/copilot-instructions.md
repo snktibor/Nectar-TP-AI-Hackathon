@@ -50,8 +50,10 @@ Use backend rulesets as the deterministic baseline:
 
 - Batch PDF/DOCX ingest through `POST /api/v1/documents/ingest`.
 - FastAPI backend with standardized `{success, data, error, meta}` envelope.
-- Parser, classifier, chunker, and ChromaDB vector store services.
-- React `DocumentIngestor` with strict 5-document intake, required-category validation, and detailed classification issue reporting.
+- Parser, classifier with ruleset filename overrides, chunker, and ChromaDB vector store services.
+- Document file retrieval supports inline browser viewing with byte-range responses for faster PDF rendering.
+- React `DocumentIngestor` with strict 5-document intake, required-category validation, detailed classification issue reporting, and targeted/bulk replacement for missing or duplicated required categories.
+- Frontend PDF evidence viewer prioritizes the target citation page first and applies quote highlighting as best-effort.
 - Active frontend audit flow wired to `POST /api/v1/audits/start`, polling `GET /status/{id}`, and loading `GET /results/{id}`.
 - Backend-driven report UI with findings, per-agent run breakdown, and telemetry tabs.
 - `phantomDesign` frontend design system with Tailwind `phantom` tokens.

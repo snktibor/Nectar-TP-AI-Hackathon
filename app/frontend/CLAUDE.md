@@ -18,12 +18,13 @@ React + Vite + TypeScript frontend for a transfer pricing documentation consiste
 
 1. **Split Workspace** — bal oldali ingest panel és jobb oldali audit/riport munkaterület
 2. **Dashboard Shell** — bal navigációs rail lokális kattintható menüállapotokkal, alul beállítások + profil kártya
-3. **Document Ingestor** — drag-drop batch PDF/DOCX feltöltés, maximum 5 fájl, és ingest csak pontosan 5 fájl esetén
-4. **Classification Validation** — kötelező kategóriák ellenőrzése (`master_file`, `local_file`, `contract`, `benchmark_study`, `invoice`) részletes hibaokokkal
+3. **Document Ingestor** — drag-drop batch PDF/DOCX feltöltés, maximum 5 fájl, ingest csak pontosan 5 fájl esetén, plusz automatikus pótlás/csere hiányzó vagy duplikált kötelező kategóriákhoz
+4. **Classification Validation** — kötelező kategóriák ellenőrzése (`master_file`, `local_file`, `contract`, `benchmark_study`, `invoice`) részletes hibaokokkal és cserélhető fájlok állapotkezelésével
 5. **Ingest Progress + Results** — explicit loading/success/error/warning állapotok, per-dokumentum klasszifikációs kártyák
 6. **Re-upload Flow** — kész állapotban `Fájlok újrafeltöltése` visszaállítja a feltöltési állapotot és újranyitja a file pickert
 7. **Analysis Workspace** — backend audit indítás, státusz polling, majd riport betöltés (`start` → `status` → `results`)
 8. **Completed Report Tabs** — megállapítások, ügynök futások, telemetria
+9. **Document Evidence Viewer** — PDF hivatkozások céloldal-first renderrel, gyors oldalbetöltéssel és best-effort quote highlighttal
 
 ## Critical Rules
 
@@ -45,12 +46,14 @@ React + Vite + TypeScript frontend for a transfer pricing documentation consiste
 ## Current Frontend File State (2026-05-09)
 
 - `src/App.tsx`: root orchestration for session, ingest completion, audit lifecycle, and polling cleanup.
-- `src/components/DocumentIngestor.tsx`: strict 5-file intake, classification issue diagnostics, and re-upload reset action.
+- `src/components/DocumentIngestor.tsx`: strict 5-file intake, classification issue diagnostics, targeted/bulk replacement, and re-upload reset action.
 - `src/components/AnalysisWorkspace.tsx`: phase-based right panel with progress view, findings tab, agent runs tab, and telemetry tab.
+- `src/components/ResultsPanel.tsx`: active document/evidence viewer host for selected documents and clicked citations.
+- `src/components/DocumentViewer.tsx`: target-page-first PDF rendering, legal/document citation display, and best-effort text highlighting.
 - `src/components/DashboardShell.tsx`: wider sidebar rail, overflow-safe labels, non-active colored layer, and profile footer.
 - `src/lib/backendAudit.ts`: typed audit DTOs, stage/severity formatting, and agent label constants.
 - `src/lib/documentDisplay.ts`: document-type badge mapping and file support checks.
-- `src/components/Header.tsx`, `src/components/UploadPanel.tsx`, `src/components/ResultsPanel.tsx`, `src/components/SeverityBadge.tsx`: jelenleg nem az aktív render útvonal részei.
+- `src/components/Header.tsx`, `src/components/UploadPanel.tsx`, `src/components/SeverityBadge.tsx`: jelenleg nem az aktív render útvonal részei.
 
 ## UX Standards
 

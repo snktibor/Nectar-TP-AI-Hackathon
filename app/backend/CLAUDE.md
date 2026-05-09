@@ -23,7 +23,7 @@ Python FastAPI backend for a transfer pricing documentation consistency auditor.
 
 - Every finding MUST have source references (`doc_id:page:paragraph`).
 - Severity and risk scores MUST be computed from `rulesets/severity_scoring.json` weights.
-- Document classification MUST use `rulesets/document_classification.json` signals.
+- Document classification MUST use `rulesets/document_classification.json` signals, including filename override rules for generated/system reports.
 - TP method identification MUST use `rulesets/tp_method_classification.json` once that ruleset is implemented.
 - NAV risk categories MUST use `rulesets/nav_risk_categories.json` once that ruleset is implemented.
 - Full type hints everywhere. No `Any` or bare `dict` in public APIs.
@@ -46,6 +46,7 @@ Current PoC uses a mock async audit pipeline with staged progress. Target pipeli
 - Envelope format: `{success, data, error, meta}`
 - `POST /documents/upload`: multipart metadata upload
 - `GET /documents/{session_id}`: session document listing
+- `GET /documents/{session_id}/file/{filename}`: inline original file retrieval for browser/PDF viewing, including byte-range responses for PDF.js
 - `POST /documents/ingest`: batch PDF/DOCX parse, classify, chunk, and vectorize
 - `POST /audits/start`: triggers mock audit pipeline and returns job ID
 - `GET /audits/status/{audit_task_id}`: polling status

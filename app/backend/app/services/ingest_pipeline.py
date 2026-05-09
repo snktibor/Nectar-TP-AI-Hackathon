@@ -49,7 +49,7 @@ def ingest_single_file(
         )
 
     sample_text = parsed.first_n_pages_text(n=5)
-    classification = classify_document(sample_text)
+    classification = classify_document(sample_text, filename=filename)
 
     pages_for_chunking = [(p.page_number, p.text) for p in parsed.pages]
     chunks = chunk_document(

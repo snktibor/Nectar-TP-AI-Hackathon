@@ -69,8 +69,10 @@ Use backend rulesets as the deterministic baseline:
 
 - React 18 + Vite + Tailwind frontend with strict 5-document ingest guardrails and `phantomDesign` tokens.
 - FastAPI backend with standardized `{success, data, error, meta}` envelope.
-- Batch PDF/DOCX ingest, parsing, ruleset classification, chunking, and ChromaDB indexing.
-- Required ingest coverage validation for `master_file`, `local_file`, `contract`, `benchmark_study`, and `invoice` with explicit issue reporting.
+- Batch PDF/DOCX ingest, parsing, ruleset classification with filename overrides, chunking, and ChromaDB indexing.
+- Document file retrieval supports inline browser viewing with byte-range responses for faster PDF rendering.
+- Required ingest coverage validation for `master_file`, `local_file`, `contract`, `benchmark_study`, and `invoice` with explicit issue reporting plus targeted/bulk replacement for missing or duplicated required categories.
+- Frontend PDF evidence viewer prioritizes the target citation page first and applies quote highlighting as best-effort.
 - Active frontend audit lifecycle wired to `/api/v1/audits/start`, `/status/{id}`, and `/results/{id}` with polling.
 - Backend-driven report surface with findings, agent run details, and telemetry tabs.
 

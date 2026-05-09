@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   AlertCircle,
   AlertTriangle,
@@ -64,6 +64,12 @@ type ClassificationIssue =
       kind: 'missing_required'
       requiredType: RequiredDocumentType
     }
+  | {
+      kind: 'file_duplicate_required'
+      filename: string
+      detectedType: RequiredDocumentType
+      missingTypes: RequiredDocumentType[]
+    }
 
 const REQUIRED_DOCUMENT_TYPES: RequiredDocumentType[] = [
   'master_file',
@@ -87,7 +93,8 @@ function isRequiredDocumentType(value: string): value is RequiredDocumentType {
 
 function buildClassificationIssues(documents: IngestedDocument[]): ClassificationIssue[] {
   const issues: ClassificationIssue[] = []
-  const matchedTypes = new Set<RequiredDocumentType>()
+  const matchedTypeCounts = new Map<RequiredDocumentType, number>()
+  const filenamesByType = new Map<RequiredDocumentType, string[]>()
 
   for (const document of documents) {
     if (document.status === 'failed') {
@@ -100,7 +107,13 @@ function buildClassificationIssues(documents: IngestedDocument[]): Classificatio
     }
 
     if (isRequiredDocumentType(document.detected_type)) {
-      matchedTypes.add(document.detected_type)
+      matchedTypeCounts.set(
+        document.detected_type,
+        (matchedTypeCounts.get(document.detected_type) ?? 0) + 1,
+      )
+      const filenames = filenamesByType.get(document.detected_type) ?? []
+      filenames.push(document.filename)
+      filenamesByType.set(document.detected_type, filenames)
       continue
     }
 
@@ -111,12 +124,32 @@ function buildClassificationIssues(documents: IngestedDocument[]): Classificatio
     })
   }
 
+  const missingTypes: RequiredDocumentType[] = []
   for (const requiredType of REQUIRED_DOCUMENT_TYPES) {
-    if (!matchedTypes.has(requiredType)) {
+    if ((matchedTypeCounts.get(requiredType) ?? 0) === 0) {
+      missingTypes.push(requiredType)
       issues.push({
         kind: 'missing_required',
         requiredType,
       })
+    }
+  }
+
+  if (missingTypes.length > 0) {
+    for (const requiredType of REQUIRED_DOCUMENT_TYPES) {
+      const filenames = filenamesByType.get(requiredType) ?? []
+      if (filenames.length <= 1) {
+        continue
+      }
+
+      for (const filename of filenames.slice(1)) {
+        issues.push({
+          kind: 'file_duplicate_required',
+          filename,
+          detectedType: requiredType,
+          missingTypes,
+        })
+      }
     }
   }
 
@@ -134,6 +167,36 @@ function collectReplaceableFilenames(documents: IngestedDocument[]): string[] {
 
     if (!isRequiredDocumentType(document.detected_type)) {
       replaceable.add(document.filename)
+    }
+  }
+
+  const requiredTypeCounts = new Map<RequiredDocumentType, number>()
+  const requiredTypeFilenames = new Map<RequiredDocumentType, string[]>()
+
+  for (const document of documents) {
+    if (document.status !== 'success' || !isRequiredDocumentType(document.detected_type)) {
+      continue
+    }
+
+    requiredTypeCounts.set(
+      document.detected_type,
+      (requiredTypeCounts.get(document.detected_type) ?? 0) + 1,
+    )
+    const filenames = requiredTypeFilenames.get(document.detected_type) ?? []
+    filenames.push(document.filename)
+    requiredTypeFilenames.set(document.detected_type, filenames)
+  }
+
+  const hasMissingRequiredType = REQUIRED_DOCUMENT_TYPES.some(
+    (requiredType) => (requiredTypeCounts.get(requiredType) ?? 0) === 0,
+  )
+
+  if (hasMissingRequiredType) {
+    for (const requiredType of REQUIRED_DOCUMENT_TYPES) {
+      const filenames = requiredTypeFilenames.get(requiredType) ?? []
+      for (const filename of filenames.slice(1)) {
+        replaceable.add(filename)
+      }
     }
   }
 
@@ -169,12 +232,20 @@ export default function DocumentIngestor({
   const [isDragOver, setIsDragOver] = useState(false)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
 
+  const canAutoFillMissingSlots =
+    phase !== 'uploading' &&
+    replacementTargetFilename === null &&
+    selectedFiles.length >= MAX_FILES &&
+    pendingReplacementFilenames.length > 0
+
   const isSelectionLocked =
     phase !== 'uploading' &&
     selectedFiles.length >= MAX_FILES &&
-    replacementTargetFilename === null
-  const lockedUploadMessage =
-    'Maximum 5 fájl tölthető fel. Törölj egyet, ha újat szeretnél kiválasztani.'
+    replacementTargetFilename === null &&
+    !canAutoFillMissingSlots
+  const lockedUploadMessage = canAutoFillMissingSlots
+    ? 'Cserélendő fájlok vannak. Dobd be az új fájlokat, a rendszer automatikusan behelyettesíti őket.'
+    : 'Maximum 5 fájl tölthető fel. Törölj egyet, ha újat szeretnél kiválasztani.'
 
   useEffect(() => {
     if (errorMessage !== DUPLICATE_FILE_MESSAGE) {
@@ -192,7 +263,7 @@ export default function DocumentIngestor({
     }
   }, [errorMessage])
 
-  const addFiles = useCallback((incoming: FileList | File[]) => {
+  function addFiles(incoming: FileList | File[]): void {
     const validFiles = Array.from(incoming).filter(
       (file) => isSupportedDocument(file) && file.size <= MAX_FILE_SIZE,
     )
@@ -202,8 +273,80 @@ export default function DocumentIngestor({
       return
     }
 
-    let exceededFileLimit = false
     let duplicateFileDetected = false
+
+    if (canAutoFillMissingSlots) {
+      const existingByName = new Map(selectedFiles.map((file) => [file.name, file]))
+      const replacementQueue = [...pendingReplacementFilenames]
+      const nextFiles = [...selectedFiles]
+      const replacements = new Map<string, File>()
+
+      for (const file of validFiles) {
+        if (existingByName.has(file.name)) {
+          duplicateFileDetected = true
+          continue
+        }
+
+        const targetFilename = replacementQueue.shift()
+        if (!targetFilename) {
+          break
+        }
+
+        const targetIndex = nextFiles.findIndex((candidate) => candidate.name === targetFilename)
+        if (targetIndex === -1) {
+          continue
+        }
+
+        replacements.set(targetFilename, file)
+        nextFiles[targetIndex] = file
+        existingByName.delete(targetFilename)
+        existingByName.set(file.name, file)
+      }
+
+      if (replacements.size === 0) {
+        setErrorMessage(
+          duplicateFileDetected
+            ? DUPLICATE_FILE_MESSAGE
+            : 'Nincs automatikusan cserélhető új fájl. Adj meg eltérő nevű dokumentumot.',
+        )
+        return
+      }
+
+      const nextResults = results.map((document) => {
+        const replacement = replacements.get(document.filename)
+        if (!replacement) {
+          return document
+        }
+
+        return {
+          ...document,
+          filename: replacement.name,
+          size_bytes: replacement.size,
+          page_count: 0,
+          chunk_count: 0,
+          confidence: 0,
+          detected_type: 'other',
+          status: 'success' as const,
+          error: null,
+        }
+      })
+
+      setSelectedFiles(nextFiles)
+      setResults(nextResults)
+      setClassificationIssues(buildClassificationIssues(nextResults))
+      setPendingReplacementFilenames(replacementQueue)
+      setErrorMessage(duplicateFileDetected ? DUPLICATE_FILE_MESSAGE : null)
+
+      if (replacementQueue.length > 0) {
+        setHasPendingReclassification(true)
+        setPhase('done')
+        return
+      }
+
+      setHasPendingReclassification(false)
+      void handleIngest(nextFiles)
+      return
+    }
 
     setSelectedFiles((previousFiles) => {
       const filesByName = new Map(previousFiles.map((file) => [file.name, file]))
@@ -218,7 +361,6 @@ export default function DocumentIngestor({
 
       const nextFiles = Array.from(filesByName.values())
       if (nextFiles.length > MAX_FILES) {
-        exceededFileLimit = true
         return nextFiles.slice(0, MAX_FILES)
       }
 
@@ -230,13 +372,9 @@ export default function DocumentIngestor({
     setHasPendingReclassification(false)
     setPendingReplacementFilenames([])
     setErrorMessage(
-      exceededFileLimit
-        ? `Maximum ${MAX_FILES} dokumentum adható meg. A többit a rendszer kihagyta.`
-        : duplicateFileDetected
-          ? DUPLICATE_FILE_MESSAGE
-        : null,
+      duplicateFileDetected ? DUPLICATE_FILE_MESSAGE : null,
     )
-  }, [])
+  }
 
   function handleDragOver(event: React.DragEvent): void {
     event.preventDefault()
@@ -636,7 +774,7 @@ export default function DocumentIngestor({
             return (
             <RevealOnScroll
               key={file.name}
-              delayMs={index * 80}
+              delayMs={index * 55}
               className={[
                 'group flex items-center gap-3 rounded-xl border p-3 shadow-sm transition-phantom duration-phantom-base hover:-translate-y-px hover:shadow-phantom-soft',
                 phase === 'error'
@@ -724,6 +862,18 @@ export default function DocumentIngestor({
                         <span className="font-bold">{issue.filename}</span>: {issue.reason}
                       </>
                     )}
+
+                    {issue.kind === 'file_duplicate_required' && (
+                      <>
+                        <span className="font-bold">{issue.filename}</span>: többszörös kategória{' '}
+                        <span className="font-bold">{REQUIRED_DOCUMENT_TYPE_LABELS_EN[issue.detectedType]}</span>. Cseréld
+                        egy hiányzó típusra:{' '}
+                        <span className="font-bold">
+                          {issue.missingTypes.map((type) => REQUIRED_DOCUMENT_TYPE_LABELS_EN[type]).join(', ')}
+                        </span>
+                        .
+                      </>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -753,7 +903,7 @@ export default function DocumentIngestor({
                 return (
                   <RevealOnScroll
                     key={document.document_id}
-                    delayMs={index * 90}
+                    delayMs={index * 60}
                     className="rounded-phantom-card border border-phantom-danger-border bg-phantom-danger-soft p-3"
                   >
                     <div className="flex items-start gap-2">
@@ -783,7 +933,7 @@ export default function DocumentIngestor({
               const isSelectable = !isMisclassified && Boolean(onSelectDocument)
 
               return (
-                <RevealOnScroll key={document.document_id} delayMs={index * 90}>
+                <RevealOnScroll key={document.document_id} delayMs={index * 60}>
                 <div
                   role={isSelectable ? 'button' : undefined}
                   tabIndex={isSelectable ? 0 : undefined}

@@ -10,8 +10,9 @@ Implement APIs and services for parsing, indexing, multi-agent orchestration, ru
 
 ## Must-Have Backend Components
 - Upload and batch ingest API with strict file validation
+- Inline document file retrieval API with byte-range support for browser PDF viewing
 - Parser abstraction for PDF/DOCX
-- Ruleset-based document classifier
+- Ruleset-based document classifier, including filename overrides for generated/system reports
 - Chunk model with source metadata (`file_name`, `doc_type`, `page`, char offsets)
 - ChromaDB retrieval/index service
 - Mock audit orchestration service in PoC; real agent orchestration is next
@@ -20,6 +21,7 @@ Implement APIs and services for parsing, indexing, multi-agent orchestration, ru
 
 ## Current API Surface
 - `POST /api/v1/documents/ingest` parses, classifies, chunks, and vectorizes PDF/DOCX uploads.
+- `GET /api/v1/documents/{session_id}/file/{filename}` returns inline original file bytes and supports byte-range requests for PDF.js.
 - `POST /api/v1/audits/start` starts the current mock audit pipeline.
 - `GET /api/v1/audits/status/{id}` and `/results/{id}` support frontend polling.
 

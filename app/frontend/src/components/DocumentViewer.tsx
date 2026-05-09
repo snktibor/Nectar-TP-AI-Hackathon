@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Document, Page, pdfjs } from 'react-pdf'
 import 'react-pdf/dist/Page/TextLayer.css'
-import 'react-pdf/dist/Page/AnnotationLayer.css'
 import { X, Scale } from 'lucide-react'
 import { phantomDesign } from '../design-system/phantomDesign'
 import type { CitationTarget } from '../types/viewer'
@@ -14,6 +13,8 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
 ).toString()
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL as string
+const HIGHLIGHT_RETRY_COUNT = 5
+const HIGHLIGHT_RETRY_DELAY_MS = 80
 
 interface DocumentViewerProps {
   readonly citation: CitationTarget
@@ -268,7 +269,7 @@ function LegalTextPanel({ citation }: Readonly<{ citation: CitationTarget }>): J
 }
 
 // ---------------------------------------------------------------------------
-// PdfViewer — all pages, full-width, auto-scroll + highlight on target
+// PdfViewer — target page first, full-width, best-effort highlight
 // ---------------------------------------------------------------------------
 
 interface PdfViewerProps {
@@ -283,14 +284,31 @@ function getVisiblePageIndices(
   numPages: number,
   targetPage0: number,
   renderAllPages: boolean,
+  targetPageRendered: boolean,
 ): number[] {
+  const clampedTargetPage0 = clampPageIndex(targetPage0, numPages)
+
+  if (!targetPageRendered) {
+    return [clampedTargetPage0]
+  }
+
   if (renderAllPages) {
     return Array.from({ length: numPages }, (_, index) => index)
   }
 
-  const start = Math.max(0, targetPage0 - 1)
-  const end = Math.min(numPages - 1, targetPage0 + 1)
-  return Array.from({ length: end - start + 1 }, (_, index) => start + index)
+  // Legal PDF mode: render ±2 pages around target so nearby paragraphs are visible
+  const window = 2
+  const start = Math.max(0, clampedTargetPage0 - window)
+  const end = Math.min(numPages - 1, clampedTargetPage0 + window)
+  return Array.from({ length: end - start + 1 }, (_, i) => start + i)
+}
+
+function clampPageIndex(page0: number, numPages: number): number {
+  if (numPages <= 0) {
+    return Math.max(0, page0)
+  }
+
+  return Math.min(Math.max(page0, 0), numPages - 1)
 }
 
 function PdfViewer({
@@ -313,7 +331,8 @@ function PdfViewer({
 
   // Prefer outline-resolved page; fall back to prop-supplied static page
   const resolvedPage0 = outlinePage0 ?? targetPage0
-  const clampedPage0 = numPages > 0 ? Math.min(resolvedPage0, numPages - 1) : resolvedPage0
+  const clampedPage0 = clampPageIndex(resolvedPage0, numPages)
+  const targetPageRendered = renderedPages.has(clampedPage0)
 
   // Measure container width for full-width PDF rendering
   useEffect(() => {
@@ -354,20 +373,42 @@ function PdfViewer({
 
   // Scroll to target page once it has rendered
   useEffect(() => {
-    if (!renderedPages.has(clampedPage0)) return
+    if (!targetPageRendered) return
     const el = pageRefs.current.get(clampedPage0)
-    el?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-  }, [renderedPages, clampedPage0])
+    el?.scrollIntoView({ behavior: 'auto', block: 'start' })
+  }, [targetPageRendered, clampedPage0])
 
   // Apply highlight when target page renders
   useEffect(() => {
-    if (!renderedPages.has(clampedPage0)) return
-    const el = pageRefs.current.get(clampedPage0)
-    if (!el) return
-    requestAnimationFrame(() => {
-      applyHighlight(el, citation.charStart, citation.charEnd, citation.quote)
-    })
-  }, [renderedPages, clampedPage0, citation])
+    if (!targetPageRendered) return
+
+    const timeoutIds: number[] = []
+    let attempts = 0
+
+    const tryHighlight = () => {
+      const el = pageRefs.current.get(clampedPage0)
+      if (!el) return
+
+      const hasTextLayer = Boolean(el.querySelector('.react-pdf__Page__textContent'))
+      if (hasTextLayer || attempts >= HIGHLIGHT_RETRY_COUNT) {
+        applyHighlight(el, citation.charStart, citation.charEnd, citation.quote)
+        return
+      }
+
+      attempts += 1
+      timeoutIds.push(
+        window.setTimeout(() => {
+          requestAnimationFrame(tryHighlight)
+        }, HIGHLIGHT_RETRY_DELAY_MS),
+      )
+    }
+
+    requestAnimationFrame(tryHighlight)
+
+    return () => {
+      timeoutIds.forEach((timeoutId) => window.clearTimeout(timeoutId))
+    }
+  }, [targetPageRendered, clampedPage0, citation])
 
   const setPageRef = useCallback((pageIdx: number) => (node: HTMLDivElement | null) => {
     if (node) pageRefs.current.set(pageIdx, node)
@@ -409,7 +450,7 @@ function PdfViewer({
           className="flex flex-col items-stretch gap-2 px-1 py-2"
         >
           {numPages > 0 &&
-            getVisiblePageIndices(numPages, clampedPage0, renderAllPages).map((i) => (
+            getVisiblePageIndices(numPages, clampedPage0, renderAllPages, targetPageRendered).map((i) => (
               <div
                 key={i}
                 ref={setPageRef(i)}
@@ -467,6 +508,14 @@ export default function DocumentViewer({ citation, onClose }: DocumentViewerProp
     pdfUrl = `${API_BASE}/api/v1/documents/${encodeURIComponent(citation.sessionId)}/file/${encodeURIComponent(citation.filename)}`
   }
 
+  const shouldRenderAllPages =
+    !isLegal &&
+    citation.page === 0 &&
+    citation.charStart === null &&
+    citation.charEnd === null &&
+    citation.quote === null &&
+    citation.label === undefined
+
   return (
     <section
       className={[
@@ -486,7 +535,7 @@ export default function DocumentViewer({ citation, onClose }: DocumentViewerProp
             pdfUrl={pdfUrl}
             targetPage0={citation.page}
             citation={citation}
-            renderAllPages={!isLegal}
+            renderAllPages={shouldRenderAllPages}
             onPageResolved={setResolvedPage0}
           />
         )}

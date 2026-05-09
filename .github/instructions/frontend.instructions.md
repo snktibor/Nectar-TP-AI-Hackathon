@@ -35,6 +35,7 @@ The frontend provides the document upload workflow and risk dashboard for review
 - Drag-and-drop or file picker for PDF/DOCX files.
 - Enforce max 5 selected files and allow ingest only when exactly 5 files are present.
 - Validate file type, duplicate filenames, and 50 MB per-file limit in the UI before sending.
+- Support targeted and bulk replacement when the processed set has missing required categories, failed files, or duplicated required categories.
 - Call `POST /api/v1/documents/ingest` and render backend classification, confidence, page count, chunk count, and file size.
 - Require coverage of `master_file`, `local_file`, `contract`, `benchmark_study`, and `invoice` in the processed result set.
 - If coverage is incomplete, show failed files with reasons and list missing required categories.
@@ -62,7 +63,13 @@ The frontend provides the document upload workflow and risk dashboard for review
 - Non-active menu items keep subtle colored layer styling and hover feedback.
 - Settings and profile remain in the lower sidebar block.
 
-### 6. Severity and Findings
+### 6. Document Evidence Viewer
+- Open uploaded document and legal citations inside `DocumentViewer` through `ResultsPanel`.
+- Prioritize rendering the target citation page before rendering broader PDF context.
+- Correct-page navigation is the minimum required behavior; quote highlighting is best-effort and must not block page display.
+- Keep PDF loading fast by avoiding unnecessary all-page rendering for evidence citations.
+
+### 7. Severity and Findings
 - Findings must carry severity labels and retain backend attribution details where available.
 - Severity color system from `severity_scoring.json`: critical=#D32F2F, high=#F57C00, medium=#FBC02D, low=#388E3C.
 

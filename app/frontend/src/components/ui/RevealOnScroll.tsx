@@ -17,8 +17,8 @@ export default function RevealOnScroll({
   delayMs = 0,
   rootMargin = '0px 0px -6% 0px',
   threshold = 0.05,
-  distance = 14,
-  durationMs = 520,
+  distance = 10,
+  durationMs = 380,
   style,
 }: RevealOnScrollProps): JSX.Element {
   const ref = useRef<HTMLDivElement | null>(null)
@@ -50,7 +50,7 @@ export default function RevealOnScroll({
   const mergedStyle: CSSProperties = {
     transitionProperty: 'opacity, transform',
     transitionDuration: `${durationMs}ms`,
-    transitionTimingFunction: 'cubic-bezier(0.2, 0.8, 0.2, 1)',
+    transitionTimingFunction: 'cubic-bezier(0.22, 1, 0.36, 1)',
     transitionDelay: revealed ? `${delayMs}ms` : '0ms',
     opacity: revealed ? 1 : 0,
     transform: revealed ? 'translate3d(0, 0, 0)' : `translate3d(0, ${distance}px, 0)`,

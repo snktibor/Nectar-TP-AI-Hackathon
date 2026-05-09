@@ -25,65 +25,106 @@ export function resolveLegalPdfUrl(filename: string): string | null {
 type SectionEntry = readonly [string, number, string]
 
 const LEGAL_SECTION_PAGE_MAP: readonly SectionEntry[] = [
-  // OECD TPG 2022 — Chapter I: The Arm's Length Principle (pp. 17-67)
+  // -------------------------------------------------------------------------
+  // OECD TPG 2022
+  // Chapter I: The Arm's Length Principle (pp. 17-68)
+  // -------------------------------------------------------------------------
+  // Sub-section entries (most specific → longest prefix wins)
   ['OECD_TPG_2022.Ch_I.D.1', 30, 'D.1'],
-  ['OECD_TPG_2022.Ch_I.D.2', 33, 'D.2'],
-  ['OECD_TPG_2022.Ch_I.D.3', 36, 'D.3'],
+  ['OECD_TPG_2022.Ch_I.D.2', 34, 'D.2'],
+  ['OECD_TPG_2022.Ch_I.D.3', 38, 'D.3'],
   ['OECD_TPG_2022.Ch_I.D', 30, 'D.'],
-  ['OECD_TPG_2022.para_1.51-1.106', 47, '1.51'],
-  ['OECD_TPG_2022.para_1.106', 58, '1.106'],
-  ['OECD_TPG_2022.para_1.60', 49, '1.60'],
-  ['OECD_TPG_2022.para_1.51', 47, '1.51'],
-  ['OECD_TPG_2022.para_1.36', 23, '1.36'],
-  ['OECD_TPG_2022.para_1.1', 16, '1.1'],
   ['OECD_TPG_2022.Ch_I.C', 25, 'C.'],
   ['OECD_TPG_2022.Ch_I.B', 19, 'B.'],
   ['OECD_TPG_2022.Ch_I.A', 17, 'A.'],
-  ['OECD_TPG_2022.para_1.106', 42, '1.106'],
-  ['OECD_TPG_2022.para_1.51-1.106', 27, '1.51'],
-  ['OECD_TPG_2022.para_1.60', 29, '1.60'],
-  ['OECD_TPG_2022.para_1.51', 27, '1.51'],
-  ['OECD_TPG_2022.para_1.36', 23, '1.36'],
-  ['OECD_TPG_2022.para_1.1', 16, '1.1'],
+  // Paragraph-level entries actually used in HIG mock findings
+  ['OECD_TPG_2022.para_1.51-1.106', 33, '1.51'],
+  ['OECD_TPG_2022.para_1.106', 58, '1.106'],
+  ['OECD_TPG_2022.para_1.60', 35, '1.60'],
+  ['OECD_TPG_2022.para_1.51', 33, '1.51'],
+  ['OECD_TPG_2022.para_1.36', 26, '1.36'],
+  ['OECD_TPG_2022.para_1.10', 20, '1.10'],
+  ['OECD_TPG_2022.para_1.1', 17, '1.1'],
+  // Chapter catch-all: "para_1" prefix — next char in "para_1.X" is "." → non-word → matches
+  ['OECD_TPG_2022.para_1', 17, 'Chapter I'],
   ['OECD_TPG_2022.Ch_I', 16, 'Chapter I'],
-  // OECD TPG 2022 — Chapter II: Transfer Pricing Methods (pp. 69-93)
+  // -------------------------------------------------------------------------
+  // Chapter II: Transfer Pricing Methods (pp. 69-94)
+  // -------------------------------------------------------------------------
   ['OECD_TPG_2022.Ch_II.C', 78, 'C.'],
   ['OECD_TPG_2022.Ch_II.B', 72, 'B.'],
   ['OECD_TPG_2022.Ch_II.A', 69, 'A.'],
+  // HIG mock: OECD TPG 2.59 (consistency between methods)
+  ['OECD_TPG_2022.para_2.59', 90, '2.59'],
+  // Chapter catch-all
+  ['OECD_TPG_2022.para_2', 69, 'Chapter II'],
   ['OECD_TPG_2022.Ch_II', 68, 'Chapter II'],
-  // OECD TPG 2022 — Chapter III: Comparability Analysis (pp. 95-119)
+  // -------------------------------------------------------------------------
+  // Chapter III: Comparability Analysis (pp. 95-120)
+  // -------------------------------------------------------------------------
   ['OECD_TPG_2022.Ch_III.D', 110, 'D.'],
   ['OECD_TPG_2022.Ch_III.C', 105, 'C.'],
   ['OECD_TPG_2022.Ch_III.B', 100, 'B.'],
   ['OECD_TPG_2022.Ch_III.A', 95, 'A.'],
-  ['OECD_TPG_2022.para_3.62', 167, '3.62'],
-  ['OECD_TPG_2022.para_3.57', 166, '3.57'],
+  // HIG mock: para_3.57 (IQR lower quartile), para_3.62 (median / conclusion)
+  ['OECD_TPG_2022.para_3.62', 118, '3.62'],
+  ['OECD_TPG_2022.para_3.57', 116, '3.57'],
+  // Chapter catch-all
+  ['OECD_TPG_2022.para_3', 95, 'Chapter III'],
   ['OECD_TPG_2022.Ch_III', 94, 'Chapter III'],
-  // OECD TPG 2022 — Chapter IV: Administrative Approaches (pp. 121-159)
+  // -------------------------------------------------------------------------
+  // Chapter IV: Administrative Approaches (pp. 121-160)
+  // -------------------------------------------------------------------------
+  ['OECD_TPG_2022.para_4', 121, 'Chapter IV'],
   ['OECD_TPG_2022.Ch_IV', 120, 'Chapter IV'],
-  // OECD TPG 2022 — Chapter V: Documentation (pp. 161-181)
+  // -------------------------------------------------------------------------
+  // Chapter V: Documentation (pp. 161-181)
+  // -------------------------------------------------------------------------
+  ['OECD_TPG_2022.para_5', 161, 'Chapter V'],
   ['OECD_TPG_2022.Ch_V', 160, 'Chapter V'],
-  // OECD TPG 2022 — Chapter VI: Intangibles (pp. 183-247)
-  ['OECD_TPG_2022.Ch_VI.D', 250, 'D.'],
-  ['OECD_TPG_2022.Ch_VI.C', 245, 'C.'],
-  ['OECD_TPG_2022.Ch_VI.B.2', 248, 'B.2'],
-  ['OECD_TPG_2022.Ch_VI.B.1', 242, 'B.1'],
-  ['OECD_TPG_2022.Ch_VI.B', 241, 'B.'],
-  ['OECD_TPG_2022.Ch_VI.A', 237, 'A.'],
-  ['OECD_TPG_2022.Ch_VI', 236, 'Chapter VI'],
-  // OECD TPG 2022 — Chapter VII: Services (pp. 249-281)
-  ['OECD_TPG_2022.Ch_VII.D', 264, 'D.'],
-  ['OECD_TPG_2022.Ch_VII.C', 259, 'C.'],
-  ['OECD_TPG_2022.Ch_VII.B', 252, 'B.'],
-  ['OECD_TPG_2022.Ch_VII.A', 250, 'A.'],
+  // -------------------------------------------------------------------------
+  // Chapter VI: Intangibles (pp. 183-248)
+  // -------------------------------------------------------------------------
+  ['OECD_TPG_2022.Ch_VI.D', 244, 'D.'],
+  ['OECD_TPG_2022.Ch_VI.C', 238, 'C.'],
+  ['OECD_TPG_2022.Ch_VI.B.2', 231, 'B.2'],
+  ['OECD_TPG_2022.Ch_VI.B.1', 220, 'B.1'],
+  ['OECD_TPG_2022.Ch_VI.B', 220, 'B.'],
+  ['OECD_TPG_2022.Ch_VI.A', 184, 'A.'],
+  // HIG mock: para_6.32-6.56 (DEMPE analysis paragraphs)
+  ['OECD_TPG_2022.para_6.32-6.56', 199, '6.32'],
+  ['OECD_TPG_2022.para_6.32', 199, '6.32'],
+  // Chapter catch-all
+  ['OECD_TPG_2022.para_6', 183, 'Chapter VI'],
+  ['OECD_TPG_2022.Ch_VI', 182, 'Chapter VI'],
+  // -------------------------------------------------------------------------
+  // Chapter VII: Services (pp. 249-280)
+  // -------------------------------------------------------------------------
+  ['OECD_TPG_2022.Ch_VII.D', 266, 'D.'],
+  ['OECD_TPG_2022.Ch_VII.C', 261, 'C.'],
+  ['OECD_TPG_2022.Ch_VII.B', 254, 'B.'],
+  ['OECD_TPG_2022.Ch_VII.A', 249, 'A.'],
+  // HIG mock: para_7.6-7.8 (benefit test), para_7.14-7.15 (specific services)
+  ['OECD_TPG_2022.para_7.14-7.15', 261, '7.14'],
+  ['OECD_TPG_2022.para_7.6-7.8', 253, '7.6'],
+  ['OECD_TPG_2022.para_7.14', 261, '7.14'],
+  ['OECD_TPG_2022.para_7.6', 253, '7.6'],
+  // Chapter catch-all
+  ['OECD_TPG_2022.para_7', 249, 'Chapter VII'],
   ['OECD_TPG_2022.Ch_VII', 248, 'Chapter VII'],
-  // OECD TPG 2022 — Chapter VIII: Cost Contribution Arrangements (pp. 283-321)
-  ['OECD_TPG_2022.Ch_VIII', 282, 'Chapter VIII'],
-  // OECD TPG 2022 — Chapter IX: Business Restructurings (pp. 323-382)
-  ['OECD_TPG_2022.Ch_IX', 324, 'Chapter IX'],
-  // OECD TPG 2022 — catch-all for any unmatched para_X.Y
-  ['OECD_TPG_2022.para_', 16, ''],
-  // 32/2017 NGM rendelet (small document ~10 pages)
+  // -------------------------------------------------------------------------
+  // Chapter VIII: Cost Contribution Arrangements (pp. 281-322)
+  // -------------------------------------------------------------------------
+  ['OECD_TPG_2022.para_8', 281, 'Chapter VIII'],
+  ['OECD_TPG_2022.Ch_VIII', 280, 'Chapter VIII'],
+  // -------------------------------------------------------------------------
+  // Chapter IX: Business Restructurings (pp. 323-382)
+  // -------------------------------------------------------------------------
+  ['OECD_TPG_2022.para_9', 323, 'Chapter IX'],
+  ['OECD_TPG_2022.Ch_IX', 322, 'Chapter IX'],
+  // -------------------------------------------------------------------------
+  // 32/2017 NGM rendelet
+  // -------------------------------------------------------------------------
   ['NGM_32_2017.section_8', 8, '8. §'],
   ['NGM_32_2017.section_7', 6, '7. §'],
   ['NGM_32_2017.section_6', 5, '6. §'],
@@ -92,7 +133,9 @@ const LEGAL_SECTION_PAGE_MAP: readonly SectionEntry[] = [
   ['NGM_32_2017.section_3', 2, '3. §'],
   ['NGM_32_2017.section_2', 1, '2. §'],
   ['NGM_32_2017.section_1', 0, '1. §'],
-  // 45/2025 NGM rendelet — sections, with both naming variants emitted by the LLM
+  // -------------------------------------------------------------------------
+  // 45/2025 NGM rendelet — both section_ and bare-numeric variants
+  // -------------------------------------------------------------------------
   ['45_2025_NGM.section_8', 8, '8. §'],
   ['45_2025_NGM.section_7', 6, '7. §'],
   ['45_2025_NGM.section_6', 5, '6. §'],
@@ -101,7 +144,6 @@ const LEGAL_SECTION_PAGE_MAP: readonly SectionEntry[] = [
   ['45_2025_NGM.section_3', 2, '3. §'],
   ['45_2025_NGM.section_2', 1, '2. §'],
   ['45_2025_NGM.section_1', 0, '1. §'],
-  // 45/2025 — bare-numeric variant the agent sometimes emits ("45_2025_NGM.4_1", "45_2025_NGM.4_1_b")
   ['45_2025_NGM.8', 8, '8. §'],
   ['45_2025_NGM.7', 6, '7. §'],
   ['45_2025_NGM.6', 5, '6. §'],
@@ -110,7 +152,9 @@ const LEGAL_SECTION_PAGE_MAP: readonly SectionEntry[] = [
   ['45_2025_NGM.3', 2, '3. §'],
   ['45_2025_NGM.2', 1, '2. §'],
   ['45_2025_NGM.1', 0, '1. §'],
+  // -------------------------------------------------------------------------
   // HU Act LXXXI/1996 — accept both with and without § sign
+  // -------------------------------------------------------------------------
   ['HU_Act_LXXXI_1996.§31_B', 30, '31/B. §'],
   ['HU_Act_LXXXI_1996.31_B', 30, '31/B. §'],
   ['HU_Act_LXXXI_1996.§28', 27, '28. §'],

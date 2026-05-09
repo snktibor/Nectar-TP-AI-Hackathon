@@ -12,9 +12,11 @@ Implement and maintain the ingest-first React/Vite dashboard with strict documen
 - Dashboard shell with left navigation rail, local click state only, and footer-level settings/profile.
 - Document ingest with drag-drop/file picker, max 5 files, and ingest enabled only when exactly 5 files are selected.
 - Required document-type coverage validation for `master_file`, `local_file`, `contract`, `benchmark_study`, and `invoice` with detailed issue diagnostics.
+- Targeted and bulk file replacement for failed, missing-category, or duplicated-required-category ingest states.
 - Ingest progress and classification result cards for each processed file.
 - Re-upload flow from results view via `Fájlok újrafeltöltése`, resetting upload state and reopening the picker.
 - Analysis workspace with backend audit lifecycle: start audit, poll status, fetch results.
+- PDF evidence viewer with target-page-first loading and best-effort quote highlighting.
 - Completed report tabs: findings, agent runs, telemetry.
 
 ## Design System
@@ -27,6 +29,7 @@ Implement and maintain the ingest-first React/Vite dashboard with strict documen
 ## UX Rules
 - Surface severity (`critical/high/medium/low`) clearly.
 - Keep evidence access one click away.
+- Correct citation page navigation is the minimum required PDF viewer behavior; highlighting must not block page display.
 - Show loading, empty, success, and recoverable error states.
 - Prevent text and chip overflow in narrow sidebar and card layouts.
 

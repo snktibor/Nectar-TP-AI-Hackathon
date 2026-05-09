@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import Annotated
 from uuid import UUID, uuid4
 
-from fastapi import APIRouter, File, Form, HTTPException, UploadFile, status
+from fastapi import APIRouter, File, Form, Header, HTTPException, UploadFile, status
 from fastapi.responses import Response
 
 # Root of the backend package — used for the datasets fallback.
@@ -43,6 +43,7 @@ _DOCUMENTS: dict[UUID, dict[UUID, DocumentRecord]] = {}
 _FILE_BYTES: dict[tuple[UUID, str], bytes] = {}
 
 _MAX_UPLOAD_BYTES = 50 * 1024 * 1024  # 50 MB hard cap for the PoC.
+_FILE_CACHE_CONTROL = "private, max-age=300"
 
 
 @router.post(
@@ -225,7 +226,11 @@ async def ingest_documents(
     "/{session_id}/file/{filename:path}",
     summary="Stream the original uploaded file bytes for in-browser viewing.",
 )
-async def download_document(session_id: UUID, filename: str) -> Response:
+async def download_document(
+    session_id: UUID,
+    filename: str,
+    range_header: Annotated[str | None, Header(alias="Range")] = None,
+) -> Response:
     """Return the raw bytes of a previously ingested file so the UI can render it.
 
     Falls back to the on-disk datasets/ folder so evidence chunks from the mock
@@ -247,11 +252,78 @@ async def download_document(session_id: UUID, filename: str) -> Response:
         if filename.lower().endswith(".pdf")
         else "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     )
+    return _build_file_response(payload, filename, media_type, range_header)
+
+
+def _build_file_response(
+    payload: bytes,
+    filename: str,
+    media_type: str,
+    range_header: str | None,
+) -> Response:
+    headers = _file_response_headers(filename, len(payload))
+    if range_header is None or len(payload) == 0:
+        return Response(content=payload, media_type=media_type, headers=headers)
+
+    byte_range = _parse_byte_range(range_header, len(payload))
+    if byte_range is None:
+        raise HTTPException(
+            status_code=status.HTTP_416_REQUESTED_RANGE_NOT_SATISFIABLE,
+            detail={"code": "INVALID_RANGE", "message": "Requested byte range is not satisfiable."},
+            headers={"Content-Range": f"bytes */{len(payload)}"},
+        )
+
+    start, end = byte_range
+    partial = payload[start : end + 1]
+    headers["Content-Length"] = str(len(partial))
+    headers["Content-Range"] = f"bytes {start}-{end}/{len(payload)}"
     return Response(
-        content=payload,
+        content=partial,
         media_type=media_type,
-        headers={"Content-Disposition": f'inline; filename="{filename}"'},
+        headers=headers,
+        status_code=status.HTTP_206_PARTIAL_CONTENT,
     )
+
+
+def _file_response_headers(filename: str, size_bytes: int) -> dict[str, str]:
+    safe_filename = Path(filename).name.replace('"', "")
+    return {
+        "Accept-Ranges": "bytes",
+        "Cache-Control": _FILE_CACHE_CONTROL,
+        "Content-Disposition": f'inline; filename="{safe_filename}"',
+        "Content-Length": str(size_bytes),
+    }
+
+
+def _parse_byte_range(range_header: str, size_bytes: int) -> tuple[int, int] | None:
+    if not range_header.startswith("bytes=") or "," in range_header:
+        return None
+
+    range_spec = range_header.removeprefix("bytes=").strip()
+    if "-" not in range_spec:
+        return None
+
+    start_text, end_text = range_spec.split("-", 1)
+    if not start_text and not end_text:
+        return None
+
+    try:
+        if not start_text:
+            suffix_length = int(end_text)
+            if suffix_length <= 0:
+                return None
+            start = max(size_bytes - suffix_length, 0)
+            end = size_bytes - 1
+        else:
+            start = int(start_text)
+            end = int(end_text) if end_text else size_bytes - 1
+    except ValueError:
+        return None
+
+    if start < 0 or end < start or start >= size_bytes:
+        return None
+
+    return start, min(end, size_bytes - 1)
 
 
 def _load_from_datasets(filename: str) -> bytes | None:
