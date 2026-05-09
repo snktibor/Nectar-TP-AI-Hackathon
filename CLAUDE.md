@@ -1,5 +1,7 @@
 # REDLINE PHANTOM — AI Harness Root Instructions
 
+c
+
 ## Project Identity
 
 **REDLINE PHANTOM** — Transfer Pricing Documentation Consistency Auditor.
