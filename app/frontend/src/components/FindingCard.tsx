@@ -1,4 +1,4 @@
-import { MapPin, Scale } from 'lucide-react'
+import { MapPin } from 'lucide-react'
 import {
   AGENT_LABELS,
   getSeverityBorderClass,
@@ -16,7 +16,17 @@ import { phantomDesign } from '../design-system/phantomDesign'
 import EvidenceChip from './EvidenceChip'
 import { StatusPill } from './ui/DashboardPrimitives'
 
-function chunkToCitation(chunk: BackendEvidenceChunk, sessionId: string): CitationTarget {
+function collectLegalReferences(attribution: BackendFindingAttribution): string[] {
+  const raw = [attribution.rule_id, ...(attribution.legal_references ?? [])]
+  const filtered = raw.filter((item): item is string => Boolean(item?.trim()))
+  return [...new Set(filtered)]
+}
+
+function chunkToCitation(
+  chunk: BackendEvidenceChunk,
+  sessionId: string,
+  fallbackQuote: string | null = null,
+): CitationTarget {
   return {
     sessionId,
     filename: chunk.filename,
@@ -24,7 +34,7 @@ function chunkToCitation(chunk: BackendEvidenceChunk, sessionId: string): Citati
     charStart: chunk.char_start ?? null,
     charEnd: chunk.char_end ?? null,
     sourceKind: chunk.source_kind ?? 'document',
-    quote: chunk.quote ?? null,
+    quote: chunk.quote ?? fallbackQuote,
   }
 }
 
@@ -104,7 +114,8 @@ function AttributionRow({
 }>): JSX.Element {
   const hasChunks = attribution.evidence_chunks.length > 0
   const confidencePct = Math.round(attribution.confidence * 100)
-  const hasLegalRefs = (attribution.legal_references?.length ?? 0) > 0
+  const legalReferences = collectLegalReferences(attribution)
+  const hasLegalRefs = legalReferences.length > 0
 
   return (
     <div className="mt-2 space-y-2 border-t border-phantom-line pt-2">
@@ -178,14 +189,7 @@ function AttributionRow({
             Jogszabályi hivatkozások
           </summary>
           <div className="mt-1 flex flex-wrap gap-1">
-            {attribution.rule_id && (
-              <LegalReferenceBadge
-                reference={attribution.rule_id}
-                sessionId={sessionId}
-                onCitationClick={onCitationClick}
-              />
-            )}
-            {attribution.legal_references?.map((ref) => (
+            {legalReferences.map((ref) => (
               <LegalReferenceBadge
                 key={ref}
                 reference={ref}
@@ -228,10 +232,15 @@ export default function FindingCard({
   const isMultiDoc = isCrossDoc && findingLocationsCount(variant) >= 2
   const evidenceChunks = attribution?.evidence_chunks ?? []
   const primaryChunk = pickPrimaryChunk(evidenceChunks)
-  const documentChunks = evidenceChunks.filter(
-    (c) => (c.source_kind ?? 'document') === 'document',
-  )
-  const legalChunks = evidenceChunks.filter((c) => c.source_kind === 'legal')
+  const fallbackQuote = (() => {
+    if (variant.kind === 'consistency') {
+      return variant.finding.evidence ?? variant.finding.description
+    }
+    if (variant.kind === 'benchmark') {
+      return variant.finding.rationale
+    }
+    return variant.finding.description
+  })()
 
   return (
     <article
@@ -294,7 +303,7 @@ export default function FindingCard({
       {variant.kind === 'missing' && (
         <>
           <p className="mt-2 break-words text-sm leading-6 text-phantom-ink">{variant.finding.description}</p>
-          <p className="mt-1 break-words text-xs text-phantom-muted">
+          <p className="break-words text-xs text-phantom-muted">
             Várható: {variant.finding.expected_in} · Kötelező: {variant.finding.required_by}
           </p>
         </>
@@ -304,42 +313,13 @@ export default function FindingCard({
         <div className="mt-3 flex min-w-0 flex-wrap items-center gap-2">
           <button
             type="button"
-            onClick={() => onCitationClick(chunkToCitation(primaryChunk, sessionId))}
+            onClick={() => onCitationClick(chunkToCitation(primaryChunk, sessionId, fallbackQuote))}
             className="inline-flex items-center gap-1.5 rounded-phantom-control bg-phantom-accent px-3 py-1.5 text-xs font-semibold text-white shadow-phantom-button transition-phantom duration-phantom-base hover:-translate-y-px hover:bg-phantom-accent-hover hover:shadow-phantom-lift active:translate-y-0 active:bg-phantom-accent-pressed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus focus-visible:ring-offset-2 focus-visible:ring-offset-phantom-surface"
             title={`${primaryChunk.filename} · oldal ${primaryChunk.page + 1}`}
           >
             <MapPin className="h-3.5 w-3.5" />
             <span>Mutasd meg hol van</span>
-            <span className="max-w-[16ch] truncate font-normal opacity-90">
-              · {primaryChunk.filename}
-            </span>
           </button>
-          {documentChunks
-            .filter((c) => c !== primaryChunk)
-            .map((chunk, i) => (
-              <button
-                key={`doc-${chunk.filename}-${chunk.page}-${chunk.chunk_index}-${i}`}
-                type="button"
-                onClick={() => onCitationClick(chunkToCitation(chunk, sessionId))}
-                className="inline-flex items-center gap-1.5 rounded-phantom-control border border-phantom-line bg-phantom-surface px-3 py-1.5 text-xs font-medium text-phantom-ink transition-phantom duration-phantom-base hover:border-phantom-accent hover:text-phantom-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus"
-                title={`${chunk.filename} · oldal ${chunk.page + 1}`}
-              >
-                <MapPin className="h-3.5 w-3.5" />
-                <span className="max-w-[18ch] truncate">{chunk.filename}</span>
-              </button>
-            ))}
-          {legalChunks.map((chunk, i) => (
-            <button
-              key={`legal-${chunk.filename}-${chunk.page}-${chunk.chunk_index}-${i}`}
-              type="button"
-              onClick={() => onCitationClick(chunkToCitation(chunk, sessionId))}
-              className="inline-flex items-center gap-1.5 rounded-phantom-control border border-phantom-accent/30 bg-phantom-accent-soft px-3 py-1.5 text-xs font-medium text-phantom-accent transition-phantom duration-phantom-base hover:bg-phantom-accent hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus"
-              title={`${chunk.filename} · oldal ${chunk.page + 1}`}
-            >
-              <Scale className="h-3.5 w-3.5" />
-              <span className="max-w-[20ch] truncate">{chunk.filename}</span>
-            </button>
-          ))}
         </div>
       )}
 
