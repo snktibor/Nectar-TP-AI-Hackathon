@@ -1,0 +1,98 @@
+2026-05-09 05:11:10,825 INFO redline :: logging initialised: level=INFO file=C:\Users\sinti\Downloads\pwc-hackhaton\pwc-hackhaton\logs.txt mode=w
+2026-05-09 05:11:10,847 INFO uvicorn.error :: Started server process [25588]
+2026-05-09 05:11:10,848 INFO uvicorn.error :: Waiting for application startup.
+2026-05-09 05:11:10,848 INFO app.main :: FastAPI startup complete — log file is being written by AutoFlushFileHandler
+2026-05-09 05:11:10,849 INFO uvicorn.error :: Application startup complete.
+2026-05-09 05:12:01,721 INFO app.services.vector_store :: Stored 17 chunks in collection doc_2301e257_d886_4050_b093_ca4a3128b5f6 (session=9ef16644-8a13-4647-abf2-58f01baea87b)
+2026-05-09 05:12:01,721 INFO app.services.ingest_pipeline :: Ingested HIG_Benchmark_2024.pdf → doc_id=2301e257-d886-4050-b093-ca4a3128b5f6 type=benchmark_study confidence=1.00 pages=8 chunks=17
+2026-05-09 05:12:03,383 INFO app.services.vector_store :: Stored 31 chunks in collection doc_175bc543_18a3_4570_b379_c490c47ec7f4 (session=9ef16644-8a13-4647-abf2-58f01baea87b)
+2026-05-09 05:12:03,384 INFO app.services.ingest_pipeline :: Ingested HIG_Contracts_2024.pdf → doc_id=175bc543-18a3-4570-b379-c490c47ec7f4 type=contract confidence=1.00 pages=9 chunks=31
+2026-05-09 05:12:04,248 INFO app.services.vector_store :: Stored 8 chunks in collection doc_b8cf2fba_50ad_4a0a_99dd_50dda3089662 (session=9ef16644-8a13-4647-abf2-58f01baea87b)
+2026-05-09 05:12:04,249 INFO app.services.ingest_pipeline :: Ingested HIG_Invoices_2024.pdf → doc_id=b8cf2fba-50ad-4a0a-99dd-50dda3089662 type=invoice confidence=1.00 pages=4 chunks=8
+2026-05-09 05:12:05,814 INFO app.services.vector_store :: Stored 27 chunks in collection doc_1c4f7569_c265_44c3_bb44_62b1810fb4a7 (session=9ef16644-8a13-4647-abf2-58f01baea87b)
+2026-05-09 05:12:05,814 INFO app.services.ingest_pipeline :: Ingested HIG_LocalFile_2024_FAULTY.pdf → doc_id=1c4f7569-c265-44c3-bb44-62b1810fb4a7 type=local_file confidence=0.75 pages=14 chunks=27
+2026-05-09 05:12:08,001 INFO app.services.vector_store :: Stored 38 chunks in collection doc_09ffb874_cf2f_48c6_9af4_4528e2fd6403 (session=9ef16644-8a13-4647-abf2-58f01baea87b)
+2026-05-09 05:12:08,002 INFO app.services.ingest_pipeline :: Ingested HIG_Masterfile_2024.pdf → doc_id=09ffb874-cf2f-48c6-9af4-4528e2fd6403 type=master_file confidence=1.00 pages=12 chunks=38
+2026-05-09 05:12:08,002 INFO app.api.v1.endpoints.documents :: Ingest complete session_id=9ef16644-8a13-4647-abf2-58f01baea87b total=5 processed=5 failed=0
+2026-05-09 05:12:08,003 INFO uvicorn.access :: 127.0.0.1:58465 - "POST /api/v1/documents/ingest HTTP/1.1" 200
+2026-05-09 05:12:12,379 INFO app.services.mock_agent_service :: audit task registered task_id=011142cc-ccf4-48ee-ab58-ac241b35957f session_id=9ef16644-8a13-4647-abf2-58f01baea87b mode=mock
+2026-05-09 05:12:12,379 INFO app.api.v1.endpoints.audits :: audit accepted session_id=9ef16644-8a13-4647-abf2-58f01baea87b audit_task_id=011142cc-ccf4-48ee-ab58-ac241b35957f
+2026-05-09 05:12:12,380 INFO uvicorn.access :: 127.0.0.1:58465 - "POST /api/v1/audits/start HTTP/1.1" 202
+2026-05-09 05:12:12,408 INFO uvicorn.access :: 127.0.0.1:58465 - "GET /api/v1/audits/status/011142cc-ccf4-48ee-ab58-ac241b35957f HTTP/1.1" 200
+2026-05-09 05:12:13,904 INFO uvicorn.access :: 127.0.0.1:58465 - "GET /api/v1/audits/status/011142cc-ccf4-48ee-ab58-ac241b35957f HTTP/1.1" 200
+2026-05-09 05:12:15,403 INFO uvicorn.access :: 127.0.0.1:58465 - "GET /api/v1/audits/status/011142cc-ccf4-48ee-ab58-ac241b35957f HTTP/1.1" 200
+2026-05-09 05:12:16,904 INFO uvicorn.access :: 127.0.0.1:58465 - "GET /api/v1/audits/status/011142cc-ccf4-48ee-ab58-ac241b35957f HTTP/1.1" 200
+2026-05-09 05:12:18,402 INFO uvicorn.access :: 127.0.0.1:58465 - "GET /api/v1/audits/status/011142cc-ccf4-48ee-ab58-ac241b35957f HTTP/1.1" 200
+2026-05-09 05:12:19,906 INFO uvicorn.access :: 127.0.0.1:58465 - "GET /api/v1/audits/status/011142cc-ccf4-48ee-ab58-ac241b35957f HTTP/1.1" 200
+2026-05-09 05:12:21,411 INFO uvicorn.access :: 127.0.0.1:58465 - "GET /api/v1/audits/status/011142cc-ccf4-48ee-ab58-ac241b35957f HTTP/1.1" 200
+2026-05-09 05:12:22,904 INFO uvicorn.access :: 127.0.0.1:58465 - "GET /api/v1/audits/status/011142cc-ccf4-48ee-ab58-ac241b35957f HTTP/1.1" 200
+2026-05-09 05:12:24,408 INFO uvicorn.access :: 127.0.0.1:58465 - "GET /api/v1/audits/status/011142cc-ccf4-48ee-ab58-ac241b35957f HTTP/1.1" 200
+2026-05-09 05:12:25,908 INFO uvicorn.access :: 127.0.0.1:58465 - "GET /api/v1/audits/status/011142cc-ccf4-48ee-ab58-ac241b35957f HTTP/1.1" 200
+2026-05-09 05:12:27,407 INFO uvicorn.access :: 127.0.0.1:58465 - "GET /api/v1/audits/status/011142cc-ccf4-48ee-ab58-ac241b35957f HTTP/1.1" 200
+2026-05-09 05:12:28,905 INFO uvicorn.access :: 127.0.0.1:58465 - "GET /api/v1/audits/status/011142cc-ccf4-48ee-ab58-ac241b35957f HTTP/1.1" 200
+2026-05-09 05:12:30,404 INFO uvicorn.access :: 127.0.0.1:58465 - "GET /api/v1/audits/status/011142cc-ccf4-48ee-ab58-ac241b35957f HTTP/1.1" 200
+2026-05-09 05:12:30,405 INFO app.services.mock_agent_service :: audit task completed task_id=011142cc-ccf4-48ee-ab58-ac241b35957f mode=mock
+2026-05-09 05:12:31,907 INFO uvicorn.access :: 127.0.0.1:58465 - "GET /api/v1/audits/status/011142cc-ccf4-48ee-ab58-ac241b35957f HTTP/1.1" 200
+2026-05-09 05:12:31,922 INFO uvicorn.access :: 127.0.0.1:58465 - "GET /api/v1/audits/results/011142cc-ccf4-48ee-ab58-ac241b35957f HTTP/1.1" 200
+2026-05-09 05:16:08,379 INFO app.services.vector_store :: Stored 17 chunks in collection doc_63f27d6c_a230_4a86_abc1_1e18caf2caa7 (session=5cfaac2b-3002-4a99-9dcd-8ee85666b7b4)
+2026-05-09 05:16:08,380 INFO app.services.ingest_pipeline :: Ingested HIG_Benchmark_2024.pdf → doc_id=63f27d6c-a230-4a86-abc1-1e18caf2caa7 type=benchmark_study confidence=1.00 pages=8 chunks=17
+2026-05-09 05:16:10,054 INFO app.services.vector_store :: Stored 31 chunks in collection doc_ec515a25_56bc_4c5c_a975_4d436de3d8a7 (session=5cfaac2b-3002-4a99-9dcd-8ee85666b7b4)
+2026-05-09 05:16:10,054 INFO app.services.ingest_pipeline :: Ingested HIG_Contracts_2024.pdf → doc_id=ec515a25-56bc-4c5c-a975-4d436de3d8a7 type=contract confidence=1.00 pages=9 chunks=31
+2026-05-09 05:16:10,874 INFO app.services.vector_store :: Stored 8 chunks in collection doc_00494b4c_834f_492a_851b_a3c1c784c77d (session=5cfaac2b-3002-4a99-9dcd-8ee85666b7b4)
+2026-05-09 05:16:10,875 INFO app.services.ingest_pipeline :: Ingested HIG_Invoices_2024.pdf → doc_id=00494b4c-834f-492a-851b-a3c1c784c77d type=invoice confidence=1.00 pages=4 chunks=8
+2026-05-09 05:16:12,492 INFO app.services.vector_store :: Stored 27 chunks in collection doc_d9237eca_ce9f_4077_b6b8_3f85b41a539f (session=5cfaac2b-3002-4a99-9dcd-8ee85666b7b4)
+2026-05-09 05:16:12,493 INFO app.services.ingest_pipeline :: Ingested HIG_LocalFile_2024_FAULTY.pdf → doc_id=d9237eca-ce9f-4077-b6b8-3f85b41a539f type=local_file confidence=0.75 pages=14 chunks=27
+2026-05-09 05:16:14,419 INFO app.services.vector_store :: Stored 38 chunks in collection doc_944e0bff_1591_436b_85b6_6ef0ccf595e3 (session=5cfaac2b-3002-4a99-9dcd-8ee85666b7b4)
+2026-05-09 05:16:14,420 INFO app.services.ingest_pipeline :: Ingested HIG_Masterfile_2024.pdf → doc_id=944e0bff-1591-436b-85b6-6ef0ccf595e3 type=master_file confidence=1.00 pages=12 chunks=38
+2026-05-09 05:16:14,420 INFO app.api.v1.endpoints.documents :: Ingest complete session_id=5cfaac2b-3002-4a99-9dcd-8ee85666b7b4 total=5 processed=5 failed=0
+2026-05-09 05:16:14,421 INFO uvicorn.access :: 127.0.0.1:54302 - "POST /api/v1/documents/ingest HTTP/1.1" 200
+2026-05-09 05:16:59,752 INFO app.services.mock_agent_service :: audit task registered task_id=14400947-0d6c-4968-9e46-517b312d478e session_id=5cfaac2b-3002-4a99-9dcd-8ee85666b7b4 mode=mock
+2026-05-09 05:16:59,753 INFO app.api.v1.endpoints.audits :: audit accepted session_id=5cfaac2b-3002-4a99-9dcd-8ee85666b7b4 audit_task_id=14400947-0d6c-4968-9e46-517b312d478e
+2026-05-09 05:16:59,754 INFO uvicorn.access :: 127.0.0.1:56244 - "POST /api/v1/audits/start HTTP/1.1" 202
+2026-05-09 05:16:59,780 INFO uvicorn.access :: 127.0.0.1:56244 - "GET /api/v1/audits/status/14400947-0d6c-4968-9e46-517b312d478e HTTP/1.1" 200
+2026-05-09 05:17:01,279 INFO uvicorn.access :: 127.0.0.1:56244 - "GET /api/v1/audits/status/14400947-0d6c-4968-9e46-517b312d478e HTTP/1.1" 200
+2026-05-09 05:17:02,783 INFO uvicorn.access :: 127.0.0.1:56244 - "GET /api/v1/audits/status/14400947-0d6c-4968-9e46-517b312d478e HTTP/1.1" 200
+2026-05-09 05:17:04,281 INFO uvicorn.access :: 127.0.0.1:56244 - "GET /api/v1/audits/status/14400947-0d6c-4968-9e46-517b312d478e HTTP/1.1" 200
+2026-05-09 05:17:05,782 INFO uvicorn.access :: 127.0.0.1:56244 - "GET /api/v1/audits/status/14400947-0d6c-4968-9e46-517b312d478e HTTP/1.1" 200
+2026-05-09 05:17:07,279 INFO uvicorn.access :: 127.0.0.1:56244 - "GET /api/v1/audits/status/14400947-0d6c-4968-9e46-517b312d478e HTTP/1.1" 200
+2026-05-09 05:17:08,779 INFO uvicorn.access :: 127.0.0.1:56244 - "GET /api/v1/audits/status/14400947-0d6c-4968-9e46-517b312d478e HTTP/1.1" 200
+2026-05-09 05:17:10,280 INFO uvicorn.access :: 127.0.0.1:56244 - "GET /api/v1/audits/status/14400947-0d6c-4968-9e46-517b312d478e HTTP/1.1" 200
+2026-05-09 05:17:11,781 INFO uvicorn.access :: 127.0.0.1:56244 - "GET /api/v1/audits/status/14400947-0d6c-4968-9e46-517b312d478e HTTP/1.1" 200
+2026-05-09 05:17:13,279 INFO uvicorn.access :: 127.0.0.1:56244 - "GET /api/v1/audits/status/14400947-0d6c-4968-9e46-517b312d478e HTTP/1.1" 200
+2026-05-09 05:17:14,780 INFO uvicorn.access :: 127.0.0.1:56244 - "GET /api/v1/audits/status/14400947-0d6c-4968-9e46-517b312d478e HTTP/1.1" 200
+2026-05-09 05:17:16,279 INFO uvicorn.access :: 127.0.0.1:56244 - "GET /api/v1/audits/status/14400947-0d6c-4968-9e46-517b312d478e HTTP/1.1" 200
+2026-05-09 05:17:17,780 INFO uvicorn.access :: 127.0.0.1:56244 - "GET /api/v1/audits/status/14400947-0d6c-4968-9e46-517b312d478e HTTP/1.1" 200
+2026-05-09 05:17:17,781 INFO app.services.mock_agent_service :: audit task completed task_id=14400947-0d6c-4968-9e46-517b312d478e mode=mock
+2026-05-09 05:17:19,278 INFO uvicorn.access :: 127.0.0.1:56244 - "GET /api/v1/audits/status/14400947-0d6c-4968-9e46-517b312d478e HTTP/1.1" 200
+2026-05-09 05:17:19,292 INFO uvicorn.access :: 127.0.0.1:56244 - "GET /api/v1/audits/results/14400947-0d6c-4968-9e46-517b312d478e HTTP/1.1" 200
+2026-05-09 05:23:20,605 INFO app.services.vector_store :: Stored 17 chunks in collection doc_3c882cfb_1e23_44ba_b696_52ba8886fac7 (session=026bbe4d-b201-4865-978e-17e2cd636f06)
+2026-05-09 05:23:20,605 INFO app.services.ingest_pipeline :: Ingested HIG_Benchmark_2024.pdf → doc_id=3c882cfb-1e23-44ba-b696-52ba8886fac7 type=benchmark_study confidence=1.00 pages=8 chunks=17
+2026-05-09 05:23:22,385 INFO app.services.vector_store :: Stored 31 chunks in collection doc_0a513b0e_bc31_4887_8adc_68d5a191acf4 (session=026bbe4d-b201-4865-978e-17e2cd636f06)
+2026-05-09 05:23:22,386 INFO app.services.ingest_pipeline :: Ingested HIG_Contracts_2024.pdf → doc_id=0a513b0e-bc31-4887-8adc-68d5a191acf4 type=contract confidence=1.00 pages=9 chunks=31
+2026-05-09 05:23:23,310 INFO app.services.vector_store :: Stored 8 chunks in collection doc_949e6cac_0b0f_4a76_b583_89fc1e257419 (session=026bbe4d-b201-4865-978e-17e2cd636f06)
+2026-05-09 05:23:23,310 INFO app.services.ingest_pipeline :: Ingested HIG_Invoices_2024.pdf → doc_id=949e6cac-0b0f-4a76-b583-89fc1e257419 type=invoice confidence=1.00 pages=4 chunks=8
+2026-05-09 05:23:25,072 INFO app.services.vector_store :: Stored 27 chunks in collection doc_5d87dabe_b1c6_40dc_9c65_6d1b04ce6803 (session=026bbe4d-b201-4865-978e-17e2cd636f06)
+2026-05-09 05:23:25,072 INFO app.services.ingest_pipeline :: Ingested HIG_LocalFile_2024_FAULTY.pdf → doc_id=5d87dabe-b1c6-40dc-9c65-6d1b04ce6803 type=local_file confidence=0.75 pages=14 chunks=27
+2026-05-09 05:23:27,227 INFO app.services.vector_store :: Stored 38 chunks in collection doc_32addc3e_a98b_4a9d_b17d_14436558afd0 (session=026bbe4d-b201-4865-978e-17e2cd636f06)
+2026-05-09 05:23:27,227 INFO app.services.ingest_pipeline :: Ingested HIG_Masterfile_2024.pdf → doc_id=32addc3e-a98b-4a9d-b17d-14436558afd0 type=master_file confidence=1.00 pages=12 chunks=38
+2026-05-09 05:23:27,228 INFO app.api.v1.endpoints.documents :: Ingest complete session_id=026bbe4d-b201-4865-978e-17e2cd636f06 total=5 processed=5 failed=0
+2026-05-09 05:23:27,228 INFO uvicorn.access :: 127.0.0.1:56881 - "POST /api/v1/documents/ingest HTTP/1.1" 200
+2026-05-09 05:23:33,475 INFO uvicorn.access :: 127.0.0.1:61572 - "OPTIONS /api/v1/audits/start HTTP/1.1" 200
+2026-05-09 05:23:33,481 INFO app.services.mock_agent_service :: audit task registered task_id=148b2340-f32c-4023-8b92-e3bfb098e426 session_id=026bbe4d-b201-4865-978e-17e2cd636f06 mode=mock
+2026-05-09 05:23:33,481 INFO app.api.v1.endpoints.audits :: audit accepted session_id=026bbe4d-b201-4865-978e-17e2cd636f06 audit_task_id=148b2340-f32c-4023-8b92-e3bfb098e426
+2026-05-09 05:23:33,482 INFO uvicorn.access :: 127.0.0.1:61572 - "POST /api/v1/audits/start HTTP/1.1" 202
+2026-05-09 05:23:33,508 INFO uvicorn.access :: 127.0.0.1:61572 - "GET /api/v1/audits/status/148b2340-f32c-4023-8b92-e3bfb098e426 HTTP/1.1" 200
+2026-05-09 05:23:35,013 INFO uvicorn.access :: 127.0.0.1:61572 - "GET /api/v1/audits/status/148b2340-f32c-4023-8b92-e3bfb098e426 HTTP/1.1" 200
+2026-05-09 05:23:36,512 INFO uvicorn.access :: 127.0.0.1:61572 - "GET /api/v1/audits/status/148b2340-f32c-4023-8b92-e3bfb098e426 HTTP/1.1" 200
+2026-05-09 05:23:38,013 INFO uvicorn.access :: 127.0.0.1:61572 - "GET /api/v1/audits/status/148b2340-f32c-4023-8b92-e3bfb098e426 HTTP/1.1" 200
+2026-05-09 05:23:39,511 INFO uvicorn.access :: 127.0.0.1:61572 - "GET /api/v1/audits/status/148b2340-f32c-4023-8b92-e3bfb098e426 HTTP/1.1" 200
+2026-05-09 05:23:41,011 INFO uvicorn.access :: 127.0.0.1:61572 - "GET /api/v1/audits/status/148b2340-f32c-4023-8b92-e3bfb098e426 HTTP/1.1" 200
+2026-05-09 05:23:42,513 INFO uvicorn.access :: 127.0.0.1:61572 - "GET /api/v1/audits/status/148b2340-f32c-4023-8b92-e3bfb098e426 HTTP/1.1" 200
+2026-05-09 05:23:44,010 INFO uvicorn.access :: 127.0.0.1:61572 - "GET /api/v1/audits/status/148b2340-f32c-4023-8b92-e3bfb098e426 HTTP/1.1" 200
+2026-05-09 05:23:45,507 INFO uvicorn.access :: 127.0.0.1:61572 - "GET /api/v1/audits/status/148b2340-f32c-4023-8b92-e3bfb098e426 HTTP/1.1" 200
+2026-05-09 05:23:47,009 INFO uvicorn.access :: 127.0.0.1:61572 - "GET /api/v1/audits/status/148b2340-f32c-4023-8b92-e3bfb098e426 HTTP/1.1" 200
+2026-05-09 05:23:48,509 INFO uvicorn.access :: 127.0.0.1:61572 - "GET /api/v1/audits/status/148b2340-f32c-4023-8b92-e3bfb098e426 HTTP/1.1" 200
+2026-05-09 05:23:50,011 INFO uvicorn.access :: 127.0.0.1:61572 - "GET /api/v1/audits/status/148b2340-f32c-4023-8b92-e3bfb098e426 HTTP/1.1" 200
+2026-05-09 05:23:51,503 INFO app.services.mock_agent_service :: audit task completed task_id=148b2340-f32c-4023-8b92-e3bfb098e426 mode=mock
+2026-05-09 05:23:51,510 INFO uvicorn.access :: 127.0.0.1:61572 - "GET /api/v1/audits/status/148b2340-f32c-4023-8b92-e3bfb098e426 HTTP/1.1" 200
+2026-05-09 05:23:51,524 INFO uvicorn.access :: 127.0.0.1:61572 - "GET /api/v1/audits/results/148b2340-f32c-4023-8b92-e3bfb098e426 HTTP/1.1" 200
