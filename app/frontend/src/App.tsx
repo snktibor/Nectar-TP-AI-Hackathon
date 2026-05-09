@@ -1,13 +1,17 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { ShieldAlert } from 'lucide-react'
+import AnalysisReadyView from './components/AnalysisReadyView'
 import AnalysisWorkspace from './components/AnalysisWorkspace'
-import DashboardShell from './components/DashboardShell'
+import DashboardShell, { type DashboardTab } from './components/DashboardShell'
 import DocumentIngestor from './components/DocumentIngestor'
-import DocumentViewer from './components/DocumentViewer'
+import FilteredFindingsPanel from './components/FilteredFindingsPanel'
+import ResultsPanel from './components/ResultsPanel'
 import { phantomDesign } from './design-system/phantomDesign'
 import type {
   BackendAuditReport,
   BackendAuditStartResponse,
   BackendAuditStatusResponse,
+  BackendDocTypeScope,
   WorkspacePhase,
 } from './lib/backendAudit'
 import type { CitationTarget } from './types/viewer'
@@ -53,6 +57,44 @@ function hasCompleteRequiredCoverage(documents: IngestedDocument[]): boolean {
   return coveredTypes.size === REQUIRED_AUDIT_TYPES.size
 }
 
+function buildFindingsByFilename(
+  report: BackendAuditReport | null,
+  documents: IngestedDocument[],
+): Record<string, number> {
+  const counts: Record<string, number> = {}
+  if (!report) return counts
+
+  const filenamesByScope = new Map<BackendDocTypeScope, string[]>()
+  for (const doc of documents) {
+    if (doc.status !== 'success') continue
+    const scope = doc.detected_type as BackendDocTypeScope
+    const arr = filenamesByScope.get(scope) ?? []
+    arr.push(doc.filename)
+    filenamesByScope.set(scope, arr)
+  }
+
+  const bumpScope = (scope: BackendDocTypeScope | undefined): void => {
+    if (!scope) return
+    const filenames = filenamesByScope.get(scope)
+    if (!filenames) return
+    for (const filename of filenames) {
+      counts[filename] = (counts[filename] ?? 0) + 1
+    }
+  }
+
+  for (const err of report.consistency_errors) {
+    bumpScope(err.attribution?.doc_type_scope)
+  }
+  for (const risk of report.benchmark_risks) {
+    bumpScope(risk.attribution?.doc_type_scope)
+  }
+  for (const missing of report.missing_elements) {
+    counts[missing.expected_in] = (counts[missing.expected_in] ?? 0) + 1
+  }
+
+  return counts
+}
+
 export default function App(): JSX.Element {
   const [ingestedDocuments, setIngestedDocuments] = useState<IngestedDocument[]>([])
   const [workspacePhase, setWorkspacePhase] = useState<WorkspacePhase>('empty')
@@ -62,9 +104,21 @@ export default function App(): JSX.Element {
   const [auditError, setAuditError] = useState<string | null>(null)
   const [activeCitation, setActiveCitation] = useState<CitationTarget | null>(null)
   const [ingestorRenderKey, setIngestorRenderKey] = useState(0)
+  const [activeTab, setActiveTab] = useState<DashboardTab>('documents')
+  const [selectedDocId, setSelectedDocId] = useState<string | null>(null)
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const hasReadyAuditCoverage = hasCompleteRequiredCoverage(ingestedDocuments)
+  const findingsByFilename = useMemo(
+    () => buildFindingsByFilename(auditReport, ingestedDocuments),
+    [auditReport, ingestedDocuments],
+  )
+  const selectedDocType = useMemo<BackendDocTypeScope | null>(() => {
+    if (selectedDocId === null) return null
+    const doc = ingestedDocuments.find((d) => d.filename === selectedDocId)
+    if (!doc || doc.status !== 'success') return null
+    return doc.detected_type as BackendDocTypeScope
+  }, [selectedDocId, ingestedDocuments])
 
   function clearPolling(): void {
     if (pollingRef.current !== null) {
@@ -195,6 +249,7 @@ export default function App(): JSX.Element {
     setIngestedDocuments(documents)
     clearAuditState()
     setActiveCitation(null)
+    setSelectedDocId(null)
 
     if (hasCompleteRequiredCoverage(documents)) {
       setWorkspacePhase('ready')
@@ -204,70 +259,128 @@ export default function App(): JSX.Element {
     setWorkspacePhase(documents.length > 0 ? 'blocked' : 'empty')
   }
 
-  function handleCloseReport(): void {
-    clearPolling()
-    clearAuditState()
-    setActiveCitation(null)
-
-    if (hasReadyAuditCoverage) {
-      setWorkspacePhase('ready')
-      return
-    }
-
-    setWorkspacePhase(ingestedDocuments.length > 0 ? 'blocked' : 'empty')
-  }
-
-  function handleCloseCitationViewer(): void {
-    setActiveCitation(null)
-  }
-
   function handleResetWorkspaceFromLeft(): void {
     clearPolling()
     clearAuditState()
     setActiveCitation(null)
     setIngestedDocuments([])
+    setSelectedDocId(null)
     setWorkspacePhase('empty')
     setIngestorRenderKey((previousKey) => previousKey + 1)
   }
+
+  function handleSelectDocument(filename: string): void {
+    setSelectedDocId(filename)
+    setActiveCitation(null)
+  }
+
+  function handleClearSelection(): void {
+    setSelectedDocId(null)
+    setActiveCitation(null)
+  }
+
+  function handleCloseGlobalReport(): void {
+    if (workspacePhase === 'failed') {
+      clearAuditState()
+      setWorkspacePhase(hasReadyAuditCoverage ? 'ready' : ingestedDocuments.length > 0 ? 'blocked' : 'empty')
+    }
+  }
+
+  function handleCitationClick(target: CitationTarget): void {
+    setActiveCitation(target)
+    if (target.sourceKind === 'document') {
+      setSelectedDocId(target.filename)
+      setActiveTab('documents')
+    }
+  }
+
+  function handleTabChange(nextTab: DashboardTab): void {
+    setActiveTab(nextTab)
+  }
+
+  const leftPanel = (() => {
+    if (activeTab === 'analysis') {
+      return (
+        <AnalysisReadyView
+          phase={workspacePhase}
+          auditStatus={auditStatus}
+          auditError={auditError}
+          onAnalyze={() => void handleAnalyze()}
+        />
+      )
+    }
+
+    if (activeTab === 'reports') {
+      return (
+        <section className="flex h-full min-h-0 flex-col items-center justify-center rounded-2xl border border-gray-100 bg-white p-8 text-center shadow-md">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-50 text-gray-400 ring-1 ring-gray-100">
+            <ShieldAlert className="h-7 w-7" />
+          </div>
+          <h2 className="mt-4 text-base font-semibold text-gray-900">Riportok hamarosan</h2>
+          <p className="mt-1 max-w-sm text-sm leading-6 text-gray-500">
+            Ez a fül a következő iterációban érkezik. Az aktuális audit eredmények a jobb oldali panelen, dokumentumonként a Dokumentumok fülről érhetők el.
+          </p>
+        </section>
+      )
+    }
+
+    if (selectedDocId !== null) {
+      return (
+        <ResultsPanel
+          selectedDocId={selectedDocId}
+          sessionId={SESSION_ID}
+          activeCitation={activeCitation}
+          onClose={handleClearSelection}
+        />
+      )
+    }
+
+    return (
+      <DocumentIngestor
+        key={`ingestor-${ingestorRenderKey}`}
+        sessionId={SESSION_ID}
+        onIngestComplete={handleIngestComplete}
+        onResetWorkspace={handleResetWorkspaceFromLeft}
+        showRestartAction={workspacePhase === 'completed'}
+        selectedDocId={selectedDocId}
+        onSelectDocument={handleSelectDocument}
+        findingsByFilename={findingsByFilename}
+        initialResults={ingestedDocuments}
+      />
+    )
+  })()
+
+  const rightPanel =
+    selectedDocId !== null ? (
+      <FilteredFindingsPanel
+        selectedDocId={selectedDocId}
+        selectedDocType={selectedDocType}
+        sessionId={SESSION_ID}
+        auditReport={auditReport}
+        onCitationClick={handleCitationClick}
+      />
+    ) : (
+      <AnalysisWorkspace
+        documents={ingestedDocuments}
+        phase={workspacePhase}
+        auditStatus={auditStatus}
+        auditReport={auditReport}
+        auditError={auditError}
+        onAnalyze={() => void handleAnalyze()}
+        sessionId={SESSION_ID}
+        onCitationClick={handleCitationClick}
+        onCloseReport={handleCloseGlobalReport}
+      />
+    )
 
   return (
     <div className={[phantomDesign.layout.page, 'h-screen'].join(' ')}>
       <main className="h-full w-full">
         <DashboardShell
-          leftPanel={
-            <div className="h-full min-h-0">
-              <div className={activeCitation === null ? 'h-full min-h-0' : 'hidden h-full min-h-0'}>
-                <DocumentIngestor
-                  key={`ingestor-${ingestorRenderKey}`}
-                  sessionId={SESSION_ID}
-                  onIngestComplete={handleIngestComplete}
-                  onResetWorkspace={handleResetWorkspaceFromLeft}
-                  showRestartAction={workspacePhase === 'completed'}
-                />
-              </div>
-              {activeCitation !== null && (
-                <div className="h-full min-h-0">
-                  <DocumentViewer
-                    citation={activeCitation}
-                    onClose={handleCloseCitationViewer}
-                  />
-                </div>
-              )}
-            </div>
-          }
-          rightPanel={(
-            <AnalysisWorkspace
-              documents={ingestedDocuments}
-              phase={workspacePhase}
-              auditStatus={auditStatus}
-              auditReport={auditReport}
-              auditError={auditError}
-              onAnalyze={() => void handleAnalyze()}
-              sessionId={SESSION_ID}
-              onCitationClick={setActiveCitation}
-              onCloseReport={handleCloseReport}
-            />
-          )}
+          activeTab={activeTab}
+          onTabChange={handleTabChange}
+          leftPanel={leftPanel}
+          rightPanel={rightPanel}
         />
       </main>
     </div>

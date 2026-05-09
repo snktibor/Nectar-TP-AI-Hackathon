@@ -559,10 +559,10 @@ export default function AnalysisWorkspace({
   ]
 
   return (
-    <section className={[phantomDesign.components.panel, 'h-full min-w-0 overflow-x-hidden shadow-none'].join(' ')}>
-      <div className="mb-4 min-h-14 rounded-phantom-card border border-phantom-line bg-phantom-surface px-4 py-3">
+    <section className="h-full min-w-0 overflow-y-auto overflow-x-hidden rounded-2xl border border-gray-100 bg-white p-4 shadow-md [scrollbar-gutter:stable] sm:p-5 lg:p-6">
+      <div className="mb-4 min-h-14 rounded-xl border border-gray-100 bg-slate-50 px-4 py-3">
         <div className="flex min-w-0 flex-wrap items-center justify-between gap-3">
-          <p className="min-w-0 truncate text-sm font-semibold text-phantom-ink">Riport</p>
+          <p className="min-w-0 truncate text-sm font-semibold text-gray-900">Riport</p>
           <div className="flex min-w-0 flex-wrap items-center gap-2">
             <span
               className={[
@@ -588,15 +588,39 @@ export default function AnalysisWorkspace({
       </div>
 
       {phase === 'empty' && (
-        <section className="group flex flex-col items-center justify-center gap-4 rounded-phantom-card border border-dashed border-phantom-line bg-phantom-surface-muted p-6 text-center transition-phantom duration-phantom-base sm:p-8">
-          <div className="flex h-14 w-14 items-center justify-center rounded-phantom-card bg-phantom-surface text-phantom-accent shadow-phantom-soft ring-1 ring-phantom-line">
-            <SearchCheck className="h-7 w-7" />
+        <section
+          aria-label="Riport előnézet betöltése"
+          className="space-y-4 rounded-xl border border-gray-100 bg-white p-5 animate-pulse"
+        >
+          <div className="flex items-center justify-between gap-3">
+            <div className="h-5 w-2/5 rounded-md bg-gray-200" />
+            <div className="h-6 w-20 rounded-full bg-gray-200" />
           </div>
-          <div>
-            <p className="text-sm font-semibold text-phantom-ink">Nincs riport</p>
-            <p className="mt-1 text-xs leading-5 text-phantom-muted">
-              Tölts fel legalább egy dokumentumot.
-            </p>
+
+          <div className="space-y-2">
+            <div className="h-3 w-full rounded-md bg-gray-200" />
+            <div className="h-3 w-11/12 rounded-md bg-gray-200" />
+            <div className="h-3 w-3/4 rounded-md bg-gray-200" />
+          </div>
+
+          <div className="grid grid-cols-3 gap-2 pt-2">
+            <div className="h-16 rounded-md bg-gray-200" />
+            <div className="h-16 rounded-md bg-gray-200" />
+            <div className="h-16 rounded-md bg-gray-200" />
+          </div>
+
+          <div className="flex h-40 items-end gap-2 rounded-md bg-gray-100 p-3">
+            <div className="h-1/3 flex-1 rounded-md bg-gray-200" />
+            <div className="h-2/3 flex-1 rounded-md bg-gray-200" />
+            <div className="h-1/2 flex-1 rounded-md bg-gray-200" />
+            <div className="h-3/4 flex-1 rounded-md bg-gray-200" />
+            <div className="h-2/5 flex-1 rounded-md bg-gray-200" />
+            <div className="h-4/5 flex-1 rounded-md bg-gray-200" />
+          </div>
+
+          <div className="space-y-2 pt-1">
+            <div className="h-3 w-1/3 rounded-md bg-gray-200" />
+            <div className="h-3 w-2/3 rounded-md bg-gray-200" />
           </div>
         </section>
       )}
