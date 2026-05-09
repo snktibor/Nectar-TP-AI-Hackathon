@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { AlertCircle, BarChart2, ClipboardList, Cpu, DatabaseZap, SearchCheck, Sparkles, Wrench, X } from 'lucide-react'
+import { AlertCircle, BarChart2, ClipboardList, Cpu, DatabaseZap, SearchCheck, Wand2, Wrench, X } from 'lucide-react'
 import { phantomDesign } from '../design-system/phantomDesign'
 import {
   ALL_AGENT_IDS,
@@ -60,22 +60,28 @@ function ProgressView({
 
   return (
     <section className="space-y-3">
-      <div className="rounded-phantom-card border border-phantom-line bg-phantom-surface p-4">
-        <div className="flex items-start gap-3">
+      <div className="relative overflow-hidden rounded-phantom-card border-2 border-phantom-ink bg-phantom-surface p-4 shadow-phantom-soft">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full bg-phantom-cyan opacity-30"
+        />
+        <div className="relative flex items-start gap-3">
           <div className="mt-0.5 h-5 w-5 shrink-0">
-            <div className="force-spin h-5 w-5 animate-spin rounded-full border-2 border-phantom-accent border-t-transparent" />
+            <div className="force-spin h-5 w-5 animate-spin rounded-full border-2 border-phantom-ink border-t-transparent" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold text-phantom-ink">
+            <p className="font-display text-sm font-extrabold text-phantom-ink">
               {status ? formatStageLabel(status.stage) : 'Audit indítás'}
             </p>
-            <div className="mt-3 h-2 overflow-hidden rounded-full bg-phantom-surface-muted ring-1 ring-phantom-line">
+            <div className="mt-3 h-3 overflow-hidden rounded-full border-2 border-phantom-ink bg-phantom-surface-muted">
               <div
-                className="h-full rounded-full bg-phantom-accent transition-phantom duration-phantom-slow"
+                className="h-full bg-phantom-accent transition-phantom duration-phantom-slow"
                 style={{ width: `${progressValue}%` }}
               />
             </div>
-            <p className="mt-2 text-xs font-semibold text-phantom-subtle">{progressValue}%</p>
+            <p className="font-display mt-2 text-xs font-extrabold tracking-[0.1em] text-phantom-ink">
+              {progressValue}%
+            </p>
           </div>
         </div>
       </div>
@@ -151,12 +157,16 @@ function FindingsView({
   return (
     <div className="space-y-3">
       {/* Summary banner */}
-      <section className="rounded-phantom-card border border-phantom-line bg-phantom-surface p-4 shadow-sm">
-        <div className="flex flex-wrap items-start justify-between gap-3">
+      <section className="relative overflow-hidden rounded-phantom-card border-2 border-phantom-ink bg-phantom-surface p-4 shadow-phantom-soft">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -right-10 -bottom-10 h-32 w-32 rounded-full bg-phantom-accent opacity-15"
+        />
+        <div className="relative flex flex-wrap items-start justify-between gap-3">
           <p className="text-sm leading-6 text-phantom-ink">{report.summary}</p>
           <span
             className={[
-              'inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold uppercase',
+              'inline-flex items-center rounded-full border-2 border-phantom-ink px-3 py-1 text-[11px] font-extrabold uppercase tracking-[0.12em] shadow-phantom-sticker',
               getSeverityTone(report.overall_risk),
             ].join(' ')}
           >
@@ -190,10 +200,10 @@ function FindingsView({
           type="button"
           onClick={() => setSeverityFilter(null)}
           className={[
-            'rounded-full px-3 py-1 text-xs font-medium ring-1 ring-inset transition-phantom',
+            'rounded-full border-2 border-phantom-ink px-3 py-1 font-display text-[11px] font-extrabold uppercase tracking-[0.1em] transition-transform duration-phantom-base',
             severityFilter === null
-              ? 'bg-phantom-accent-soft text-phantom-accent ring-phantom-accent/30'
-              : 'bg-phantom-surface-muted text-phantom-muted ring-phantom-line hover:bg-phantom-surface',
+              ? 'bg-phantom-paper text-phantom-ink shadow-phantom-sticker'
+              : 'bg-phantom-surface text-phantom-ink hover:-translate-y-0.5 hover:shadow-phantom-sticker',
           ].join(' ')}
         >
           Mind
@@ -204,10 +214,10 @@ function FindingsView({
             type="button"
             onClick={() => setSeverityFilter(severityFilter === s ? null : s)}
             className={[
-              'rounded-full px-3 py-1 text-xs font-medium ring-1 ring-inset transition-phantom',
+              'rounded-full border-2 border-phantom-ink px-3 py-1 font-display text-[11px] font-extrabold uppercase tracking-[0.1em] transition-transform duration-phantom-base',
               severityFilter === s
-                ? getSeverityTone(s)
-                : 'bg-phantom-surface-muted text-phantom-muted ring-phantom-line hover:bg-phantom-surface',
+                ? `${getSeverityTone(s)} shadow-phantom-sticker`
+                : 'bg-phantom-surface text-phantom-ink hover:-translate-y-0.5 hover:shadow-phantom-sticker',
             ].join(' ')}
           >
             {severityLabel(s)}
@@ -228,16 +238,16 @@ function FindingsView({
           return (
             <details
               key={agentId}
-              className="rounded-phantom-card border border-phantom-line bg-phantom-surface"
+              className="rounded-phantom-card border-2 border-phantom-ink bg-phantom-surface shadow-phantom-sticker"
               open
             >
               <summary className="flex cursor-pointer select-none items-center justify-between gap-2 p-3">
-                <span className="text-sm font-semibold text-phantom-ink">
+                <span className="font-display text-sm font-extrabold text-phantom-ink">
                   {AGENT_LABELS[agentId]}
                 </span>
                 <StatusPill tone="neutral">{filtered.length}</StatusPill>
               </summary>
-              <div className="space-y-2 border-t border-phantom-line p-3">
+              <div className="space-y-2 border-t-2 border-phantom-ink p-3">
                 {filtered.map((f) => (
                   <FindingCard
                     key={findingKey(f)}
@@ -262,14 +272,16 @@ function FindingsView({
           if (filtered.length === 0) return null
           return (
             <details
-              className="rounded-phantom-card border border-phantom-line bg-phantom-surface"
+              className="rounded-phantom-card border-2 border-phantom-ink bg-phantom-surface shadow-phantom-sticker"
               open
             >
               <summary className="flex cursor-pointer select-none items-center justify-between gap-2 p-3">
-                <span className="text-sm font-semibold text-phantom-ink">Nincs ügynök</span>
+                <span className="font-display text-sm font-extrabold text-phantom-ink">
+                  Nincs ügynök
+                </span>
                 <StatusPill tone="neutral">{filtered.length}</StatusPill>
               </summary>
-              <div className="space-y-2 border-t border-phantom-line p-3">
+              <div className="space-y-2 border-t-2 border-phantom-ink p-3">
                 {filtered.map((f) => (
                   <FindingCard
                     key={findingKey(f)}
@@ -287,8 +299,8 @@ function FindingsView({
 
       {/* Flat severity list */}
       {filteredFindings.length > 0 && (
-        <section className="rounded-phantom-card border border-phantom-line bg-phantom-surface p-4">
-          <p className="mb-2 text-sm font-semibold text-phantom-ink">
+        <section className="rounded-phantom-card border-2 border-phantom-ink bg-phantom-surface p-4 shadow-phantom-sticker">
+          <p className="font-display mb-2 text-sm font-extrabold uppercase tracking-[0.1em] text-phantom-ink">
             Összes megállapítás ({filteredFindings.length})
           </p>
           <div className="space-y-2">
@@ -336,10 +348,10 @@ function AgentRunsView({ report }: Readonly<{ report: BackendAuditReport }>): JS
         return (
           <article
             key={run.agent_id}
-            className="rounded-phantom-card border border-phantom-line bg-phantom-surface p-4"
+            className="rounded-phantom-card border-2 border-phantom-ink bg-phantom-surface p-4 shadow-phantom-sticker"
           >
             <div className="flex min-w-0 flex-wrap items-start justify-between gap-2">
-              <p className="min-w-0 truncate text-sm font-semibold text-phantom-ink">
+              <p className="font-display min-w-0 truncate text-sm font-extrabold text-phantom-ink">
                 {AGENT_LABELS[run.agent_id]}
               </p>
               <StatusPill tone={statusTone}>{statusText}</StatusPill>
@@ -359,7 +371,7 @@ function AgentRunsView({ report }: Readonly<{ report: BackendAuditReport }>): JS
             </div>
 
             {run.status === 'error' && run.error && (
-              <div className="mt-2 rounded-phantom-control border border-phantom-severity-critical-border bg-phantom-severity-critical-soft px-3 py-2 text-xs text-phantom-severity-critical-text">
+              <div className="mt-2 rounded-phantom-control border-2 border-phantom-ink bg-phantom-pink px-3 py-2 text-xs text-white shadow-phantom-sticker">
                 {run.error.code}: {run.error.message}
               </div>
             )}
@@ -405,14 +417,14 @@ function TelemetryView({ report }: Readonly<{ report: BackendAuditReport }>): JS
         <MetricCard icon={Wrench} label="Eszközhívások" value={formatTokenCount(totals.toolCalls)} />
       </div>
 
-      <section className="rounded-phantom-card border border-phantom-line bg-phantom-surface p-4">
-        <p className="mb-3 text-xs font-semibold uppercase tracking-[0.06em] text-phantom-subtle">
+      <section className="rounded-phantom-card border-2 border-phantom-ink bg-phantom-surface p-4 shadow-phantom-sticker">
+        <p className="font-display mb-3 text-xs font-extrabold uppercase tracking-[0.18em] text-phantom-ink">
           Token felhasználás ügynökönként
         </p>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[560px] text-xs">
             <thead>
-              <tr className="border-b border-phantom-line text-left text-phantom-subtle">
+              <tr className="border-b-2 border-phantom-ink text-left text-phantom-muted">
                 <th className="pb-2 pr-3 font-medium">Ügynök</th>
                 <th className="pb-2 pr-3 text-right font-medium">Bemenet</th>
                 <th className="pb-2 pr-3 text-right font-medium">Kimenet</th>
@@ -507,16 +519,19 @@ export default function AnalysisWorkspace({
 
   return (
     <section className={[phantomDesign.components.panel, 'h-full min-w-0 overflow-x-hidden'].join(' ')}>
-      <div className="mb-4 min-h-14 rounded-phantom-card border border-phantom-line bg-phantom-surface px-4 py-3">
-        <div className="flex min-w-0 flex-wrap items-center justify-between gap-3">
-          <p className="min-w-0 truncate text-sm font-semibold text-phantom-ink">Riport</p>
+      <div className="mb-4 space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <span className="tag-sticker bg-phantom-purple text-white">
+            <SearchCheck className="h-3 w-3" />
+            ELEMZÉS
+          </span>
           <div className="flex min-w-0 flex-wrap items-center gap-2">
             <StatusPill tone={status.tone}>{status.label}</StatusPill>
             {canCloseReport && (
               <button
                 type="button"
                 onClick={onCloseReport}
-                className="inline-flex min-h-8 items-center justify-center gap-1 rounded-phantom-control border border-phantom-line bg-phantom-surface-muted px-2.5 py-1 text-xs font-semibold text-phantom-muted transition-phantom duration-phantom-base hover:border-phantom-accent hover:text-phantom-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus"
+                className="inline-flex min-h-8 items-center justify-center gap-1 rounded-phantom-control border-2 border-phantom-ink bg-phantom-surface px-2.5 py-1 font-display text-xs font-extrabold text-phantom-ink shadow-phantom-sticker transition-transform duration-phantom-base hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus"
                 aria-label="Riport bezárása"
               >
                 <X className="h-3.5 w-3.5" />
@@ -525,15 +540,24 @@ export default function AnalysisWorkspace({
             )}
           </div>
         </div>
+        <h2 className="headline headline-lg">
+          A te <span className="scribble-underline">riportod</span>.
+        </h2>
       </div>
 
       {phase === 'empty' && (
-        <section className="group flex flex-col items-center justify-center gap-4 rounded-phantom-card border border-dashed border-phantom-line bg-phantom-surface-muted p-6 text-center transition-phantom duration-phantom-base sm:p-8">
-          <div className="flex h-14 w-14 items-center justify-center rounded-phantom-card bg-phantom-surface text-phantom-accent shadow-phantom-soft ring-1 ring-phantom-line">
+        <section className="group relative flex flex-col items-center justify-center gap-4 overflow-hidden rounded-phantom-card border-2 border-dashed border-phantom-ink bg-phantom-surface-muted p-6 text-center shadow-phantom-soft sm:p-8">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full bg-phantom-pink opacity-25"
+          />
+          <div className="relative flex h-16 w-16 items-center justify-center rounded-phantom-card border-2 border-phantom-ink bg-phantom-paper text-phantom-ink shadow-phantom-sticker">
             <SearchCheck className="h-7 w-7" />
           </div>
-          <div>
-            <p className="text-sm font-semibold text-phantom-ink">Nincs riport</p>
+          <div className="relative">
+            <p className="font-display text-base font-extrabold text-phantom-ink">
+              Nincs riport
+            </p>
             <p className="mt-1 text-xs leading-5 text-phantom-muted">
               Tölts fel legalább egy dokumentumot.
             </p>
@@ -542,8 +566,12 @@ export default function AnalysisWorkspace({
       )}
 
       {phase === 'ready' && (
-        <div className="rounded-phantom-card border border-phantom-line bg-phantom-surface p-4">
-          <p className="text-sm text-phantom-ink">
+        <div className="relative overflow-hidden rounded-phantom-card border-2 border-phantom-ink bg-phantom-surface p-4 shadow-phantom-soft">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -right-10 -bottom-10 h-32 w-32 rounded-full bg-phantom-cyan opacity-30"
+          />
+          <p className="font-display relative text-sm font-extrabold text-phantom-ink">
             Sikeres dokumentumok: {successfulDocuments.length}
           </p>
           <button
@@ -552,11 +580,11 @@ export default function AnalysisWorkspace({
             className={[
               phantomDesign.components.buttonBase,
               phantomDesign.components.buttonPrimary,
-              'mt-3 w-full sm:w-auto',
+              'relative mt-3 w-full sm:w-auto',
             ].join(' ')}
           >
             <span className="inline-flex items-center gap-2">
-              <Sparkles className="h-4 w-4" />
+              <Wand2 className="h-4 w-4" />
               Elemzés indítása
             </span>
           </button>
@@ -564,11 +592,15 @@ export default function AnalysisWorkspace({
       )}
 
       {phase === 'blocked' && (
-        <div className="rounded-phantom-card border border-phantom-danger-border bg-phantom-danger-soft p-4">
-          <p className="text-sm font-semibold text-phantom-danger-text">
+        <div className="relative overflow-hidden rounded-phantom-card border-2 border-phantom-ink bg-phantom-amber p-4 shadow-phantom-soft">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full bg-phantom-pink opacity-25"
+          />
+          <p className="font-display relative text-sm font-extrabold uppercase tracking-[0.12em] text-phantom-ink">
             Nem indítható az elemzés
           </p>
-          <p className="mt-1 break-words text-xs text-phantom-danger-text">
+          <p className="relative mt-1 break-words text-xs text-phantom-ink">
             Töltsd fel és osztályozd helyesen mind az 5 kötelező kategóriát: Master File, Local File, Contract, Benchmark Study, Invoice.
           </p>
         </div>
@@ -577,9 +609,17 @@ export default function AnalysisWorkspace({
       {(phase === 'starting' || phase === 'polling') && <ProgressView status={auditStatus} />}
 
       {phase === 'failed' && (
-        <div className="rounded-phantom-card border border-rose-200 bg-rose-50 p-4 text-rose-900">
-          <p className="text-sm font-semibold">Audit hiba</p>
-          <p className="mt-1 text-sm">{auditError ?? 'Ismeretlen hiba történt.'}</p>
+        <div className="relative overflow-hidden rounded-phantom-card border-2 border-phantom-ink bg-phantom-pink p-4 text-white shadow-phantom-soft">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -right-10 -bottom-10 h-32 w-32 rounded-full bg-phantom-ink opacity-15"
+          />
+          <p className="font-display relative text-sm font-extrabold uppercase tracking-[0.12em]">
+            Audit hiba
+          </p>
+          <p className="relative mt-1 text-sm text-white/95">
+            {auditError ?? 'Ismeretlen hiba történt.'}
+          </p>
         </div>
       )}
 
@@ -598,10 +638,10 @@ export default function AnalysisWorkspace({
                 aria-selected={activeTab === tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={[
-                  'max-w-full rounded-phantom-control px-3 py-1.5 text-xs font-medium ring-1 ring-inset transition-phantom',
+                  'max-w-full rounded-full border-2 border-phantom-ink px-3 py-1.5 font-display text-[11px] font-extrabold uppercase tracking-[0.12em] transition-transform duration-phantom-base',
                   activeTab === tab.id
-                    ? 'bg-phantom-accent-soft text-phantom-accent ring-phantom-accent/30'
-                    : 'bg-phantom-surface-muted text-phantom-muted ring-phantom-line hover:bg-phantom-surface',
+                    ? 'bg-phantom-paper text-phantom-ink shadow-phantom-sticker'
+                    : 'bg-phantom-surface text-phantom-ink hover:-translate-y-0.5 hover:shadow-phantom-sticker',
                 ].join(' ')}
               >
                 {tab.label}

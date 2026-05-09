@@ -11,11 +11,11 @@ export default function EvidenceChip({ chunk, isCrossDoc = false, onClick }: Evi
   const tooltip = chunk.quote ?? label
 
   const colorClasses = isCrossDoc
-    ? 'bg-phantom-accent-soft text-phantom-accent ring-phantom-accent/30'
-    : 'bg-phantom-surface-muted text-phantom-muted ring-phantom-line'
+    ? 'bg-phantom-cyan text-phantom-ink'
+    : 'bg-phantom-paper text-phantom-ink'
 
   const interactiveClasses = onClick
-    ? 'cursor-pointer hover:ring-phantom-accent hover:text-phantom-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-accent'
+    ? 'cursor-pointer hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus'
     : ''
 
   const inner = (
@@ -29,8 +29,8 @@ export default function EvidenceChip({ chunk, isCrossDoc = false, onClick }: Evi
   )
 
   const baseClasses = [
-    'inline-flex max-w-[22ch] items-center gap-1 rounded-phantom-control px-2 py-0.5',
-    'text-[11px] font-medium ring-1 ring-inset',
+    'inline-flex max-w-[22ch] items-center gap-1 rounded-full border-2 border-phantom-ink px-2 py-0.5',
+    'font-display text-[11px] font-extrabold tracking-[0.06em] shadow-phantom-sticker transition-transform duration-phantom-base',
     colorClasses,
     interactiveClasses,
   ].join(' ')

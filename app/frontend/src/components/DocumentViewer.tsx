@@ -267,16 +267,23 @@ function ViewerHeader({
   onClose,
 }: Readonly<{ citation: CitationTarget; onClose: () => void }>): JSX.Element {
   return (
-    <div className="flex shrink-0 items-center justify-between gap-2 border-b border-phantom-line px-4 py-3">
-      <div className="min-w-0">
-        <p className="truncate text-sm font-semibold text-phantom-ink">{citation.filename}</p>
-        <p className="text-xs text-phantom-subtle">Oldal {citation.page + 1}</p>
+    <div className="flex shrink-0 items-center justify-between gap-2 border-b-2 border-phantom-ink bg-phantom-paper px-4 py-3">
+      <div className="flex min-w-0 items-center gap-3">
+        <span className="tag-sticker hidden sm:inline-flex">
+          DOKUMENTUM
+        </span>
+        <div className="min-w-0">
+          <p className="font-display truncate text-sm font-extrabold text-phantom-ink">
+            {citation.filename}
+          </p>
+          <p className="text-xs text-phantom-muted">Oldal {citation.page + 1}</p>
+        </div>
       </div>
       <button
         type="button"
         onClick={onClose}
         aria-label="Bezárás"
-        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-phantom-control text-phantom-muted transition-phantom hover:bg-phantom-surface-muted hover:text-phantom-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-accent"
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-phantom-control border-2 border-phantom-ink bg-phantom-surface text-phantom-ink shadow-phantom-sticker transition-transform duration-phantom-base hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus"
       >
         <X className="h-4 w-4" />
       </button>

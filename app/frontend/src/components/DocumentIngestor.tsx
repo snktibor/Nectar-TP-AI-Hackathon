@@ -3,8 +3,8 @@ import {
   AlertCircle,
   CheckCircle,
   FileText,
-  FileUp,
   Upload,
+  Wand2,
   X,
 } from 'lucide-react'
 import { phantomDesign } from '../design-system/phantomDesign'
@@ -349,9 +349,21 @@ export default function DocumentIngestor({
 
   return (
     <section className={[phantomDesign.components.panel, 'h-full'].join(' ')}>
-      <div className="mb-4 flex min-h-14 flex-wrap items-center justify-between gap-2 rounded-phantom-card border border-phantom-line bg-phantom-surface-muted/60 px-4 py-3">
-        <p className="text-sm font-semibold text-phantom-ink">Dokumentum feltöltés</p>
-        <StatusPill tone={phase === 'done' ? 'success' : 'neutral'}>PDF / DOCX</StatusPill>
+      <div className="mb-4 space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <span className="tag-sticker bg-phantom-pink text-white">
+            <Upload className="h-3 w-3" />
+            FELTÖLTÉS
+          </span>
+          <StatusPill tone={phase === 'done' ? 'success' : 'neutral'}>PDF / DOCX</StatusPill>
+        </div>
+        <h2 className="headline headline-lg">
+          Tölts fel{' '}
+          <span className="scribble-underline">5 dokumentumot</span>.
+        </h2>
+        <p className="text-sm text-phantom-muted">
+          Master File, Local File, szerződés, benchmark és egy számla — pontosan ennyi kell az auditfutáshoz.
+        </p>
       </div>
 
       {phase !== 'done' && phase !== 'uploading' && (
@@ -368,29 +380,29 @@ export default function DocumentIngestor({
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
             className={[
-              'group flex flex-col items-center justify-center gap-4 rounded-phantom-card border border-dashed p-6 text-center transition-phantom duration-phantom-base sm:p-8',
+              'group flex flex-col items-center justify-center gap-4 rounded-phantom-card border-2 border-dashed border-phantom-ink p-6 text-center transition-phantom duration-phantom-base sm:p-8',
               isSelectionLocked
-                ? 'cursor-not-allowed border-phantom-line bg-phantom-surface-muted/95 saturate-0'
+                ? 'cursor-not-allowed bg-phantom-surface-muted opacity-70'
                 : 'cursor-pointer',
               !isSelectionLocked && isDragOver
-                ? 'border-phantom-accent bg-phantom-accent-soft shadow-phantom-soft'
+                ? 'bg-phantom-accent-soft shadow-phantom-soft'
                 : !isSelectionLocked
-                  ? 'border-phantom-line bg-phantom-surface-muted hover:border-phantom-accent hover:bg-phantom-accent-soft hover:shadow-phantom-soft'
+                  ? 'bg-phantom-paper hover:bg-phantom-accent-soft hover:shadow-phantom-soft'
                   : '',
             ].join(' ')}
           >
             <div
               className={[
-                'flex h-14 w-14 items-center justify-center rounded-phantom-card ring-1 ring-phantom-line transition-phantom duration-phantom-base',
+                'flex h-16 w-16 items-center justify-center rounded-phantom-card border-2 border-phantom-ink transition-phantom duration-phantom-base',
                 isSelectionLocked
                   ? 'bg-phantom-surface-muted text-phantom-subtle'
-                  : 'bg-phantom-surface text-phantom-accent shadow-phantom-soft group-hover:-translate-y-0.5',
+                  : 'bg-phantom-paper text-phantom-ink shadow-phantom-sticker group-hover:-translate-y-0.5',
               ].join(' ')}
             >
               <Upload className="h-7 w-7" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-phantom-ink">
+              <p className="font-display text-base font-extrabold text-phantom-ink">
                 {isSelectionLocked
                   ? '5/5 fájl kiválasztva'
                   : isDragOver
@@ -419,9 +431,9 @@ export default function DocumentIngestor({
 
       {(phase === 'ready' || phase === 'error' || phase === 'uploading') && selectedFiles.length > 0 && (
         <div className="mt-4 space-y-2">
-          <div className="mb-1 rounded-phantom-card border border-phantom-line bg-phantom-surface px-4 py-2.5">
+          <div className="mb-1 rounded-phantom-card border-2 border-phantom-ink bg-phantom-paper px-4 py-2.5 shadow-phantom-sticker">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <p className="text-xs font-semibold text-phantom-muted">
+              <p className="font-display text-xs font-extrabold uppercase tracking-[0.18em] text-phantom-ink">
                 Kiválasztva: {selectedFiles.length}/{MAX_FILES}
               </p>
               <StatusPill tone={selectedFiles.length === MAX_FILES ? 'success' : 'warning'}>
@@ -435,9 +447,11 @@ export default function DocumentIngestor({
           {selectedFiles.map((file) => (
             <div
               key={file.name}
-              className="flex items-center gap-3 rounded-phantom-card border border-phantom-line bg-phantom-surface p-3 shadow-sm"
+              className={[
+                'flex items-center gap-3 rounded-phantom-card border-2 border-phantom-ink bg-phantom-surface p-3 shadow-phantom-sticker transition-transform duration-phantom-base',
+              ].join(' ')}
             >
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-phantom-control bg-phantom-surface-muted text-phantom-muted ring-1 ring-phantom-line">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-phantom-control border-2 border-phantom-ink bg-phantom-cyan text-phantom-ink">
                 <FileText className="h-4 w-4" />
               </div>
               <div className="min-w-0 flex-1">
@@ -466,19 +480,21 @@ export default function DocumentIngestor({
       )}
 
       {phase === 'uploading' && (
-        <div className="mt-4 rounded-phantom-card border border-phantom-line bg-phantom-surface-muted p-4">
+        <div className="mt-4 rounded-phantom-card border-2 border-phantom-ink bg-phantom-paper p-4 shadow-phantom-sticker">
           <div className="flex items-center gap-3">
-            <div className="force-spin h-5 w-5 animate-spin rounded-full border-2 border-phantom-accent border-t-transparent" />
-            <p className="text-sm font-semibold text-phantom-ink">Beolvasás folyamatban...</p>
+            <div className="force-spin h-5 w-5 animate-spin rounded-full border-2 border-phantom-ink border-t-transparent" />
+            <p className="font-display text-sm font-extrabold text-phantom-ink">
+              Beolvasás folyamatban...
+            </p>
           </div>
         </div>
       )}
 
       {phase === 'done' && results.length > 0 && (
         <div className="space-y-4">
-          <div className="rounded-phantom-card border border-phantom-line bg-phantom-surface px-4 py-2.5">
+          <div className="rounded-phantom-card border-2 border-phantom-ink bg-phantom-surface px-4 py-2.5 shadow-phantom-sticker">
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <p className="text-sm font-semibold text-phantom-success-text">
+              <p className="font-display text-sm font-extrabold text-phantom-ink">
                 Feldolgozva: {successfulResults.length}/{results.length}
               </p>
               <StatusPill tone={classificationIssues.length === 0 ? 'success' : 'danger'}>
@@ -488,13 +504,18 @@ export default function DocumentIngestor({
           </div>
 
           {classificationIssues.length > 0 && (
-            <div className="rounded-phantom-card border border-phantom-danger-border bg-phantom-danger-soft p-4">
-              <p className="text-sm font-semibold text-phantom-danger-text">
-                A kötelező 5 kategória osztályozása nem sikerült teljesen.
-              </p>
-              <ul className="mt-2 list-disc space-y-1 pl-5">
+            <div className="rounded-phantom-card border-2 border-phantom-ink bg-phantom-ink p-4 text-white shadow-phantom-soft">
+              <div className="flex items-start justify-between gap-3">
+                <p className="font-display text-sm font-extrabold uppercase tracking-[0.12em]">
+                  Osztályozási hibák
+                </p>
+                <span className="font-display text-3xl font-black leading-none text-phantom-accent">
+                  {classificationIssues.length}
+                </span>
+              </div>
+              <ul className="mt-3 list-disc space-y-1 pl-5">
                 {classificationIssues.map((issue, index) => (
-                  <li key={`${issue.kind}-${index}`} className="text-xs text-phantom-danger-text">
+                  <li key={`${issue.kind}-${index}`} className="text-xs text-white/90">
                     {issue.kind === 'missing_required' && (
                       <>
                         Hiányzó kötelező kategória:{' '}
@@ -533,24 +554,24 @@ export default function DocumentIngestor({
                 return (
                   <div
                     key={document.document_id}
-                    className="rounded-phantom-card border border-phantom-danger-border bg-phantom-danger-soft p-3"
+                    className="rounded-phantom-card border-2 border-phantom-ink bg-phantom-pink p-3 text-white shadow-phantom-sticker"
                   >
                     <div className="flex items-start gap-2">
-                      <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-phantom-danger-text" />
+                      <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-white" />
                       <div className="min-w-0 flex flex-1 flex-col">
                         <div className="flex items-start justify-between gap-2">
-                          <p className="truncate text-sm font-semibold text-phantom-danger-text" title={document.filename}>
+                          <p className="font-display truncate text-sm font-extrabold text-white" title={document.filename}>
                             {document.filename}
                           </p>
                           <button
                             type="button"
                             onClick={() => replaceSingleFile(document.filename)}
-                            className="inline-flex h-7 shrink-0 items-center justify-center rounded-phantom-control border border-phantom-danger-border bg-phantom-surface px-3 text-xs font-semibold text-phantom-danger-text transition-phantom duration-phantom-base hover:bg-phantom-danger-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus"
+                            className="inline-flex h-7 shrink-0 items-center justify-center rounded-phantom-control border-2 border-phantom-ink bg-phantom-surface px-3 font-display text-xs font-extrabold text-phantom-ink shadow-phantom-sticker transition-transform duration-phantom-base hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus"
                           >
                             Fájl csere
                           </button>
                         </div>
-                        <p className="mt-1 text-xs text-phantom-danger-text">Feldolgozás meghiúsult.</p>
+                        <p className="mt-1 text-xs text-white/90">Feldolgozás meghiúsult.</p>
                       </div>
                     </div>
                   </div>
@@ -561,33 +582,30 @@ export default function DocumentIngestor({
                 <div
                   key={document.document_id}
                   className={[
-                    'rounded-phantom-card border p-3 shadow-sm',
+                    'rounded-phantom-card border-2 border-phantom-ink p-3 shadow-phantom-sticker',
                     isMisclassified
-                      ? 'border-phantom-danger-border bg-phantom-danger-soft'
-                      : 'border-phantom-line bg-phantom-surface',
+                      ? 'bg-phantom-amber'
+                      : 'bg-phantom-surface',
                   ].join(' ')}
                 >
                   <div className="flex items-start gap-2">
                     {isMisclassified ? (
-                      <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-phantom-danger-text" />
+                      <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-phantom-ink" />
                     ) : (
-                      <CheckCircle className="mt-0.5 h-5 w-5 shrink-0 text-phantom-success-text" />
+                      <CheckCircle className="mt-0.5 h-5 w-5 shrink-0 text-phantom-ink" />
                     )}
                     <div className="min-w-0 flex-1">
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex min-w-0 flex-wrap items-center gap-2">
                           <p
-                            className={[
-                              'truncate text-sm font-semibold',
-                              isMisclassified ? 'text-phantom-danger-text' : 'text-phantom-ink',
-                            ].join(' ')}
+                            className="font-display truncate text-sm font-extrabold text-phantom-ink"
                             title={document.filename}
                           >
                             {document.filename}
                           </p>
                           <span
                             className={[
-                              'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ring-1 ring-inset',
+                              'inline-flex items-center rounded-full border-2 border-phantom-ink px-2 py-0.5 text-[11px] font-extrabold uppercase tracking-[0.1em] shadow-phantom-sticker',
                               typeConfig.badgeClassName,
                             ].join(' ')}
                           >
@@ -599,7 +617,7 @@ export default function DocumentIngestor({
                           <button
                             type="button"
                             onClick={() => replaceSingleFile(document.filename)}
-                            className="inline-flex h-7 shrink-0 items-center justify-center rounded-phantom-control border border-phantom-danger-border bg-phantom-surface px-3 text-xs font-semibold text-phantom-danger-text transition-phantom duration-phantom-base hover:bg-phantom-danger-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus"
+                            className="inline-flex h-7 shrink-0 items-center justify-center rounded-phantom-control border-2 border-phantom-ink bg-phantom-surface px-3 font-display text-xs font-extrabold text-phantom-ink shadow-phantom-sticker transition-transform duration-phantom-base hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus"
                           >
                             Fájl csere
                           </button>
@@ -624,12 +642,14 @@ export default function DocumentIngestor({
       )}
 
       {errorMessage && errorMessage !== lockedUploadMessage && phase !== 'uploading' && (
-        <div className="mt-4 rounded-phantom-card border border-phantom-danger-border bg-phantom-danger-soft p-4">
+        <div className="mt-4 rounded-phantom-card border-2 border-phantom-ink bg-phantom-pink p-4 text-white shadow-phantom-sticker">
           <div className="flex items-start gap-3">
-            <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-phantom-danger-text" />
+            <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-white" />
             <div>
-              <p className="text-sm font-semibold text-phantom-danger-text">Figyelmeztetés</p>
-              <p className="mt-1 text-xs text-phantom-danger-text">{errorMessage}</p>
+              <p className="font-display text-sm font-extrabold uppercase tracking-[0.12em]">
+                Figyelmeztetés
+              </p>
+              <p className="mt-1 text-xs text-white/90">{errorMessage}</p>
             </div>
           </div>
         </div>
@@ -646,7 +666,7 @@ export default function DocumentIngestor({
             'mt-4 flex items-center justify-center gap-2',
           ].join(' ')}
         >
-          <FileUp className="h-4 w-4" />
+          <Wand2 className="h-4 w-4" />
           Beolvasás indítása ({selectedFiles.length}/{MAX_FILES})
         </button>
       )}

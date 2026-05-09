@@ -9,6 +9,8 @@ export default {
       colors: {
         phantom: {
           canvas: 'var(--phantom-color-canvas)',
+          cream: 'var(--phantom-color-canvas)',
+          paper: 'var(--phantom-color-surface-muted)',
           surface: 'var(--phantom-color-surface)',
           'surface-muted': 'var(--phantom-color-surface-muted)',
           'surface-raised': 'var(--phantom-color-surface-raised)',
@@ -23,6 +25,11 @@ export default {
             pressed: 'var(--phantom-color-accent-pressed)',
             soft: 'var(--phantom-color-accent-soft)',
           },
+          lime: 'var(--phantom-color-accent)',
+          purple: 'var(--phantom-color-purple)',
+          pink: 'var(--phantom-color-pink)',
+          cyan: 'var(--phantom-color-cyan)',
+          amber: 'var(--phantom-color-amber)',
           focus: 'var(--phantom-color-focus)',
           disabled: 'var(--phantom-color-disabled)',
           success: {
@@ -40,25 +47,25 @@ export default {
               DEFAULT: '#D32F2F',
               soft: '#FDECEC',
               text: '#A51F1F',
-              border: '#F4B6B6',
+              border: '#0A0A0A',
             },
             high: {
               DEFAULT: '#F57C00',
               soft: '#FFF0DE',
               text: '#A84F00',
-              border: '#FFD2A3',
+              border: '#0A0A0A',
             },
             medium: {
               DEFAULT: '#FBC02D',
               soft: '#FFF8D8',
               text: '#7A5A00',
-              border: '#F8E39A',
+              border: '#0A0A0A',
             },
             low: {
               DEFAULT: '#388E3C',
               soft: '#EAF6EA',
               text: '#256B2B',
-              border: '#B8DCBA',
+              border: '#0A0A0A',
             },
           },
         },
@@ -66,14 +73,17 @@ export default {
       borderRadius: {
         'phantom-card': 'var(--phantom-radius-card)',
         'phantom-control': 'var(--phantom-radius-control)',
+        'phantom-hero': 'var(--phantom-radius-hero)',
       },
       boxShadow: {
         'phantom-soft': 'var(--phantom-shadow-soft)',
         'phantom-lift': 'var(--phantom-shadow-lift)',
         'phantom-button': 'var(--phantom-shadow-button)',
+        'phantom-sticker': 'var(--phantom-shadow-sticker)',
       },
       fontFamily: {
         sans: ['Inter', 'Segoe UI', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        display: ['"Space Grotesk"', 'Inter', 'Segoe UI', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
       transitionDuration: {
         'phantom-fast': '120ms',

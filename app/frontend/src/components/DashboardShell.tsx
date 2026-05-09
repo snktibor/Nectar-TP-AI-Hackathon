@@ -5,6 +5,7 @@ import {
   LayoutDashboard,
   Settings,
   ShieldAlert,
+  Sparkles,
 } from 'lucide-react'
 
 interface DashboardShellProps {
@@ -32,29 +33,17 @@ function SidebarButton({
       type="button"
       onClick={onClick}
       className={[
-        'flex w-full min-w-0 items-center gap-2 overflow-hidden rounded-phantom-control border px-3 py-2 text-left transition-phantom duration-phantom-base',
+        'flex w-full min-w-0 items-center gap-2 overflow-hidden rounded-phantom-control border-2 px-3 py-2 text-left font-display font-extrabold transition-phantom duration-phantom-base',
         isActive
-          ? 'border-phantom-accent/30 bg-phantom-accent-soft'
-          : 'border-phantom-line bg-phantom-surface hover:border-phantom-line hover:bg-phantom-surface-muted',
+          ? 'border-phantom-ink bg-phantom-paper text-phantom-ink shadow-phantom-sticker'
+          : 'border-phantom-ink bg-phantom-surface text-phantom-ink hover:bg-phantom-paper hover:shadow-phantom-sticker',
       ].join(' ')}
     >
-      <Icon
-        className={[
-          'h-4 w-4 shrink-0',
-          isActive ? 'text-phantom-accent' : 'text-phantom-subtle',
-        ].join(' ')}
-      />
-      <span
-        className={[
-          'truncate text-sm font-medium',
-          isActive ? 'text-phantom-accent' : 'text-phantom-muted',
-        ].join(' ')}
-      >
-        {label}
-      </span>
+      <Icon className="h-4 w-4 shrink-0" />
+      <span className="truncate text-sm">{label}</span>
       {isActive ? (
         <>
-          <span className="ml-auto h-2.5 w-2.5 shrink-0 rounded-full bg-phantom-accent" aria-hidden="true" />
+          <span className="pulse-dot ml-auto" aria-hidden="true" />
           <span className="sr-only">Aktív</span>
         </>
       ) : null}
@@ -64,20 +53,37 @@ function SidebarButton({
 
 function SidebarProfileCard(): JSX.Element {
   return (
-    <section className="rounded-phantom-card border border-phantom-line bg-phantom-surface px-3 py-2 shadow-sm">
+    <section className="rounded-phantom-card border-2 border-phantom-ink bg-phantom-surface px-3 py-2 shadow-phantom-sticker">
       <div className="flex items-center gap-2.5">
-        <img
-          src="/favicon.ico"
-          alt="Profilkep"
-          className="h-8 w-8 object-contain"
-          loading="lazy"
-        />
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-phantom-control border-2 border-phantom-ink bg-phantom-cyan">
+          <span className="font-display text-sm font-black text-phantom-ink">HP</span>
+        </div>
         <div className="min-w-0">
-          <p className="text-[11px] leading-4 text-phantom-subtle">Profil</p>
-          <p className="truncate text-sm font-semibold leading-5 text-phantom-ink">Hajdú Patrik</p>
+          <p className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-phantom-muted">
+            Profil
+          </p>
+          <p className="font-display truncate text-sm font-black leading-5 text-phantom-ink">
+            Hajdú Patrik
+          </p>
         </div>
       </div>
     </section>
+  )
+}
+
+function BrandSticker(): JSX.Element {
+  return (
+    <div className="space-y-2 pl-1">
+      <span className="tag-sticker bg-phantom-pink text-white">
+        <Sparkles className="h-3 w-3" />
+        TP AUDITOR
+      </span>
+      <p className="font-display text-xl font-black leading-tight tracking-tight text-phantom-ink">
+        REDLINE
+        <br />
+        <span className="scribble-underline">PHANTOM</span>
+      </p>
+    </div>
   )
 }
 
@@ -85,18 +91,11 @@ function MinimalSidebar(): JSX.Element {
   const [activeItem, setActiveItem] = useState<SidebarItem>('analysis')
 
   return (
-    <aside className="flex flex-col justify-between border-b border-phantom-line/70 bg-phantom-surface-muted/80 p-3 sm:p-4 lg:min-h-screen lg:border-b-0 lg:border-r lg:p-5">
-      <div className="space-y-4 px-1 py-1">
-        <div className="pl-1">
-          <p className="text-sm font-semibold uppercase tracking-[0.08em] text-phantom-ink">
-            <span className="text-phantom-accent">REDLINE</span>{' '}
-            <span>PHANTOM</span>
-          </p>
-        </div>
+    <aside className="flex flex-col justify-between border-b-2 border-phantom-ink bg-phantom-paper p-3 sm:p-4 lg:min-h-screen lg:border-b-0 lg:border-r-2 lg:p-5">
+      <div className="space-y-5 px-1 py-1">
+        <BrandSticker />
 
-        <nav aria-label="Oldal menü" className="relative pl-3">
-          <div className="pointer-events-none absolute bottom-1 left-0 top-1 w-px bg-phantom-line" />
-
+        <nav aria-label="Oldal menü" className="relative">
           <div className="space-y-1.5">
             <SidebarButton
               icon={LayoutDashboard}
@@ -140,7 +139,7 @@ export default function DashboardShell({
   rightPanel,
 }: DashboardShellProps): JSX.Element {
   return (
-    <div className="h-full w-full bg-phantom-surface">
+    <div className="h-full w-full bg-phantom-canvas">
       <div className="grid h-full min-h-0 lg:grid-cols-[15rem_minmax(0,1fr)]">
         <MinimalSidebar />
 

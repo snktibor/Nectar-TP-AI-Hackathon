@@ -107,7 +107,7 @@ function AttributionRow({
   const hasLegalRefs = (attribution.legal_references?.length ?? 0) > 0
 
   return (
-    <div className="mt-2 border-t border-phantom-line pt-2 space-y-2">
+    <div className="mt-2 border-t-2 border-dashed border-phantom-ink/40 pt-2 space-y-2">
       {/* Evidence chips */}
       <div className="flex flex-wrap items-center gap-1.5">
         <span className="text-[11px] text-phantom-subtle">Hivatkozások:</span>
@@ -138,9 +138,9 @@ function AttributionRow({
 
       {/* Confidence bar + human review badge */}
       <div className="flex items-center gap-2">
-        <div className="h-1 flex-1 overflow-hidden rounded-full bg-phantom-surface ring-1 ring-phantom-line">
+        <div className="h-2 flex-1 overflow-hidden rounded-full border-2 border-phantom-ink bg-phantom-surface">
           <div
-            className="h-full rounded-full bg-phantom-accent"
+            className="h-full bg-phantom-accent"
             style={{ width: `${confidencePct}%` }}
           />
         </div>
@@ -234,15 +234,16 @@ export default function FindingCard({
   return (
     <article
       className={[
-        'rounded-phantom-card border border-phantom-line bg-phantom-surface-muted p-3',
-        'border-l-4',
+        'rounded-phantom-card border-2 border-phantom-ink bg-phantom-surface p-3 shadow-phantom-sticker',
+        'border-l-[6px]',
+        'transition-transform duration-phantom-base hover:-translate-y-0.5 hover:shadow-[8px_10px_0_#0A0A0A]',
         borderClass,
       ].join(' ')}
     >
       <div className="flex flex-wrap items-center gap-1.5">
         <span
           className={[
-            'inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold uppercase',
+            'inline-flex rounded-full border-2 border-phantom-ink px-2 py-0.5 font-display text-[11px] font-extrabold uppercase tracking-[0.12em] shadow-phantom-sticker',
             getSeverityTone(severity),
           ].join(' ')}
         >
@@ -303,7 +304,7 @@ export default function FindingCard({
           <button
             type="button"
             onClick={() => onCitationClick(chunkToCitation(primaryChunk, sessionId))}
-            className="inline-flex items-center gap-1.5 rounded-phantom-control bg-phantom-accent px-3 py-1.5 text-xs font-semibold text-white shadow-phantom-button transition-phantom duration-phantom-base hover:-translate-y-px hover:bg-phantom-accent-hover hover:shadow-phantom-lift active:translate-y-0 active:bg-phantom-accent-pressed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus focus-visible:ring-offset-2 focus-visible:ring-offset-phantom-surface"
+            className="inline-flex items-center gap-1.5 rounded-phantom-control border-2 border-phantom-ink bg-phantom-accent px-3 py-1.5 font-display text-xs font-extrabold text-phantom-ink shadow-phantom-button transition-transform duration-phantom-base hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0_#0A0A0A] active:translate-x-0 active:translate-y-0 active:shadow-[2px_2px_0_#0A0A0A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus focus-visible:ring-offset-2 focus-visible:ring-offset-phantom-surface"
             title={`${primaryChunk.filename} · oldal ${primaryChunk.page + 1}`}
           >
             <MapPin className="h-3.5 w-3.5" />
@@ -319,7 +320,7 @@ export default function FindingCard({
                 key={`doc-${chunk.filename}-${chunk.page}-${chunk.chunk_index}-${i}`}
                 type="button"
                 onClick={() => onCitationClick(chunkToCitation(chunk, sessionId))}
-                className="inline-flex items-center gap-1.5 rounded-phantom-control border border-phantom-line bg-phantom-surface px-3 py-1.5 text-xs font-medium text-phantom-ink transition-phantom duration-phantom-base hover:border-phantom-accent hover:text-phantom-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus"
+                className="inline-flex items-center gap-1.5 rounded-phantom-control border-2 border-phantom-ink bg-phantom-surface px-3 py-1.5 font-display text-xs font-extrabold text-phantom-ink shadow-phantom-sticker transition-transform duration-phantom-base hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus"
                 title={`${chunk.filename} · oldal ${chunk.page + 1}`}
               >
                 <MapPin className="h-3.5 w-3.5" />
@@ -331,7 +332,7 @@ export default function FindingCard({
               key={`legal-${chunk.filename}-${chunk.page}-${chunk.chunk_index}-${i}`}
               type="button"
               onClick={() => onCitationClick(chunkToCitation(chunk, sessionId))}
-              className="inline-flex items-center gap-1.5 rounded-phantom-control border border-phantom-accent/30 bg-phantom-accent-soft px-3 py-1.5 text-xs font-medium text-phantom-accent transition-phantom duration-phantom-base hover:bg-phantom-accent hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus"
+              className="inline-flex items-center gap-1.5 rounded-phantom-control border-2 border-phantom-ink bg-phantom-cyan px-3 py-1.5 font-display text-xs font-extrabold text-phantom-ink shadow-phantom-sticker transition-transform duration-phantom-base hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus"
               title={`${chunk.filename} · oldal ${chunk.page + 1}`}
             >
               <Scale className="h-3.5 w-3.5" />

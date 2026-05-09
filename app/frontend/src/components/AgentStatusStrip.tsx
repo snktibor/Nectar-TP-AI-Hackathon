@@ -41,14 +41,14 @@ function resolveCompletedStatuses(agentRuns: BackendAgentRunResult[]): Record<Ag
 function cellClasses(status: AgentProgressStatus | BackendAgentRunStatus): string {
   switch (status) {
     case 'running':
-      return 'border-phantom-accent bg-phantom-accent-soft text-phantom-accent'
+      return 'border-phantom-ink bg-phantom-accent-soft text-phantom-ink shadow-phantom-sticker'
     case 'ok':
-      return 'border-phantom-severity-low-border bg-phantom-severity-low-soft text-phantom-severity-low-text'
+      return 'border-phantom-ink bg-phantom-cyan text-phantom-ink shadow-phantom-sticker'
     case 'timeout':
     case 'error':
-      return 'border-phantom-severity-critical-border bg-phantom-severity-critical-soft text-phantom-severity-critical-text'
+      return 'border-phantom-ink bg-phantom-pink text-white shadow-phantom-sticker'
     default:
-      return 'border-phantom-line bg-phantom-surface-muted text-phantom-subtle'
+      return 'border-phantom-ink bg-phantom-surface text-phantom-ink'
   }
 }
 
@@ -97,17 +97,17 @@ export default function AgentStatusStrip(props: AgentStatusStripProps): JSX.Elem
           <div
             key={id}
             className={[
-              'min-w-0 overflow-hidden rounded-phantom-card border p-2.5 transition-phantom',
+              'min-w-0 overflow-hidden rounded-phantom-card border-2 p-2.5 transition-phantom',
               cellClasses(status),
             ].join(' ')}
           >
             <div className="flex min-w-0 items-center gap-1.5">
               <StatusIcon status={status} />
-              <span className="min-w-0 truncate text-[11px] font-semibold uppercase tracking-[0.05em]">
+              <span className="font-display min-w-0 truncate text-[11px] font-extrabold uppercase tracking-[0.12em]">
                 {statusText(status)}
               </span>
             </div>
-            <p className="mt-1 truncate text-xs font-medium leading-tight">
+            <p className="font-display mt-1 truncate text-xs font-extrabold leading-tight">
               {AGENT_LABELS[id]}
             </p>
             {toolCalls !== undefined && (

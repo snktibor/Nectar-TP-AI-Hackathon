@@ -2,28 +2,31 @@ import type { RiskSeverity } from '../types/api'
 
 export const phantomDesign = {
   colors: {
-    canvas: '#F4F3EE',
+    canvas: '#FAF6EE',
     surface: '#FFFFFF',
-    surfaceMuted: '#EEEDE6',
+    surfaceMuted: '#F2EBDC',
     surfaceRaised: '#FFFFFF',
-    ink: '#111812',
-    inkMuted: '#2F362F',
-    inkSubtle: '#5C655B',
-    line: '#D9D8CF',
-    lineStrong: '#C7C6BD',
-    accent: '#FF7B47',
-    accentHover: '#EF6E3A',
-    accentSoft: '#FFE9DF',
-    mint: '#FFF4ED',
-    sky: '#F7F6F1',
-    lavender: '#F0EFE8',
-    amber: '#FFEFE4',
+    ink: '#0A0A0A',
+    inkMuted: '#2F2F2F',
+    inkSubtle: 'rgba(10,10,10,0.6)',
+    line: '#0A0A0A',
+    lineStrong: '#0A0A0A',
+    accent: '#C7F458',
+    accentHover: '#B8E83F',
+    accentSoft: '#E9F9B6',
+    purple: '#5B2EE5',
+    pink: '#FF3D8A',
+    cyan: '#00D4FF',
+    amber: '#FFB800',
+    cream: '#FAF6EE',
+    paper: '#F2EBDC',
   },
   severity: {
     CRITICAL: {
       label: 'Kritikus',
       tone: '#D32F2F',
-      badge: 'bg-phantom-severity-critical-soft text-phantom-severity-critical-text ring-phantom-severity-critical-border',
+      badge:
+        'bg-phantom-severity-critical-soft text-phantom-severity-critical-text ring-1 ring-phantom-ink',
       text: 'text-phantom-severity-critical-text',
       border: 'border-l-phantom-severity-critical',
       icon: 'text-phantom-severity-critical-text',
@@ -31,7 +34,8 @@ export const phantomDesign = {
     HIGH: {
       label: 'Magas',
       tone: '#F57C00',
-      badge: 'bg-phantom-severity-high-soft text-phantom-severity-high-text ring-phantom-severity-high-border',
+      badge:
+        'bg-phantom-severity-high-soft text-phantom-severity-high-text ring-1 ring-phantom-ink',
       text: 'text-phantom-severity-high-text',
       border: 'border-l-phantom-severity-high',
       icon: 'text-phantom-severity-high-text',
@@ -39,7 +43,8 @@ export const phantomDesign = {
     MEDIUM: {
       label: 'Közepes',
       tone: '#FBC02D',
-      badge: 'bg-phantom-severity-medium-soft text-phantom-severity-medium-text ring-phantom-severity-medium-border',
+      badge:
+        'bg-phantom-severity-medium-soft text-phantom-severity-medium-text ring-1 ring-phantom-ink',
       text: 'text-phantom-severity-medium-text',
       border: 'border-l-phantom-severity-medium',
       icon: 'text-phantom-severity-medium-text',
@@ -47,7 +52,8 @@ export const phantomDesign = {
     LOW: {
       label: 'Alacsony',
       tone: '#388E3C',
-      badge: 'bg-phantom-severity-low-soft text-phantom-severity-low-text ring-phantom-severity-low-border',
+      badge:
+        'bg-phantom-severity-low-soft text-phantom-severity-low-text ring-1 ring-phantom-ink',
       text: 'text-phantom-severity-low-text',
       border: 'border-l-phantom-severity-low',
       icon: 'text-phantom-severity-low-text',
@@ -69,25 +75,31 @@ export const phantomDesign = {
     dashboardGrid: 'grid min-w-0 gap-4 lg:grid-cols-3 lg:gap-5 xl:gap-6',
   },
   components: {
-    panel: 'rounded-phantom-card border border-phantom-line bg-phantom-surface p-4 shadow-phantom-soft sm:p-5 lg:p-6',
+    panel:
+      'rounded-phantom-card border-2 border-phantom-ink bg-phantom-surface p-4 shadow-phantom-soft sm:p-5 lg:p-6',
     panelHeader: 'mb-4 space-y-1 sm:mb-5',
-    panelTitle: 'text-base font-semibold leading-6 text-phantom-ink',
+    panelTitle: 'font-display text-lg font-extrabold leading-7 tracking-tight text-phantom-ink',
     panelDescription: 'text-sm leading-5 text-phantom-muted',
-    subtleCard: 'rounded-phantom-card border border-phantom-line bg-phantom-surface-muted p-3 sm:p-4',
-    statusPill: 'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold leading-5 ring-1 ring-inset',
-    metaPill: 'rounded-full bg-phantom-surface-muted px-2 py-0.5 text-xs font-medium text-phantom-muted ring-1 ring-phantom-line',
-    tag: 'rounded-phantom-control bg-phantom-surface-muted px-1.5 py-0.5 font-mono text-xs text-phantom-muted ring-1 ring-phantom-line',
+    subtleCard:
+      'rounded-phantom-card border-2 border-phantom-ink bg-phantom-surface-muted p-3 sm:p-4',
+    statusPill:
+      'inline-flex items-center rounded-full border-2 border-phantom-ink bg-phantom-surface px-2.5 py-0.5 text-[11px] font-extrabold uppercase tracking-[0.12em] shadow-phantom-sticker',
+    metaPill:
+      'inline-flex items-center rounded-full border-2 border-phantom-ink bg-phantom-surface px-2 py-0.5 text-xs font-bold text-phantom-ink shadow-phantom-sticker',
+    tag:
+      'inline-flex items-center rounded-phantom-control border-2 border-phantom-ink bg-phantom-surface px-1.5 py-0.5 font-mono text-xs text-phantom-ink shadow-phantom-sticker',
     buttonBase:
-      'min-h-11 w-full rounded-phantom-control px-4 py-3 text-sm font-semibold transition-phantom duration-phantom-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus focus-visible:ring-offset-2 focus-visible:ring-offset-phantom-surface disabled:cursor-not-allowed',
+      'min-h-11 w-full rounded-phantom-control border-2 border-phantom-ink px-4 py-3 text-sm font-display font-extrabold transition-phantom duration-phantom-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus focus-visible:ring-offset-2 focus-visible:ring-offset-phantom-surface disabled:cursor-not-allowed',
     buttonPrimary:
-      'bg-phantom-accent text-phantom-canvas shadow-phantom-button hover:-translate-y-px hover:bg-phantom-accent-hover hover:shadow-phantom-lift active:translate-y-0 active:bg-phantom-accent-pressed disabled:bg-phantom-disabled disabled:text-phantom-subtle disabled:shadow-none disabled:hover:translate-y-0',
+      'bg-phantom-accent text-phantom-ink shadow-phantom-button hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0_#0A0A0A] active:translate-x-0 active:translate-y-0 active:shadow-[2px_2px_0_#0A0A0A] disabled:bg-phantom-disabled disabled:text-phantom-subtle disabled:shadow-none disabled:hover:translate-x-0 disabled:hover:translate-y-0',
     uploadSlotBase:
-      'flex min-h-16 w-full min-w-0 items-center gap-3 rounded-phantom-card border border-dashed px-3 py-3 text-left transition-phantom duration-phantom-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus focus-visible:ring-offset-2 focus-visible:ring-offset-phantom-surface sm:px-4',
+      'flex min-h-16 w-full min-w-0 items-center gap-3 rounded-phantom-card border-2 border-dashed px-3 py-3 text-left transition-phantom duration-phantom-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus focus-visible:ring-offset-2 focus-visible:ring-offset-phantom-surface sm:px-4',
     uploadSlotIdle:
-      'border-phantom-line bg-phantom-surface-muted hover:-translate-y-px hover:border-phantom-accent hover:bg-phantom-accent-soft hover:shadow-phantom-soft',
+      'border-phantom-ink bg-phantom-surface hover:bg-phantom-accent-soft hover:shadow-phantom-soft',
     uploadSlotUploaded:
-      'border-phantom-success-border bg-phantom-success-soft text-phantom-success-text shadow-phantom-soft',
-    uploadSlotDisabled: 'cursor-not-allowed opacity-70 hover:translate-y-0 hover:shadow-none',
+      'border-phantom-ink bg-phantom-success-soft text-phantom-ink shadow-phantom-soft',
+    uploadSlotDisabled:
+      'cursor-not-allowed opacity-70 hover:translate-y-0 hover:shadow-none',
   },
   motion: {
     transition: 'transition-phantom duration-phantom-base ease-phantom-standard',
