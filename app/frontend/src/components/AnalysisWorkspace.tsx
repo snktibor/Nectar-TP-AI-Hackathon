@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { AlertCircle, BarChart2, ChevronDown, ClipboardList, Cpu, DatabaseZap, SearchCheck, Sparkles, Wrench, X } from 'lucide-react'
+import { AlertCircle, BarChart2, ClipboardList, Cpu, DatabaseZap, SearchCheck, Sparkles, Wrench, X } from 'lucide-react'
 import { phantomDesign } from '../design-system/phantomDesign'
 import {
   ALL_AGENT_IDS,
@@ -83,23 +83,23 @@ function ProgressView({
   const progressValue = Math.max(0, Math.min(status?.progress ?? 0, 100))
 
   return (
-    <section className="space-y-3 animate-phantom-fade-in">
-      <div className="rounded-phantom-card border border-phantom-line bg-phantom-surface p-4 animate-phantom-progress-glow">
+    <section className="space-y-3">
+      <div className="rounded-phantom-card border border-phantom-line bg-phantom-surface p-4">
         <div className="flex items-start gap-3">
           <div className="mt-0.5 h-5 w-5 shrink-0">
             <div className="force-spin h-5 w-5 animate-spin rounded-full border-2 border-phantom-accent border-t-transparent" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold text-phantom-ink animate-phantom-fade-in-up">
+            <p className="text-sm font-semibold text-phantom-ink">
               {status ? formatStageLabel(status.stage) : 'Audit indítás'}
             </p>
             <div className="mt-3 h-2 overflow-hidden rounded-full bg-phantom-surface-muted ring-1 ring-phantom-line">
               <div
-                className="phantom-progress-stripes relative h-full rounded-full bg-phantom-accent transition-[width] duration-700 ease-out"
+                className="h-full rounded-full bg-phantom-accent transition-phantom duration-phantom-slow"
                 style={{ width: `${progressValue}%` }}
               />
             </div>
-            <p className="mt-2 text-xs font-semibold text-phantom-subtle tabular-nums">{progressValue}%</p>
+            <p className="mt-2 text-xs font-semibold text-phantom-subtle">{progressValue}%</p>
           </div>
         </div>
       </div>
@@ -194,14 +194,14 @@ function FindingsView({
   const severityOptions: BackendRiskSeverity[] = ['critical', 'high', 'medium', 'low']
 
   return (
-    <div className="space-y-3 animate-phantom-fade-in">
+    <div className="space-y-3">
       {/* Summary banner */}
-      <section className="min-w-0 overflow-hidden rounded-phantom-card border border-phantom-line bg-phantom-surface p-4 animate-phantom-fade-in-up transition-phantom duration-phantom-base hover:shadow-phantom-soft">
+      <section className="min-w-0 overflow-hidden rounded-phantom-card border border-phantom-line bg-phantom-surface p-4">
         <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
           <p className="min-w-0 flex-1 break-words text-sm leading-6 text-phantom-ink">{report.summary}</p>
           <span
             className={[
-              'inline-flex h-7 shrink-0 items-center rounded-full px-3 text-xs font-semibold uppercase whitespace-nowrap animate-phantom-bounce-in transition-transform duration-phantom-base hover:scale-105',
+              'inline-flex h-7 shrink-0 items-center rounded-full px-3 text-xs font-semibold uppercase whitespace-nowrap',
               getSeverityTone(report.overall_risk),
             ].join(' ')}
           >
@@ -212,31 +212,33 @@ function FindingsView({
 
       {/* Metric cards */}
       <div className="grid grid-cols-1 gap-2 xs:grid-cols-2 sm:grid-cols-3">
-        {[
-          { icon: AlertCircle, label: 'Konzisztencia\nhibák', value: String(report.consistency_errors.length) },
-          { icon: BarChart2, label: 'Benchmark\nkockázatok', value: String(report.benchmark_risks.length) },
-          { icon: ClipboardList, label: 'Hiányzó\nelemek', value: String(report.missing_elements.length) },
-        ].map((card, index) => (
-          <div
-            key={card.label}
-            style={{ animationDelay: `${index * 70}ms` }}
-            className="animate-phantom-fade-in-up"
-          >
-            <MetricCard icon={card.icon} label={card.label} value={card.value} />
-          </div>
-        ))}
+        <MetricCard
+          icon={AlertCircle}
+          label={'Konzisztencia\nhibák'}
+          value={String(report.consistency_errors.length)}
+        />
+        <MetricCard
+          icon={BarChart2}
+          label={'Benchmark\nkockázatok'}
+          value={String(report.benchmark_risks.length)}
+        />
+        <MetricCard
+          icon={ClipboardList}
+          label={'Hiányzó\nelemek'}
+          value={String(report.missing_elements.length)}
+        />
       </div>
 
       {/* Severity filter */}
-      <div className="grid min-w-0 grid-cols-2 gap-1.5 animate-phantom-fade-in-up sm:grid-cols-3 xl:grid-cols-5" style={{ animationDelay: '240ms' }}>
+      <div className="grid min-w-0 grid-cols-2 gap-1.5 sm:grid-cols-3 xl:grid-cols-5">
         <button
           type="button"
           onClick={() => setSeverityFilter(null)}
           className={[
-            'inline-flex h-7 w-full items-center justify-center whitespace-nowrap rounded-full px-3 text-xs font-medium transition-phantom duration-phantom-base hover:-translate-y-px hover:shadow-phantom-soft active:translate-y-0 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus',
+            'inline-flex h-7 w-full items-center justify-center whitespace-nowrap rounded-full px-3 text-xs font-medium transition-phantom focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus',
             severityFilter === null
-              ? 'bg-phantom-accent-soft text-phantom-accent ring-1 ring-inset ring-phantom-accent/30 scale-[1.02]'
-              : 'bg-phantom-surface-muted text-phantom-muted hover:bg-phantom-accent-soft/60 hover:text-phantom-accent',
+              ? 'bg-phantom-accent-soft text-phantom-accent'
+              : 'bg-phantom-surface-muted text-phantom-muted',
           ].join(' ')}
         >
           Mind
@@ -247,9 +249,9 @@ function FindingsView({
             type="button"
             onClick={() => setSeverityFilter(severityFilter === s ? null : s)}
             className={[
-              'inline-flex h-7 w-full items-center justify-center whitespace-nowrap rounded-full px-3 text-xs font-medium transition-phantom duration-phantom-base hover:-translate-y-px hover:shadow-phantom-soft active:translate-y-0 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus',
+              'inline-flex h-7 w-full items-center justify-center whitespace-nowrap rounded-full px-3 text-xs font-medium transition-phantom focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus',
               severityFilter === s
-                ? `${getSeverityFilterTone(s)} scale-[1.02] shadow-phantom-soft ring-1 ring-inset ring-current/20`
+                ? getSeverityFilterTone(s)
                 : 'bg-phantom-surface-muted text-phantom-muted',
             ].join(' ')}
           >
@@ -260,7 +262,7 @@ function FindingsView({
 
       {/* Per-agent accordion */}
       <div className="space-y-2">
-        {ALL_AGENT_IDS.map((agentId, index) => {
+        {ALL_AGENT_IDS.map((agentId) => {
           const bucket = grouped.get(agentId)
           if (!bucket || bucket.length === 0) return null
           const filtered = bucket.filter((f) => matchesSeverityFilter(f, severityFilter))
@@ -269,18 +271,14 @@ function FindingsView({
           return (
             <details
               key={agentId}
-              style={{ animationDelay: `${300 + index * 60}ms` }}
-              className="phantom-accordion animate-phantom-fade-in-up rounded-phantom-card border border-phantom-line bg-phantom-surface transition-phantom duration-phantom-base hover:border-phantom-accent/40"
+              className="rounded-phantom-card border border-phantom-line bg-phantom-surface"
               open
             >
-              <summary className="group flex min-w-0 cursor-pointer select-none items-center justify-between gap-2 p-3 hover:bg-phantom-accent-soft/30">
-                <span className="min-w-0 flex-1 break-words text-sm font-semibold leading-5 text-phantom-ink transition-colors duration-phantom-base group-hover:text-phantom-accent">
+              <summary className="flex min-w-0 cursor-pointer select-none items-center justify-between gap-2 p-3">
+                <span className="min-w-0 flex-1 break-words text-sm font-semibold leading-5 text-phantom-ink">
                   {AGENT_LABELS[agentId]}
                 </span>
-                <span className="inline-flex items-center gap-2">
-                  <StatusPill tone="neutral">{filtered.length}</StatusPill>
-                  <ChevronDown className="phantom-accordion-chevron h-4 w-4 shrink-0 text-phantom-subtle" />
-                </span>
+                <StatusPill tone="neutral">{filtered.length}</StatusPill>
               </summary>
               <div className="space-y-2 border-t border-phantom-line p-3">
                 {filtered.map((f) => (
@@ -305,15 +303,12 @@ function FindingsView({
           if (filtered.length === 0) return null
           return (
             <details
-              className="phantom-accordion rounded-phantom-card border border-phantom-line bg-phantom-surface transition-phantom duration-phantom-base hover:border-phantom-accent/40"
+              className="rounded-phantom-card border border-phantom-line bg-phantom-surface"
               open
             >
-              <summary className="group flex min-w-0 cursor-pointer select-none items-center justify-between gap-2 p-3 hover:bg-phantom-accent-soft/30">
-                <span className="min-w-0 flex-1 break-words text-sm font-semibold leading-5 text-phantom-ink transition-colors duration-phantom-base group-hover:text-phantom-accent">Nincs ügynök</span>
-                <span className="inline-flex items-center gap-2">
-                  <StatusPill tone="neutral">{filtered.length}</StatusPill>
-                  <ChevronDown className="phantom-accordion-chevron h-4 w-4 shrink-0 text-phantom-subtle" />
-                </span>
+              <summary className="flex min-w-0 cursor-pointer select-none items-center justify-between gap-2 p-3">
+                <span className="min-w-0 flex-1 break-words text-sm font-semibold leading-5 text-phantom-ink">Nincs ügynök</span>
+                <StatusPill tone="neutral">{filtered.length}</StatusPill>
               </summary>
               <div className="space-y-2 border-t border-phantom-line p-3">
                 {filtered.map((f) => (
@@ -332,7 +327,7 @@ function FindingsView({
       </div>
 
       {/* Flat severity list (single section-level scrollbar) */}
-      <section className="min-w-0 overflow-hidden rounded-phantom-card border border-phantom-line bg-phantom-surface p-4 animate-phantom-fade-in-up" style={{ animationDelay: '720ms' }}>
+      <section className="min-w-0 overflow-hidden rounded-phantom-card border border-phantom-line bg-phantom-surface p-4">
         <p className="mb-2 break-words text-sm font-semibold text-phantom-ink">
           Összes megállapítás ({filteredFindings.length})
         </p>
@@ -377,13 +372,8 @@ function AgentRunsView({ report }: Readonly<{ report: BackendAuditReport }>): JS
   }
 
   return (
-<<<<<<< HEAD
     <div className="space-y-3">
       {report.agent_runs.map((run) => {
-=======
-    <div className="space-y-2 animate-phantom-fade-in">
-      {report.agent_runs.map((run, index) => {
->>>>>>> 3a8508588991892f7a5b814a4f47fe8bb0700865
         let statusTone: StatusPillTone = 'danger'
         let statusText = 'Hiba'
         if (run.status === 'ok') {
@@ -422,8 +412,7 @@ function AgentRunsView({ report }: Readonly<{ report: BackendAuditReport }>): JS
         return (
           <article
             key={run.agent_id}
-            style={{ animationDelay: `${index * 70}ms` }}
-            className="min-w-0 overflow-hidden rounded-phantom-card border border-phantom-line bg-phantom-surface p-4 animate-phantom-fade-in-up transition-phantom duration-phantom-base hover:-translate-y-0.5 hover:shadow-phantom-soft hover:border-phantom-accent/40"
+            className="min-w-0 overflow-hidden rounded-phantom-card border border-phantom-line bg-phantom-surface p-4"
           >
             <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
               <div className="flex min-w-0 items-start gap-2.5">
@@ -518,31 +507,16 @@ function TelemetryView({ report }: Readonly<{ report: BackendAuditReport }>): JS
     { input: 0, output: 0, cacheRead: 0, cacheCreate: 0, toolCalls: 0 },
   )
 
-  const telemetryCards = [
-    { icon: Cpu, label: 'Bemenet (token)', value: formatTokenCount(totals.input) },
-    { icon: Cpu, label: 'Kimenet (token)', value: formatTokenCount(totals.output) },
-    { icon: DatabaseZap, label: 'Cache olvasás', value: formatTokenCount(totals.cacheRead) },
-    { icon: Wrench, label: 'Eszköz\nhívások', value: formatTokenCount(totals.toolCalls) },
-  ]
-
   return (
-    <div className="space-y-4 animate-phantom-fade-in">
+    <div className="space-y-4">
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4">
-        {telemetryCards.map((card, index) => (
-          <div
-            key={card.label}
-            style={{ animationDelay: `${index * 70}ms` }}
-            className="animate-phantom-fade-in-up"
-          >
-            <MetricCard icon={card.icon} label={card.label} value={card.value} />
-          </div>
-        ))}
+        <MetricCard icon={Cpu} label="Bemenet (token)" value={formatTokenCount(totals.input)} />
+        <MetricCard icon={Cpu} label="Kimenet (token)" value={formatTokenCount(totals.output)} />
+        <MetricCard icon={DatabaseZap} label="Cache olvasás" value={formatTokenCount(totals.cacheRead)} />
+        <MetricCard icon={Wrench} label={'Eszköz\nhívások'} value={formatTokenCount(totals.toolCalls)} />
       </div>
 
-      <section
-        className="min-w-0 overflow-hidden rounded-phantom-card border border-phantom-line bg-phantom-surface p-4 animate-phantom-fade-in-up"
-        style={{ animationDelay: '320ms' }}
-      >
+      <section className="min-w-0 overflow-hidden rounded-phantom-card border border-phantom-line bg-phantom-surface p-4">
         <p className="mb-3 break-words text-xs font-semibold uppercase tracking-[0.06em] text-phantom-subtle">
           Token felhasználás ügynökönként
         </p>
@@ -566,7 +540,7 @@ function TelemetryView({ report }: Readonly<{ report: BackendAuditReport }>): JS
                   run.cache_read_tokens +
                   run.cache_creation_tokens
                 return (
-                  <tr key={run.agent_id} className="text-phantom-ink transition-colors duration-phantom-base hover:bg-phantom-accent-soft/40">
+                  <tr key={run.agent_id} className="text-phantom-ink">
                     <td className="py-2 pr-3 break-words">{AGENT_LABELS[run.agent_id]}</td>
                     <td className="py-2 pr-3 text-right tabular-nums">
                       {formatTokenCount(run.input_tokens)}
@@ -643,8 +617,8 @@ export default function AnalysisWorkspace({
   ]
 
   return (
-    <section className="h-full min-w-0 overflow-y-auto overflow-x-hidden rounded-2xl border border-gray-100 bg-white p-4 shadow-md animate-phantom-fade-in [scrollbar-gutter:stable] sm:p-5 lg:p-6">
-      <div className="mb-4 min-h-14 rounded-xl border border-gray-100 bg-slate-50 px-4 py-3 animate-phantom-fade-in-down">
+    <section className="h-full min-w-0 overflow-y-auto overflow-x-hidden rounded-2xl border border-gray-100 bg-white p-4 shadow-md [scrollbar-gutter:stable] sm:p-5 lg:p-6">
+      <div className="mb-4 min-h-14 rounded-xl border border-gray-100 bg-slate-50 px-4 py-3">
         <div className="flex min-w-0 flex-wrap items-center justify-between gap-3">
           <p className="min-w-0 truncate text-sm font-semibold text-gray-900">Riport</p>
           <div className="flex min-w-0 flex-wrap items-center gap-2">
@@ -660,10 +634,10 @@ export default function AnalysisWorkspace({
               <button
                 type="button"
                 onClick={onCloseReport}
-                className="group/close inline-flex min-h-8 items-center justify-center gap-1 rounded-phantom-control border border-phantom-line bg-phantom-surface-muted px-2.5 py-1 text-xs font-semibold text-phantom-muted transition-phantom duration-phantom-base hover:-translate-y-px hover:border-phantom-accent hover:text-phantom-ink hover:shadow-phantom-soft active:translate-y-0 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus"
+                className="inline-flex min-h-8 items-center justify-center gap-1 rounded-phantom-control border border-phantom-line bg-phantom-surface-muted px-2.5 py-1 text-xs font-semibold text-phantom-muted transition-phantom duration-phantom-base hover:border-phantom-accent hover:text-phantom-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus"
                 aria-label="Riport bezárása"
               >
-                <X className="h-3.5 w-3.5 transition-transform duration-phantom-base group-hover/close:rotate-90" />
+                <X className="h-3.5 w-3.5" />
                 <span className="hidden sm:inline">Bezárás</span>
               </button>
             )}
@@ -710,7 +684,7 @@ export default function AnalysisWorkspace({
       )}
 
       {phase === 'ready' && (
-        <div className="rounded-phantom-card border border-phantom-line bg-phantom-surface p-4 animate-phantom-fade-in-up">
+        <div className="rounded-phantom-card border border-phantom-line bg-phantom-surface p-4">
           <p className="text-sm text-phantom-ink">
             Sikeres dokumentumok: {successfulDocuments.length}
           </p>
@@ -720,11 +694,11 @@ export default function AnalysisWorkspace({
             className={[
               phantomDesign.components.buttonBase,
               phantomDesign.components.buttonPrimary,
-              'group/analyze mt-3 h-10 min-h-8 w-full px-3 py-1.5 text-xs shadow-phantom-soft hover:scale-[1.02] hover:shadow-phantom-lift active:scale-95 sm:w-auto',
+              'mt-3 h-10 min-h-8 w-full px-3 py-1.5 text-xs shadow-phantom-soft hover:translate-y-0 hover:shadow-phantom-soft active:shadow-phantom-soft sm:w-auto',
             ].join(' ')}
           >
             <span className="inline-flex items-center gap-2">
-              <Sparkles className="h-4 w-4 transition-transform duration-phantom-base group-hover/analyze:rotate-12 group-hover/analyze:scale-125" />
+              <Sparkles className="h-4 w-4" />
               Elemzés indítása
             </span>
           </button>
@@ -732,7 +706,7 @@ export default function AnalysisWorkspace({
       )}
 
       {phase === 'blocked' && (
-        <div className="rounded-phantom-card border border-phantom-danger-border bg-phantom-danger-soft p-4 animate-phantom-fade-in-down">
+        <div className="rounded-phantom-card border border-phantom-danger-border bg-phantom-danger-soft p-4">
           <p className="text-sm font-semibold text-phantom-danger-text">
             Nem indítható az elemzés
           </p>
@@ -745,7 +719,7 @@ export default function AnalysisWorkspace({
       {(phase === 'starting' || phase === 'polling') && <ProgressView status={auditStatus} />}
 
       {phase === 'failed' && (
-        <div className="rounded-phantom-card border border-rose-200 bg-rose-50 p-4 text-rose-900 animate-phantom-fade-in-down">
+        <div className="rounded-phantom-card border border-rose-200 bg-rose-50 p-4 text-rose-900">
           <p className="text-sm font-semibold">Audit hiba</p>
           <p className="mt-1 text-sm">{auditError ?? 'Ismeretlen hiba történt.'}</p>
         </div>
@@ -754,12 +728,10 @@ export default function AnalysisWorkspace({
       {phase === 'completed' && auditReport && (
         <div className="min-w-0 space-y-3">
           {/* Agent status strip — always visible above tabs */}
-          <div className="animate-phantom-fade-in-up" style={{ animationDelay: '60ms' }}>
-            <AgentStatusStrip mode="completed" agentRuns={auditReport.agent_runs} />
-          </div>
+          <AgentStatusStrip mode="completed" agentRuns={auditReport.agent_runs} />
 
           {/* Tab bar */}
-          <div className="flex min-w-0 flex-wrap gap-1.5 animate-phantom-fade-in-up" style={{ animationDelay: '140ms' }} role="tablist">
+          <div className="flex min-w-0 flex-wrap gap-1.5" role="tablist">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
@@ -768,10 +740,10 @@ export default function AnalysisWorkspace({
                 aria-selected={activeTab === tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={[
-                  'relative h-7 shrink-0 whitespace-nowrap rounded-phantom-control px-3 text-xs font-medium transition-phantom duration-phantom-base hover:-translate-y-px hover:shadow-phantom-soft active:translate-y-0 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus',
+                  'h-7 shrink-0 whitespace-nowrap rounded-phantom-control px-3 text-xs font-medium transition-phantom focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus',
                   activeTab === tab.id
-                    ? 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200 shadow-phantom-soft'
-                    : 'bg-phantom-surface-muted text-phantom-muted hover:bg-blue-50/60 hover:text-blue-700',
+                    ? 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200'
+                    : 'bg-phantom-surface-muted text-phantom-muted',
                 ].join(' ')}
               >
                 {tab.label}
@@ -780,17 +752,15 @@ export default function AnalysisWorkspace({
           </div>
 
           {/* Tab content */}
-          <div key={activeTab} className="animate-phantom-fade-in-up">
-            {activeTab === 'findings' && (
-              <FindingsView
-                report={auditReport}
-                sessionId={sessionId}
-                onCitationClick={onCitationClick}
-              />
-            )}
-            {activeTab === 'agent_runs' && <AgentRunsView report={auditReport} />}
-            {activeTab === 'telemetry' && <TelemetryView report={auditReport} />}
-          </div>
+          {activeTab === 'findings' && (
+            <FindingsView
+              report={auditReport}
+              sessionId={sessionId}
+              onCitationClick={onCitationClick}
+            />
+          )}
+          {activeTab === 'agent_runs' && <AgentRunsView report={auditReport} />}
+          {activeTab === 'telemetry' && <TelemetryView report={auditReport} />}
         </div>
       )}
     </section>

@@ -22,17 +22,10 @@ interface BuildStep {
 }
 
 const STEPS: ReadonlyArray<BuildStep> = [
-<<<<<<< HEAD
   { id: 'compose',  label: 'Composing executive narrative',     durationMs: 900 },
   { id: 'risk',     label: 'Aggregating risk dashboard metrics', durationMs: 800 },
   { id: 'findings', label: 'Rendering findings with citations',  durationMs: 1100 },
   { id: 'finalize', label: 'Finalizing PDF layout',              durationMs: 700 },
-=======
-  { id: 'compose',  label: 'Vezetői összefoglaló összeállítása', durationMs: 900 },
-  { id: 'risk',     label: 'Kockázati metrikák aggregálása',     durationMs: 800 },
-  { id: 'findings', label: 'Megállapítások hivatkozásokkal',     durationMs: 1100 },
-  { id: 'finalize', label: 'PDF elrendezés véglegesítése',       durationMs: 700 },
->>>>>>> 3a8508588991892f7a5b814a4f47fe8bb0700865
 ]
 
 export default function ReportGeneratorModal({
@@ -95,7 +88,6 @@ export default function ReportGeneratorModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="report-modal-title"
-<<<<<<< HEAD
       className="fixed inset-0 z-50 flex items-center justify-center bg-phantom-ink/50 px-4 py-6 backdrop-blur-sm"
       onClick={onClose}
     >
@@ -107,57 +99,27 @@ export default function ReportGeneratorModal({
         <div className="flex items-start justify-between gap-3 border-b border-phantom-line bg-phantom-surface-muted px-6 py-4">
           <div className="flex items-center gap-3">
             <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-phantom-accent/10 text-phantom-accent">
-=======
-      className="fixed inset-0 z-50 flex items-center justify-center bg-phantom-ink/50 px-4 py-6 backdrop-blur-sm animate-phantom-fade-in"
-      onClick={onClose}
-    >
-      <div
-        className="w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-phantom-line animate-phantom-scale-in"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className="flex items-start justify-between gap-3 border-b border-phantom-line bg-phantom-surface-muted px-6 py-4 animate-phantom-fade-in-down">
-          <div className="flex items-center gap-3">
-            <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-phantom-accent/10 text-phantom-accent animate-phantom-bounce-in">
->>>>>>> 3a8508588991892f7a5b814a4f47fe8bb0700865
               <FileText className="h-5 w-5" />
             </span>
             <div>
               <h2
                 id="report-modal-title"
-<<<<<<< HEAD
                 className="font-serif text-base font-semibold text-phantom-ink"
               >
                 Generate Compliance Report
               </h2>
               <p className="text-xs text-phantom-muted">
                 Session {report.session_id.slice(0, 8)} · A4 PDF deliverable
-=======
-                className="font-serif text-base font-semibold text-phantom-ink animate-phantom-fade-in-up"
-                style={{ animationDelay: '80ms' }}
-              >
-                Megfelelőségi jelentés generálása
-              </h2>
-              <p className="text-xs text-phantom-muted animate-phantom-fade-in-up" style={{ animationDelay: '140ms' }}>
-                Munkamenet {report.session_id.slice(0, 8)} · A4 PDF dokumentum
->>>>>>> 3a8508588991892f7a5b814a4f47fe8bb0700865
               </p>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-<<<<<<< HEAD
             aria-label="Close"
             className="rounded-md p-1 text-phantom-muted transition-colors hover:bg-white hover:text-phantom-ink"
           >
             <X className="h-5 w-5" />
-=======
-            aria-label="Bezárás"
-            className="group rounded-md p-1 text-phantom-muted transition-phantom duration-phantom-base hover:bg-white hover:text-phantom-ink active:scale-90"
-          >
-            <X className="h-5 w-5 transition-transform duration-phantom-base group-hover:rotate-90" />
->>>>>>> 3a8508588991892f7a5b814a4f47fe8bb0700865
           </button>
         </div>
 
@@ -168,15 +130,7 @@ export default function ReportGeneratorModal({
               const isDone = idx < completedCount
               const isActive = idx === completedCount && !isReady
               return (
-<<<<<<< HEAD
                 <li key={step.id} className="flex items-center gap-3">
-=======
-                <li
-                  key={step.id}
-                  style={{ animationDelay: `${180 + idx * 80}ms` }}
-                  className="flex items-center gap-3 animate-phantom-slide-in-right"
-                >
->>>>>>> 3a8508588991892f7a5b814a4f47fe8bb0700865
                   <span
                     className={[
                       'flex h-6 w-6 shrink-0 items-center justify-center rounded-full ring-1 transition-colors',
@@ -188,15 +142,9 @@ export default function ReportGeneratorModal({
                     ].join(' ')}
                   >
                     {isDone ? (
-<<<<<<< HEAD
                       <Check className="h-3.5 w-3.5" strokeWidth={3} />
                     ) : isActive ? (
                       <Loader2 className="h-3.5 w-3.5 animate-spin" />
-=======
-                      <Check className="h-3.5 w-3.5 animate-phantom-bounce-in" strokeWidth={3} />
-                    ) : isActive ? (
-                      <Loader2 className="force-spin h-3.5 w-3.5 animate-spin" />
->>>>>>> 3a8508588991892f7a5b814a4f47fe8bb0700865
                     ) : (
                       <span className="text-[10px] font-semibold">{idx + 1}</span>
                     )}
@@ -219,29 +167,16 @@ export default function ReportGeneratorModal({
           </ol>
 
           {/* Progress bar */}
-<<<<<<< HEAD
           <div className="mt-6 h-1.5 w-full overflow-hidden rounded-full bg-phantom-surface-muted">
             <div
               className="h-full rounded-full bg-phantom-accent transition-all duration-500 ease-out"
-=======
-          <div
-            className="mt-6 h-1.5 w-full overflow-hidden rounded-full bg-phantom-surface-muted animate-phantom-fade-in-up"
-            style={{ animationDelay: `${180 + STEPS.length * 80}ms` }}
-          >
-            <div
-              className="phantom-progress-stripes h-full rounded-full bg-phantom-accent transition-[width] duration-500 ease-out"
->>>>>>> 3a8508588991892f7a5b814a4f47fe8bb0700865
               style={{ width: `${(completedCount / STEPS.length) * 100}%` }}
             />
           </div>
         </div>
 
         {/* Footer / CTA */}
-<<<<<<< HEAD
         <div className="border-t border-phantom-line bg-white px-6 py-5">
-=======
-        <div className="border-t border-phantom-line bg-white px-6 py-5 animate-phantom-fade-in-up" style={{ animationDelay: `${260 + STEPS.length * 80}ms` }}>
->>>>>>> 3a8508588991892f7a5b814a4f47fe8bb0700865
           {isReady ? (
             <PDFDownloadLink
               document={documentElement}
@@ -252,11 +187,7 @@ export default function ReportGeneratorModal({
                 if (error) {
                   return (
                     <span className="text-sm font-medium text-white">
-<<<<<<< HEAD
                       Failed to render PDF — please retry.
-=======
-                      PDF generálás sikertelen — próbálja újra.
->>>>>>> 3a8508588991892f7a5b814a4f47fe8bb0700865
                     </span>
                   )
                 }
@@ -264,22 +195,14 @@ export default function ReportGeneratorModal({
                   return (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin" />
-<<<<<<< HEAD
                       Preparing download…
-=======
-                      Letöltés előkészítése…
->>>>>>> 3a8508588991892f7a5b814a4f47fe8bb0700865
                     </>
                   )
                 }
                 return (
                   <>
                     <Download className="h-4 w-4" />
-<<<<<<< HEAD
                     Download PDF Report
-=======
-                    PDF jelentés letöltése
->>>>>>> 3a8508588991892f7a5b814a4f47fe8bb0700865
                   </>
                 )
               }}
@@ -291,19 +214,11 @@ export default function ReportGeneratorModal({
               className="flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-lg bg-phantom-surface-muted px-5 py-3.5 text-sm font-semibold text-phantom-muted"
             >
               <Loader2 className="h-4 w-4 animate-spin" />
-<<<<<<< HEAD
               Building report…
             </button>
           )}
           <p className="mt-3 text-center text-[11px] text-phantom-muted">
             Confidential — contains tax-sensitive information.
-=======
-              Jelentés készítése…
-            </button>
-          )}
-          <p className="mt-3 text-center text-[11px] text-phantom-muted">
-            Bizalmas — adózási információt tartalmaz.
->>>>>>> 3a8508588991892f7a5b814a4f47fe8bb0700865
           </p>
         </div>
       </div>
