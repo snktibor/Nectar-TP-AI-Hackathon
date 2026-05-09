@@ -22,10 +22,10 @@ interface BuildStep {
 }
 
 const STEPS: ReadonlyArray<BuildStep> = [
-  { id: 'compose',  label: 'Composing executive narrative',     durationMs: 900 },
-  { id: 'risk',     label: 'Aggregating risk dashboard metrics', durationMs: 800 },
-  { id: 'findings', label: 'Rendering findings with citations',  durationMs: 1100 },
-  { id: 'finalize', label: 'Finalizing PDF layout',              durationMs: 700 },
+  { id: 'compose',  label: 'Vezetői összefoglaló összeállítása', durationMs: 900 },
+  { id: 'risk',     label: 'Kockázati metrikák aggregálása',     durationMs: 800 },
+  { id: 'findings', label: 'Megállapítások hivatkozásokkal',     durationMs: 1100 },
+  { id: 'finalize', label: 'PDF elrendezés véglegesítése',       durationMs: 700 },
 ]
 
 export default function ReportGeneratorModal({
@@ -106,17 +106,17 @@ export default function ReportGeneratorModal({
                 id="report-modal-title"
                 className="font-serif text-base font-semibold text-phantom-ink"
               >
-                Generate Compliance Report
+                Megfelelőségi jelentés generálása
               </h2>
               <p className="text-xs text-phantom-muted">
-                Session {report.session_id.slice(0, 8)} · A4 PDF deliverable
+                Munkamenet {report.session_id.slice(0, 8)} · A4 PDF dokumentum
               </p>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close"
+            aria-label="Bezárás"
             className="rounded-md p-1 text-phantom-muted transition-colors hover:bg-white hover:text-phantom-ink"
           >
             <X className="h-5 w-5" />
@@ -187,7 +187,7 @@ export default function ReportGeneratorModal({
                 if (error) {
                   return (
                     <span className="text-sm font-medium text-white">
-                      Failed to render PDF — please retry.
+                      PDF generálás sikertelen — próbálja újra.
                     </span>
                   )
                 }
@@ -195,14 +195,14 @@ export default function ReportGeneratorModal({
                   return (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin" />
-                      Preparing download…
+                      Letöltés előkészítése…
                     </>
                   )
                 }
                 return (
                   <>
                     <Download className="h-4 w-4" />
-                    Download PDF Report
+                    PDF jelentés letöltése
                   </>
                 )
               }}
@@ -214,11 +214,11 @@ export default function ReportGeneratorModal({
               className="flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-lg bg-phantom-surface-muted px-5 py-3.5 text-sm font-semibold text-phantom-muted"
             >
               <Loader2 className="h-4 w-4 animate-spin" />
-              Building report…
+              Jelentés készítése…
             </button>
           )}
           <p className="mt-3 text-center text-[11px] text-phantom-muted">
-            Confidential — contains tax-sensitive information.
+            Bizalmas — adózási információt tartalmaz.
           </p>
         </div>
       </div>

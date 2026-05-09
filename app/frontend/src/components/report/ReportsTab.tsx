@@ -1,7 +1,17 @@
 import { useState } from 'react'
 import { FileText, Sparkles, ShieldAlert, Lock } from 'lucide-react'
-import type { BackendAuditReport } from '../../lib/backendAudit'
+import type {
+  BackendAuditReport,
+  BackendRiskSeverity,
+} from '../../lib/backendAudit'
 import ReportGeneratorModal from './ReportGeneratorModal'
+
+const RISK_LABEL_HU: Record<BackendRiskSeverity, string> = {
+  critical: 'Kritikus',
+  high: 'Magas',
+  medium: 'Közepes',
+  low: 'Alacsony',
+}
 
 interface ReportsTabProps {
   readonly auditReport: BackendAuditReport | null
@@ -53,13 +63,13 @@ export default function ReportsTab({ auditReport }: ReportsTabProps): JSX.Elemen
               <p className="text-[10px] font-semibold uppercase tracking-wide text-phantom-muted">
                 Kockázat
               </p>
-              <p className="mt-0.5 text-base font-semibold text-phantom-ink uppercase">
-                {auditReport.overall_risk}
+              <p className="mt-0.5 text-base font-semibold text-phantom-ink">
+                {RISK_LABEL_HU[auditReport.overall_risk]}
               </p>
             </div>
             <div className="rounded-lg border border-phantom-line bg-phantom-surface-muted px-3 py-2">
               <p className="text-[10px] font-semibold uppercase tracking-wide text-phantom-muted">
-                Session
+                Munkamenet
               </p>
               <p className="mt-0.5 truncate font-mono text-xs font-semibold text-phantom-ink">
                 {auditReport.session_id.slice(0, 8)}
