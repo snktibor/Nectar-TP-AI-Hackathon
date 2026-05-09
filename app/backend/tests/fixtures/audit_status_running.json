@@ -1,27 +1,27 @@
 {
   "success": true,
   "data": {
-    "audit_task_id": "e5de3c0e-e9ad-44b1-b48c-e150e9aaa6ab",
-    "session_id": "7d2a1e10-9c5e-4f55-8a02-2f1e7b3d4a91",
+    "audit_task_id": "f3a1b2c4-d5e6-7890-abcd-ef1234567891",
+    "session_id": "c4d5e6f7-a8b9-0123-cdef-234567890abc",
     "status": "in_progress",
     "progress": 47,
-    "stage": "agent:cross_doc_consistency_agent:running",
-    "started_at": "2026-05-08T22:03:10.865862Z",
-    "updated_at": "2026-05-08T22:03:10.866416Z",
+    "stage": "agent:benchmark_agent:running",
+    "started_at": "2026-05-09T10:00:01.000000Z",
+    "updated_at": "2026-05-09T10:00:12.000000Z",
     "error": null,
     "agent_progress": {
       "master_file_agent": "ok",
-      "local_file_agent": "running",
+      "local_file_agent": "ok",
       "benchmark_agent": "running",
       "contract_agent": "pending",
       "invoice_agent": "pending",
-      "cross_doc_consistency_agent": "running"
+      "cross_doc_consistency_agent": "pending"
     }
   },
   "error": null,
   "meta": {
-    "request_id": "056a78a6-a9ad-4daf-ba71-46c031a34cd5",
-    "timestamp": "2026-05-08T22:03:10.867429Z",
+    "request_id": "e5f6a7b8-c9d0-1234-ef01-234567890bcd",
+    "timestamp": "2026-05-09T10:00:12.000000Z",
     "api_version": "v1"
   }
 }

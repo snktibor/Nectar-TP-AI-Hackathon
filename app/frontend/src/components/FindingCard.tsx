@@ -1,3 +1,4 @@
+import { MapPin, Scale } from 'lucide-react'
 import {
   AGENT_LABELS,
   getSeverityBorderClass,
@@ -5,13 +6,78 @@ import {
   severityLabel,
   type BackendBenchmarkRisk,
   type BackendConsistencyError,
+  type BackendEvidenceChunk,
   type BackendFindingAttribution,
   type BackendMissingElement,
 } from '../lib/backendAudit'
 import type { CitationTarget } from '../types/viewer'
+import { resolveLegalReference } from '../lib/legalDocs'
 import { phantomDesign } from '../design-system/phantomDesign'
 import EvidenceChip from './EvidenceChip'
 import { StatusPill } from './ui/DashboardPrimitives'
+
+function chunkToCitation(chunk: BackendEvidenceChunk, sessionId: string): CitationTarget {
+  return {
+    sessionId,
+    filename: chunk.filename,
+    page: chunk.page,
+    charStart: chunk.char_start ?? null,
+    charEnd: chunk.char_end ?? null,
+    sourceKind: chunk.source_kind ?? 'document',
+    quote: chunk.quote ?? null,
+  }
+}
+
+function LegalReferenceBadge({
+  reference,
+  sessionId,
+  onCitationClick,
+}: Readonly<{
+  reference: string
+  sessionId: string
+  onCitationClick?: (target: CitationTarget) => void
+}>): JSX.Element {
+  const target = resolveLegalReference(reference)
+  const baseClass = phantomDesign.components.tag
+  if (!target || !onCitationClick) {
+    return <code className={baseClass}>{reference}</code>
+  }
+
+  const citation: CitationTarget = {
+    sessionId,
+    filename: target.filename,
+    page: 0,
+    charStart: null,
+    charEnd: null,
+    sourceKind: 'legal',
+    quote: null,
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={() => onCitationClick(citation)}
+      className={[
+        baseClass,
+        'cursor-pointer text-phantom-accent hover:bg-phantom-accent-soft hover:text-phantom-accent hover:ring-phantom-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus',
+      ].join(' ')}
+      title={`${target.filename} megnyitása`}
+    >
+      {reference}
+    </button>
+  )
+}
+
+// Pick the most useful chunk for the "Show me where" CTA: prefer an uploaded
+// document chunk over a legal one, since the user wants to see THEIR file.
+function pickPrimaryChunk(
+  chunks: readonly BackendEvidenceChunk[],
+): BackendEvidenceChunk | null {
+  if (chunks.length === 0) return null
+  return (
+    chunks.find((c) => (c.source_kind ?? 'document') === 'document') ?? chunks[0]
+  )
+}
 
 type FindingVariant =
   | { kind: 'consistency'; finding: BackendConsistencyError }
@@ -111,10 +177,19 @@ function AttributionRow({
           </summary>
           <div className="mt-1 flex flex-wrap gap-1">
             {attribution.rule_id && (
-              <code className={phantomDesign.components.tag}>{attribution.rule_id}</code>
+              <LegalReferenceBadge
+                reference={attribution.rule_id}
+                sessionId={sessionId}
+                onCitationClick={onCitationClick}
+              />
             )}
             {attribution.legal_references?.map((ref) => (
-              <code key={ref} className={phantomDesign.components.tag}>{ref}</code>
+              <LegalReferenceBadge
+                key={ref}
+                reference={ref}
+                sessionId={sessionId}
+                onCitationClick={onCitationClick}
+              />
             ))}
           </div>
         </details>
@@ -149,6 +224,12 @@ export default function FindingCard({
   const borderClass = getSeverityBorderClass(severity)
   const isCrossDoc = attribution?.agent_id === 'cross_doc_consistency_agent'
   const isMultiDoc = isCrossDoc && findingLocationsCount(variant) >= 2
+  const evidenceChunks = attribution?.evidence_chunks ?? []
+  const primaryChunk = pickPrimaryChunk(evidenceChunks)
+  const documentChunks = evidenceChunks.filter(
+    (c) => (c.source_kind ?? 'document') === 'document',
+  )
+  const legalChunks = evidenceChunks.filter((c) => c.source_kind === 'legal')
 
   return (
     <article
@@ -215,6 +296,49 @@ export default function FindingCard({
             Várható: {variant.finding.expected_in} · Kötelező: {variant.finding.required_by}
           </p>
         </>
+      )}
+
+      {primaryChunk && onCitationClick && (
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={() => onCitationClick(chunkToCitation(primaryChunk, sessionId))}
+            className="inline-flex items-center gap-1.5 rounded-phantom-control bg-phantom-accent px-3 py-1.5 text-xs font-semibold text-white shadow-phantom-button transition-phantom duration-phantom-base hover:-translate-y-px hover:bg-phantom-accent-hover hover:shadow-phantom-lift active:translate-y-0 active:bg-phantom-accent-pressed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus focus-visible:ring-offset-2 focus-visible:ring-offset-phantom-surface"
+            title={`${primaryChunk.filename} · oldal ${primaryChunk.page + 1}`}
+          >
+            <MapPin className="h-3.5 w-3.5" />
+            <span>Mutasd meg hol van</span>
+            <span className="max-w-[16ch] truncate font-normal opacity-90">
+              · {primaryChunk.filename}
+            </span>
+          </button>
+          {documentChunks
+            .filter((c) => c !== primaryChunk)
+            .map((chunk, i) => (
+              <button
+                key={`doc-${chunk.filename}-${chunk.page}-${chunk.chunk_index}-${i}`}
+                type="button"
+                onClick={() => onCitationClick(chunkToCitation(chunk, sessionId))}
+                className="inline-flex items-center gap-1.5 rounded-phantom-control border border-phantom-line bg-phantom-surface px-3 py-1.5 text-xs font-medium text-phantom-ink transition-phantom duration-phantom-base hover:border-phantom-accent hover:text-phantom-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus"
+                title={`${chunk.filename} · oldal ${chunk.page + 1}`}
+              >
+                <MapPin className="h-3.5 w-3.5" />
+                <span className="max-w-[18ch] truncate">{chunk.filename}</span>
+              </button>
+            ))}
+          {legalChunks.map((chunk, i) => (
+            <button
+              key={`legal-${chunk.filename}-${chunk.page}-${chunk.chunk_index}-${i}`}
+              type="button"
+              onClick={() => onCitationClick(chunkToCitation(chunk, sessionId))}
+              className="inline-flex items-center gap-1.5 rounded-phantom-control border border-phantom-accent/30 bg-phantom-accent-soft px-3 py-1.5 text-xs font-medium text-phantom-accent transition-phantom duration-phantom-base hover:bg-phantom-accent hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus"
+              title={`${chunk.filename} · oldal ${chunk.page + 1}`}
+            >
+              <Scale className="h-3.5 w-3.5" />
+              <span className="max-w-[20ch] truncate">{chunk.filename}</span>
+            </button>
+          ))}
+        </div>
       )}
 
       {attribution && (

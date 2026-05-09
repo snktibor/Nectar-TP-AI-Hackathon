@@ -127,17 +127,26 @@ class LlmTurn(BaseModel):
 # ---------------------------------------------------------------------------
 
 
-_RETRY_STATUSES = frozenset({408, 409, 429, 500, 502, 503, 504})
+# 429 is intentionally excluded: the Anthropic SDK handles rate-limit retries
+# itself, honouring the Retry-After header (which can be 40+ seconds).  Adding
+# a second tenacity layer on top of 429 produces competing backoffs and obscures
+# which retry is waiting.  Tenacity only covers transient connection/server faults
+# that the SDK does not automatically retry.
+_TENACITY_RETRY_STATUSES = frozenset({408, 500, 502, 503, 504})
 
 
 def _is_retryable(exc: BaseException) -> bool:
-    """Decide whether to retry based on the raised exception."""
+    """Return True for transient faults that tenacity should retry.
+
+    429 / RateLimitError is excluded — the SDK handles those internally via
+    Retry-After and its own max_retries counter.
+    """
     if isinstance(exc, httpx.TimeoutException):
         return True
     if isinstance(exc, anthropic.APIConnectionError):
         return True
     if isinstance(exc, anthropic.APIStatusError):
-        return exc.status_code in _RETRY_STATUSES
+        return exc.status_code in _TENACITY_RETRY_STATUSES
     return False
 
 
@@ -169,6 +178,10 @@ class LlmClient:
                 )
             self._client = AsyncAnthropic(
                 api_key=self._settings.anthropic_api_key.get_secret_value(),
+                # The SDK handles 429 with Retry-After-aware backoff. We hand the
+                # retry count setting here so it matches our settings, and tenacity
+                # does NOT duplicate this for 429 (see _is_retryable).
+                max_retries=self._settings.llm_max_retries,
             )
         return self._client
 
@@ -193,9 +206,12 @@ class LlmClient:
         assert max_tokens_eff > 0, "max_tokens must be positive"
         assert 0.0 <= temperature <= 1.0, "temperature must be in [0,1]"
 
+        # Tenacity covers connection faults and 5xx — not 429 (SDK handles those).
+        # max=60 gives two connection-error retries breathing room without
+        # interfering with the SDK's own Retry-After timing.
         retrying = AsyncRetrying(
-            stop=stop_after_attempt(self._settings.llm_max_retries + 1),
-            wait=wait_exponential(multiplier=0.5, min=0.5, max=8.0),
+            stop=stop_after_attempt(2),
+            wait=wait_exponential(multiplier=1.0, min=1.0, max=60.0),
             retry=retry_if_exception(_is_retryable),
             reraise=True,
         )

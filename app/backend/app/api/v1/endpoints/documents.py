@@ -9,11 +9,16 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Annotated
 from uuid import UUID, uuid4
 
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile, status
 from fastapi.responses import Response
+
+# Root of the backend package — used for the datasets fallback.
+_BACKEND_ROOT = Path(__file__).resolve().parents[4]
+_DATASETS_ROOT = _BACKEND_ROOT / "datasets"
 
 from app.models.schemas import (
     ApiResponse,
@@ -221,13 +226,22 @@ async def ingest_documents(
     summary="Stream the original uploaded file bytes for in-browser viewing.",
 )
 async def download_document(session_id: UUID, filename: str) -> Response:
-    """Return the raw bytes of a previously ingested file so the UI can render it."""
+    """Return the raw bytes of a previously ingested file so the UI can render it.
+
+    Falls back to the on-disk datasets/ folder so evidence chunks from the mock
+    pipeline resolve even when the file was never explicitly uploaded in this session.
+    """
     payload = _FILE_BYTES.get((session_id, filename))
+
+    if payload is None:
+        payload = _load_from_datasets(filename)
+
     if payload is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail={"code": "FILE_NOT_FOUND", "message": f"No stored bytes for '{filename}' in session {session_id}."},
         )
+
     media_type = (
         "application/pdf"
         if filename.lower().endswith(".pdf")
@@ -238,6 +252,22 @@ async def download_document(session_id: UUID, filename: str) -> Response:
         media_type=media_type,
         headers={"Content-Disposition": f'inline; filename="{filename}"'},
     )
+
+
+def _load_from_datasets(filename: str) -> bytes | None:
+    """Search datasets/ subdirectories for a file matching `filename` by name only.
+
+    Returns the raw bytes if found, None otherwise.  Never traverses outside
+    `_DATASETS_ROOT` — the search is limited to direct children of that directory.
+    """
+    if not _DATASETS_ROOT.is_dir():
+        return None
+    needle = Path(filename).name
+    for candidate in _DATASETS_ROOT.rglob(needle):
+        if candidate.is_file():
+            logger.info("datasets fallback: serving '%s' from %s", filename, candidate)
+            return candidate.read_bytes()
+    return None
 
 
 def _map_doc_type(detected: str) -> DocumentType:

@@ -5,6 +5,7 @@ import 'react-pdf/dist/Page/AnnotationLayer.css'
 import { X, Scale } from 'lucide-react'
 import { phantomDesign } from '../design-system/phantomDesign'
 import type { CitationTarget } from '../types/viewer'
+import { resolveLegalPdfUrl } from '../lib/legalDocs'
 import { EmptyPanel } from './ui/DashboardPrimitives'
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
@@ -51,6 +52,79 @@ function LegalTextPanel({ citation }: Readonly<{ citation: CitationTarget }>): J
 // Highlight helpers for text layer
 // ---------------------------------------------------------------------------
 
+const HIGHLIGHT_CLASSES = [
+  'phantom-highlight',
+  'bg-yellow-200',
+  'rounded',
+  'outline-dashed',
+  'outline-2',
+  'outline-phantom-accent',
+  'outline-offset-1',
+] as const
+
+function normalizeForMatch(value: string): string {
+  return value.toLowerCase().replace(/\s+/g, ' ').trim()
+}
+
+function highlightByQuote(spans: HTMLElement[], quote: string): boolean {
+  const needle = normalizeForMatch(quote)
+  if (needle.length < 3) return false
+
+  // Build cumulative page text (normalized) and remember where each span lands.
+  type SpanRange = { span: HTMLElement; start: number; end: number }
+  const ranges: SpanRange[] = []
+  let pageText = ''
+  for (const span of spans) {
+    const raw = span.textContent ?? ''
+    const normalized = raw.toLowerCase().replace(/\s+/g, ' ')
+    if (normalized.length === 0) continue
+    const withSep = pageText.length > 0 && !pageText.endsWith(' ') ? ' ' + normalized : normalized
+    const start = pageText.length
+    pageText = pageText + withSep
+    ranges.push({ span, start, end: pageText.length })
+  }
+
+  // Try the full needle, then a 60-char prefix as a fallback so partially split
+  // quotes still light up something useful.
+  const candidates = [needle]
+  if (needle.length > 60) candidates.push(needle.slice(0, 60))
+
+  for (const candidate of candidates) {
+    const matchStart = pageText.indexOf(candidate)
+    if (matchStart === -1) continue
+    const matchEnd = matchStart + candidate.length
+    let matched = false
+    for (const range of ranges) {
+      if (range.start < matchEnd && range.end > matchStart) {
+        range.span.classList.add(...HIGHLIGHT_CLASSES)
+        matched = true
+      }
+    }
+    if (matched) return true
+  }
+
+  return false
+}
+
+function highlightByCharOffsets(
+  spans: HTMLElement[],
+  charStart: number,
+  charEnd: number,
+): boolean {
+  let offset = 0
+  let matched = false
+  for (const span of spans) {
+    const text = span.textContent ?? ''
+    const spanEnd = offset + text.length
+    if (offset < charEnd && spanEnd > charStart) {
+      span.classList.add(...HIGHLIGHT_CLASSES)
+      matched = true
+    }
+    offset = spanEnd
+  }
+  return matched
+}
+
 function applyHighlight(
   pageContainer: HTMLElement,
   charStart: number | null,
@@ -63,33 +137,18 @@ function applyHighlight(
   const spans = Array.from(textLayer.querySelectorAll<HTMLElement>('span[role="presentation"], span'))
   if (spans.length === 0) return
 
-  // Remove previous highlights
   pageContainer.querySelectorAll('.phantom-highlight').forEach((el) => {
-    el.classList.remove('phantom-highlight', 'bg-yellow-200', 'rounded')
+    el.classList.remove(...HIGHLIGHT_CLASSES)
   })
 
-  if (charStart !== null && charEnd !== null) {
-    // Char-offset based highlight
-    let offset = 0
-    for (const span of spans) {
-      const text = span.textContent ?? ''
-      const spanEnd = offset + text.length
-      if (offset < charEnd && spanEnd > charStart) {
-        span.classList.add('phantom-highlight', 'bg-yellow-200', 'rounded')
-      }
-      offset = spanEnd
-    }
-    return
-  }
+  // Quote-based match is the primary path: the backend's char_start/char_end
+  // are document-global, while the textLayer is per-page — so per-page char
+  // offsets would only line up by accident on page 1. We try the quote first,
+  // and only fall back to per-page char ranges when no quote is available.
+  if (quote && highlightByQuote(spans, quote)) return
 
-  // Fallback: fuzzy quote match
-  if (!quote) return
-  const normalised = quote.toLowerCase().trim()
-  for (const span of spans) {
-    const text = (span.textContent ?? '').toLowerCase()
-    if (text.length > 0 && normalised.includes(text)) {
-      span.classList.add('phantom-highlight', 'bg-yellow-200', 'rounded')
-    }
+  if (charStart !== null && charEnd !== null) {
+    highlightByCharOffsets(spans, charStart, charEnd)
   }
 }
 
@@ -105,11 +164,17 @@ export default function DocumentViewer({ citation, onClose }: DocumentViewerProp
 
   const isDocx = citation.filename.toLowerCase().endsWith('.docx')
   const isLegal = citation.sourceKind === 'legal'
-  const showTextPanel = isLegal || isDocx
+  const legalPdfUrl = isLegal ? resolveLegalPdfUrl(citation.filename) : null
+  // Show the text-only fallback panel when:
+  //  - the citation is a .docx (no PDF render path yet), OR
+  //  - the citation is legal but we don't have a mapped ruleset PDF for it.
+  const showTextPanel = isDocx || (isLegal && legalPdfUrl === null)
 
   const pdfUrl = showTextPanel
     ? null
-    : `${API_BASE}/api/v1/documents/${encodeURIComponent(citation.sessionId)}/file/${encodeURIComponent(citation.filename)}`
+    : isLegal
+      ? legalPdfUrl
+      : `${API_BASE}/api/v1/documents/${encodeURIComponent(citation.sessionId)}/file/${encodeURIComponent(citation.filename)}`
 
   // 1-based page for react-pdf
   const pageNumber = citation.page + 1

@@ -96,6 +96,9 @@ class AgentOrchestrator:
         self._rag = rag or _resolve_rag_service()
         self._tasks: dict[UUID, _AgentTaskState] = {}
         self._lock = asyncio.Lock()
+        # Limits how many agents call the LLM API at the same time so we stay
+        # below the Anthropic rate limit and avoid cascading 429 → timeout chains.
+        self._api_sem = asyncio.Semaphore(self._settings.agent_max_concurrency)
 
     # ---- Public API --------------------------------------------------
 
@@ -136,15 +139,19 @@ class AgentOrchestrator:
         per_agent_weight = (100 - _DISPATCH_WEIGHT - _FINALIZE_WEIGHT) // max(len(AGENT_CLASSES), 1)
         results: list[AgentRunResult] = []
 
-        # Schedule all agents in parallel, each with its own timeout.
+        # Each agent acquires the semaphore before calling the LLM, so at most
+        # `agent_max_concurrency` agents hit the API simultaneously.  All agents
+        # are still scheduled as asyncio Tasks (they can do RAG / preprocessing
+        # in parallel); only the LLM call itself is gated.
         async def _run_one(cls: type[DocumentTypeAgent]) -> AgentRunResult:
             agent = cls(llm=self._llm, rag=self._rag, settings=self._settings)
             await self._mark_agent(task_id, agent.agent_id, "running")
             try:
-                result = await asyncio.wait_for(
-                    agent.run(state.session_id),
-                    timeout=self._settings.agent_timeout_s,
-                )
+                async with self._api_sem:
+                    result = await asyncio.wait_for(
+                        agent.run(state.session_id),
+                        timeout=self._settings.agent_timeout_s,
+                    )
             except asyncio.TimeoutError:
                 logger.warning("agent timed out agent_id=%s", agent.agent_id)
                 result = _synthetic_failure(

@@ -12,6 +12,7 @@ implementation.
 
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 from abc import ABC
@@ -139,7 +140,10 @@ class DocumentTypeAgent(ABC):
         ]
 
         try:
-            for _ in range(self._settings.max_tool_iterations):
+            for turn_idx in range(self._settings.max_tool_iterations):
+                if turn_idx > 0 and self._settings.inter_turn_delay_s > 0:
+                    await asyncio.sleep(self._settings.inter_turn_delay_s)
+
                 turn = await self._llm.create(
                     model=self.model,
                     system=system_blocks,
@@ -272,11 +276,11 @@ class DocumentTypeAgent(ABC):
         query_raw = tool_input.get("query")
         if not isinstance(query_raw, str) or not query_raw.strip():
             return ("query is required and must be a non-empty string.", True)
-        n_raw = tool_input.get("n_results", 5)
+        n_raw = tool_input.get("n_results", self._settings.rag_n_results)
         try:
-            n_results = max(1, min(20, int(n_raw)))
+            n_results = max(1, min(10, int(n_raw)))
         except (TypeError, ValueError):
-            return ("n_results must be an integer in [1,20].", True)
+            return ("n_results must be an integer in [1,10].", True)
 
         chunks = await self._rag.query_context(
             session_id=session_id,
