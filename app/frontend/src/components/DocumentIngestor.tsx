@@ -19,6 +19,7 @@ import {
 } from '../lib/documentDisplay'
 import type { ApiResponse, IngestedDocument, IngestResponse } from '../types/api'
 import { StatusPill } from './ui/DashboardPrimitives'
+import RevealOnScroll from './ui/RevealOnScroll'
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL
 const ACCEPTED_TYPES = '.pdf,.docx'
@@ -633,11 +634,11 @@ export default function DocumentIngestor({
               ? 'bg-red-50 text-red-600 ring-red-100'
               : 'bg-blue-50 text-blue-600 ring-blue-100'
             return (
-            <div
+            <RevealOnScroll
               key={file.name}
-              style={{ animationDelay: `${index * 60}ms` }}
+              delayMs={index * 80}
               className={[
-                'group flex items-center gap-3 rounded-xl border p-3 shadow-sm transition-phantom duration-phantom-base animate-phantom-fade-in-up hover:-translate-y-px hover:shadow-phantom-soft',
+                'group flex items-center gap-3 rounded-xl border p-3 shadow-sm transition-phantom duration-phantom-base hover:-translate-y-px hover:shadow-phantom-soft',
                 phase === 'error'
                   ? 'border-phantom-danger-border bg-phantom-danger-soft'
                   : 'border-gray-100 bg-white hover:border-phantom-accent/40',
@@ -674,7 +675,7 @@ export default function DocumentIngestor({
                   <X className="h-4 w-4" />
                 </button>
               </div>
-            </div>
+            </RevealOnScroll>
             )
           })}
         </div>
@@ -750,10 +751,10 @@ export default function DocumentIngestor({
 
               if (document.status === 'failed') {
                 return (
-                  <div
+                  <RevealOnScroll
                     key={document.document_id}
-                    style={{ animationDelay: `${index * 60}ms` }}
-                    className="rounded-phantom-card border border-phantom-danger-border bg-phantom-danger-soft p-3 animate-phantom-fade-in-up"
+                    delayMs={index * 90}
+                    className="rounded-phantom-card border border-phantom-danger-border bg-phantom-danger-soft p-3"
                   >
                     <div className="flex items-start gap-2">
                       <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-phantom-danger-text" />
@@ -773,7 +774,7 @@ export default function DocumentIngestor({
                         <p className="mt-1 text-xs text-phantom-danger-text">Feldolgozás meghiúsult.</p>
                       </div>
                     </div>
-                  </div>
+                  </RevealOnScroll>
                 )
               }
 
@@ -782,8 +783,8 @@ export default function DocumentIngestor({
               const isSelectable = !isMisclassified && Boolean(onSelectDocument)
 
               return (
+                <RevealOnScroll key={document.document_id} delayMs={index * 90}>
                 <div
-                  key={document.document_id}
                   role={isSelectable ? 'button' : undefined}
                   tabIndex={isSelectable ? 0 : undefined}
                   onClick={
@@ -801,9 +802,8 @@ export default function DocumentIngestor({
                         }
                       : undefined
                   }
-                  style={{ animationDelay: `${index * 60}ms` }}
                   className={[
-                    'group rounded-xl border p-3 shadow-sm transition-phantom duration-phantom-base animate-phantom-fade-in-up',
+                    'group rounded-xl border p-3 shadow-sm transition-phantom duration-phantom-base',
                     isMisclassified
                       ? 'border-phantom-danger-border bg-phantom-danger-soft hover:-translate-y-px hover:shadow-phantom-soft'
                       : isSelected
@@ -886,6 +886,7 @@ export default function DocumentIngestor({
                     </div>
                   </div>
                 </div>
+                </RevealOnScroll>
               )
             })}
           </div>

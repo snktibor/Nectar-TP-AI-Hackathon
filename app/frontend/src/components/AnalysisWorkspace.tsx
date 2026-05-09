@@ -24,6 +24,7 @@ import type { IngestedDocument } from '../types/api'
 import AgentStatusStrip from './AgentStatusStrip'
 import FindingCard from './FindingCard'
 import { EmptyPanel, MetricCard, StatusPill } from './ui/DashboardPrimitives'
+import RevealOnScroll from './ui/RevealOnScroll'
 
 type TabId = 'findings' | 'agent_runs' | 'telemetry'
 type StatusPillTone = 'neutral' | 'accent' | 'success' | 'warning' | 'danger' | 'info'
@@ -196,7 +197,7 @@ function FindingsView({
   return (
     <div className="space-y-3 animate-phantom-fade-in">
       {/* Summary banner */}
-      <section className="min-w-0 overflow-hidden rounded-phantom-card border border-phantom-line bg-phantom-surface p-4 animate-phantom-fade-in-up transition-phantom duration-phantom-base hover:shadow-phantom-soft">
+      <RevealOnScroll className="min-w-0 overflow-hidden rounded-phantom-card border border-phantom-line bg-phantom-surface p-4 transition-phantom duration-phantom-base hover:shadow-phantom-soft">
         <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
           <p className="min-w-0 flex-1 break-words text-sm leading-6 text-phantom-ink">{report.summary}</p>
           <span
@@ -208,7 +209,7 @@ function FindingsView({
             {severityLabel(report.overall_risk)}
           </span>
         </div>
-      </section>
+      </RevealOnScroll>
 
       {/* Metric cards */}
       <div className="grid grid-cols-1 gap-2 xs:grid-cols-2 sm:grid-cols-3">
@@ -217,18 +218,14 @@ function FindingsView({
           { icon: BarChart2, label: 'Benchmark\nkockázatok', value: String(report.benchmark_risks.length) },
           { icon: ClipboardList, label: 'Hiányzó\nelemek', value: String(report.missing_elements.length) },
         ].map((card, index) => (
-          <div
-            key={card.label}
-            style={{ animationDelay: `${index * 70}ms` }}
-            className="animate-phantom-fade-in-up"
-          >
+          <RevealOnScroll key={card.label} delayMs={index * 90}>
             <MetricCard icon={card.icon} label={card.label} value={card.value} />
-          </div>
+          </RevealOnScroll>
         ))}
       </div>
 
       {/* Severity filter */}
-      <div className="grid min-w-0 grid-cols-2 gap-1.5 animate-phantom-fade-in-up sm:grid-cols-3 xl:grid-cols-5" style={{ animationDelay: '240ms' }}>
+      <RevealOnScroll className="grid min-w-0 grid-cols-2 gap-1.5 sm:grid-cols-3 xl:grid-cols-5">
         <button
           type="button"
           onClick={() => setSeverityFilter(null)}
@@ -256,7 +253,7 @@ function FindingsView({
             {severityLabel(s)}
           </button>
         ))}
-      </div>
+      </RevealOnScroll>
 
       {/* Per-agent accordion */}
       <div className="space-y-2">
@@ -267,10 +264,9 @@ function FindingsView({
           if (filtered.length === 0) return null
 
           return (
+            <RevealOnScroll key={agentId} delayMs={index * 80}>
             <details
-              key={agentId}
-              style={{ animationDelay: `${300 + index * 60}ms` }}
-              className="phantom-accordion animate-phantom-fade-in-up rounded-phantom-card border border-phantom-line bg-phantom-surface transition-phantom duration-phantom-base hover:border-phantom-accent/40"
+              className="phantom-accordion rounded-phantom-card border border-phantom-line bg-phantom-surface transition-phantom duration-phantom-base hover:border-phantom-accent/40"
               open
             >
               <summary className="group flex min-w-0 cursor-pointer select-none items-center justify-between gap-2 p-3 hover:bg-phantom-accent-soft/30">
@@ -283,17 +279,19 @@ function FindingsView({
                 </span>
               </summary>
               <div className="space-y-2 border-t border-phantom-line p-3">
-                {filtered.map((f) => (
-                  <FindingCard
-                    key={findingKey(f)}
-                    variant={f}
-                    showAgentBadge={false}
-                    sessionId={sessionId}
-                    onCitationClick={onCitationClick}
-                  />
+                {filtered.map((f, fIdx) => (
+                  <RevealOnScroll key={findingKey(f)} delayMs={fIdx * 50}>
+                    <FindingCard
+                      variant={f}
+                      showAgentBadge={false}
+                      sessionId={sessionId}
+                      onCitationClick={onCitationClick}
+                    />
+                  </RevealOnScroll>
                 ))}
               </div>
             </details>
+            </RevealOnScroll>
           )
         })}
 
@@ -304,6 +302,7 @@ function FindingsView({
           const filtered = bucket.filter((f) => matchesSeverityFilter(f, severityFilter))
           if (filtered.length === 0) return null
           return (
+            <RevealOnScroll>
             <details
               className="phantom-accordion rounded-phantom-card border border-phantom-line bg-phantom-surface transition-phantom duration-phantom-base hover:border-phantom-accent/40"
               open
@@ -316,36 +315,39 @@ function FindingsView({
                 </span>
               </summary>
               <div className="space-y-2 border-t border-phantom-line p-3">
-                {filtered.map((f) => (
-                  <FindingCard
-                    key={findingKey(f)}
-                    variant={f}
-                    showAgentBadge={false}
-                    sessionId={sessionId}
-                    onCitationClick={onCitationClick}
-                  />
+                {filtered.map((f, fIdx) => (
+                  <RevealOnScroll key={findingKey(f)} delayMs={fIdx * 50}>
+                    <FindingCard
+                      variant={f}
+                      showAgentBadge={false}
+                      sessionId={sessionId}
+                      onCitationClick={onCitationClick}
+                    />
+                  </RevealOnScroll>
                 ))}
               </div>
             </details>
+            </RevealOnScroll>
           )
         })()}
       </div>
 
       {/* Flat severity list (single section-level scrollbar) */}
-      <section className="min-w-0 overflow-hidden rounded-phantom-card border border-phantom-line bg-phantom-surface p-4 animate-phantom-fade-in-up" style={{ animationDelay: '720ms' }}>
+      <RevealOnScroll className="min-w-0 overflow-hidden rounded-phantom-card border border-phantom-line bg-phantom-surface p-4">
         <p className="mb-2 break-words text-sm font-semibold text-phantom-ink">
           Összes megállapítás ({filteredFindings.length})
         </p>
         <div className="space-y-2">
           {filteredFindings.length > 0 ? (
-            filteredFindings.map((f) => (
-              <FindingCard
-                key={findingKey(f)}
-                variant={f}
-                showAgentBadge={true}
-                sessionId={sessionId}
-                onCitationClick={onCitationClick}
-              />
+            filteredFindings.map((f, fIdx) => (
+              <RevealOnScroll key={findingKey(f)} delayMs={Math.min(fIdx, 6) * 50}>
+                <FindingCard
+                  variant={f}
+                  showAgentBadge={true}
+                  sessionId={sessionId}
+                  onCitationClick={onCitationClick}
+                />
+              </RevealOnScroll>
             ))
           ) : (
             <p className="break-words text-sm font-normal text-phantom-ink">
@@ -355,7 +357,7 @@ function FindingsView({
             </p>
           )}
         </div>
-      </section>
+      </RevealOnScroll>
 
     </div>
   )
@@ -392,10 +394,10 @@ function AgentRunsView({ report }: Readonly<{ report: BackendAuditReport }>): JS
           run.consistency_errors.length + run.benchmark_risks.length + run.missing_elements.length
 
         return (
-          <article
+          <RevealOnScroll
             key={run.agent_id}
-            style={{ animationDelay: `${index * 70}ms` }}
-            className="min-w-0 overflow-hidden rounded-phantom-card border border-phantom-line bg-phantom-surface p-4 animate-phantom-fade-in-up transition-phantom duration-phantom-base hover:-translate-y-0.5 hover:shadow-phantom-soft hover:border-phantom-accent/40"
+            delayMs={index * 90}
+            className="min-w-0 overflow-hidden rounded-phantom-card border border-phantom-line bg-phantom-surface p-4 transition-phantom duration-phantom-base hover:-translate-y-0.5 hover:shadow-phantom-soft hover:border-phantom-accent/40"
           >
             <div className="flex min-w-0 flex-wrap items-start justify-between gap-2">
               <p className="min-w-0 break-words text-sm font-semibold leading-5 text-phantom-ink">
@@ -422,7 +424,7 @@ function AgentRunsView({ report }: Readonly<{ report: BackendAuditReport }>): JS
                 {run.error.code}: {run.error.message}
               </div>
             )}
-          </article>
+          </RevealOnScroll>
         )
       })}
     </div>
@@ -466,20 +468,13 @@ function TelemetryView({ report }: Readonly<{ report: BackendAuditReport }>): JS
     <div className="space-y-4 animate-phantom-fade-in">
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4">
         {telemetryCards.map((card, index) => (
-          <div
-            key={card.label}
-            style={{ animationDelay: `${index * 70}ms` }}
-            className="animate-phantom-fade-in-up"
-          >
+          <RevealOnScroll key={card.label} delayMs={index * 80}>
             <MetricCard icon={card.icon} label={card.label} value={card.value} />
-          </div>
+          </RevealOnScroll>
         ))}
       </div>
 
-      <section
-        className="min-w-0 overflow-hidden rounded-phantom-card border border-phantom-line bg-phantom-surface p-4 animate-phantom-fade-in-up"
-        style={{ animationDelay: '320ms' }}
-      >
+      <RevealOnScroll className="min-w-0 overflow-hidden rounded-phantom-card border border-phantom-line bg-phantom-surface p-4">
         <p className="mb-3 break-words text-xs font-semibold uppercase tracking-[0.06em] text-phantom-subtle">
           Token felhasználás ügynökönként
         </p>
@@ -548,7 +543,7 @@ function TelemetryView({ report }: Readonly<{ report: BackendAuditReport }>): JS
             </tfoot>
           </table>
         </div>
-      </section>
+      </RevealOnScroll>
     </div>
   )
 }

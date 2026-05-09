@@ -11,6 +11,7 @@ import {
 } from '../lib/backendAudit'
 import type { CitationTarget } from '../types/viewer'
 import FindingCard from './FindingCard'
+import RevealOnScroll from './ui/RevealOnScroll'
 
 type AnyFinding =
   | { kind: 'consistency'; finding: BackendConsistencyError }
@@ -110,18 +111,14 @@ export default function FilteredFindingsPanel({
         ) : (
           <div className="space-y-2">
             {filtered.map((f, index) => (
-              <div
-                key={findingKey(f)}
-                style={{ animationDelay: `${index * 50}ms` }}
-                className="animate-phantom-fade-in-up"
-              >
+              <RevealOnScroll key={findingKey(f)} delayMs={Math.min(index, 6) * 60}>
                 <FindingCard
                   variant={f}
                   showAgentBadge
                   sessionId={sessionId}
                   onCitationClick={onCitationClick}
                 />
-              </div>
+              </RevealOnScroll>
             ))}
           </div>
         )}
