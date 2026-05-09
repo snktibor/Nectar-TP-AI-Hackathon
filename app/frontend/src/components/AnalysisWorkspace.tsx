@@ -636,7 +636,7 @@ export default function AnalysisWorkspace({
             className={[
               phantomDesign.components.buttonBase,
               phantomDesign.components.buttonPrimary,
-              'mt-3 w-full min-h-9 px-3 py-2 text-xs shadow-phantom-soft hover:translate-y-0 hover:shadow-phantom-soft active:shadow-phantom-soft sm:w-auto',
+              'mt-3 h-10 min-h-8 w-full px-3 py-1.5 text-xs shadow-phantom-soft hover:translate-y-0 hover:shadow-phantom-soft active:shadow-phantom-soft sm:w-auto',
             ].join(' ')}
           >
             <span className="inline-flex items-center gap-2">

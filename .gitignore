@@ -40,6 +40,7 @@ Thumbs.db
 
 ### Logs
 *.log
+logs.txt
 
 ### Local data
 *.sqlite
@@ -55,4 +56,6 @@ settings.local.json
 /app/backend/data/chromadb
 /app/backend/data/chromadb
 /app/backend/data/chromadb
-/audit_reports
+/audit_reports/
+audit_reports/a
+logs.txt
