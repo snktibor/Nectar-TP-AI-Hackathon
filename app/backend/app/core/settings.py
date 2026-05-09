@@ -122,6 +122,16 @@ class Settings(BaseSettings):
         default=True,
         description="When False, /audits/* falls back to the legacy mock pipeline.",
     )
+    mock_report_enabled: bool = Field(
+        default=False,
+        validation_alias=AliasChoices(
+            "REDLINE_MOCK_REPORT_ENABLED", "MOCK_REPORT_ENABLED"
+        ),
+        description=(
+            "When True, the report download endpoint serves the prebuilt "
+            "datasets/mock_document.pdf with a freshly timestamped filename."
+        ),
+    )
 
     # ---- Paths (read-only references; RAG layer is owned elsewhere) -------
     chroma_path: Path = Field(default=_BACKEND_ROOT / "data" / "chromadb")

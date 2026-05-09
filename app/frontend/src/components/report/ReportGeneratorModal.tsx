@@ -5,6 +5,8 @@ import { phantomDesign } from '../../design-system/phantomDesign'
 import type { BackendAuditReport } from '../../lib/backendAudit'
 import ReportTemplate from './ReportTemplate'
 
+const API_BASE = import.meta.env.VITE_API_BASE_URL as string
+
 interface ReportGeneratorModalProps {
   readonly open: boolean
   readonly report: BackendAuditReport
@@ -30,6 +32,27 @@ export default function ReportGeneratorModal({
   onClose,
 }: ReportGeneratorModalProps): JSX.Element | null {
   const [completedCount, setCompletedCount] = useState(0)
+  const [directDownloadAvailable, setDirectDownloadAvailable] = useState(false)
+
+  useEffect(() => {
+    if (!open) return
+    let cancelled = false
+    void (async () => {
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/reports/availability`)
+        if (!res.ok) return
+        const json = (await res.json()) as { data?: { available?: boolean } }
+        if (!cancelled && json.data?.available === true) {
+          setDirectDownloadAvailable(true)
+        }
+      } catch {
+        // Silent fallback to in-browser PDF rendering.
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [open])
 
   // Reset and replay the staged loader every time the modal opens.
   useEffect(() => {
@@ -167,6 +190,16 @@ export default function ReportGeneratorModal({
         {/* Footer / CTA */}
         <div className="border-t border-phantom-line bg-phantom-surface px-6 py-5">
           {isReady ? (
+            directDownloadAvailable ? (
+              <a
+                href={`${API_BASE}/api/v1/reports/download`}
+                download={downloadFilename}
+                className={[phantomDesign.components.buttonBase, phantomDesign.components.buttonPrimary, 'flex items-center justify-center gap-2'].join(' ')}
+              >
+                <Download className="h-4 w-4" />
+                PDF riport letöltése
+              </a>
+            ) : (
             <PDFDownloadLink
               document={documentElement}
               fileName={downloadFilename}
@@ -196,6 +229,7 @@ export default function ReportGeneratorModal({
                 )
               }}
             </PDFDownloadLink>
+            )
           ) : (
             <button
               type="button"

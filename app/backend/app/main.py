@@ -20,7 +20,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from app.api.v1.endpoints import audits, documents
 from app.core.logging import configure_logging, rebind_external_loggers
 from app.core.settings import get_settings
-from app.api.v1.endpoints import audits, documents, rag
+from app.api.v1.endpoints import audits, documents, rag, reports
 from app.models.schemas import ApiResponse, ErrorDetail, ResponseMeta
 
 logger = logging.getLogger(__name__)
@@ -85,6 +85,7 @@ def create_app() -> FastAPI:
     app.include_router(documents.router, prefix=api_v1_prefix)
     app.include_router(audits.router, prefix=api_v1_prefix)
     app.include_router(rag.router, prefix=api_v1_prefix)
+    app.include_router(reports.router, prefix=api_v1_prefix)
 
     # ---- Health probe ------------------------------------------------------
     @app.get("/health", tags=["system"], response_model=ApiResponse[dict[str, str]])
