@@ -454,17 +454,10 @@ function ViewerHeader({
       <button
         type="button"
         onClick={onClose}
-<<<<<<< HEAD
         aria-label="Vissza a globális nézethez"
         className="inline-flex h-8 shrink-0 items-center justify-center rounded-phantom-control border border-phantom-line bg-phantom-surface-muted px-2.5 text-xs font-semibold text-phantom-muted transition-phantom hover:border-phantom-accent hover:text-phantom-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-accent"
       >
         Vissza
-=======
-        aria-label="Bezárás"
-        className="group flex h-8 w-8 shrink-0 items-center justify-center rounded-phantom-control text-phantom-muted transition-phantom duration-phantom-base hover:bg-phantom-surface-muted hover:text-phantom-ink active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-accent"
-      >
-        <X className="h-4 w-4 transition-transform duration-phantom-base group-hover:rotate-90" />
->>>>>>> 3a8508588991892f7a5b814a4f47fe8bb0700865
       </button>
     </div>
   )

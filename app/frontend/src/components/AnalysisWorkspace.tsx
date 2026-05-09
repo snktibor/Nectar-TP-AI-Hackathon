@@ -377,13 +377,8 @@ function AgentRunsView({ report }: Readonly<{ report: BackendAuditReport }>): JS
   }
 
   return (
-<<<<<<< HEAD
     <div className="space-y-3">
       {report.agent_runs.map((run) => {
-=======
-    <div className="space-y-2 animate-phantom-fade-in">
-      {report.agent_runs.map((run, index) => {
->>>>>>> 3a8508588991892f7a5b814a4f47fe8bb0700865
         let statusTone: StatusPillTone = 'danger'
         let statusText = 'Hiba'
         if (run.status === 'ok') {
