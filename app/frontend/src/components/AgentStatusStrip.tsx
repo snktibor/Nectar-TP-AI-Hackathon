@@ -103,15 +103,15 @@ export default function AgentStatusStrip(props: AgentStatusStripProps): JSX.Elem
           >
             <div className="flex min-w-0 items-center gap-1.5">
               <StatusIcon status={status} />
-              <span className="min-w-0 truncate text-[11px] font-semibold uppercase tracking-[0.05em]">
+              <span className="min-w-0 break-words text-[11px] font-semibold uppercase tracking-[0.05em]">
                 {statusText(status)}
               </span>
             </div>
-            <p className="mt-1 truncate text-xs font-medium leading-tight">
+            <p className="mt-1 break-words text-xs font-medium leading-tight">
               {AGENT_LABELS[id]}
             </p>
             {toolCalls !== undefined && (
-              <p className="mt-0.5 truncate text-[10px] opacity-60">
+              <p className="mt-0.5 break-words text-[10px] opacity-60">
                 Eszközhívás: {toolCalls}
               </p>
             )}

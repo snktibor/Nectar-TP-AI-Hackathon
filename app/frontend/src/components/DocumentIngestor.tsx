@@ -4,6 +4,7 @@ import {
   CheckCircle,
   FileText,
   FileUp,
+  RotateCcw,
   Upload,
   X,
 } from 'lucide-react'
@@ -26,6 +27,7 @@ interface DocumentIngestorProps {
   readonly sessionId: string
   readonly onIngestComplete?: (documents: IngestedDocument[]) => void
   readonly onResetWorkspace?: () => void
+  readonly showRestartAction?: boolean
 }
 
 type IngestPhase = 'empty' | 'ready' | 'uploading' | 'done' | 'error'
@@ -115,6 +117,7 @@ export default function DocumentIngestor({
   sessionId,
   onIngestComplete,
   onResetWorkspace,
+  showRestartAction = false,
 }: DocumentIngestorProps): JSX.Element {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
   const [phase, setPhase] = useState<IngestPhase>('empty')
@@ -284,7 +287,6 @@ export default function DocumentIngestor({
 
     setReplacementTargetFilename(filename)
     setErrorMessage(null)
-    onResetWorkspace?.()
     fileInputRef.current?.click()
   }
 
@@ -292,6 +294,21 @@ export default function DocumentIngestor({
     if (isSelectionLocked) {
       event.preventDefault()
     }
+  }
+
+  function handleRestartFromIngestor(): void {
+    if (phase === 'uploading') {
+      return
+    }
+
+    setSelectedFiles([])
+    setResults([])
+    setClassificationIssues([])
+    setErrorMessage(null)
+    setReplacementTargetFilename(null)
+    setIsDragOver(false)
+    setPhase('empty')
+    onResetWorkspace?.()
   }
 
   async function handleIngest(filesToIngest: File[] = selectedFiles): Promise<void> {
@@ -346,12 +363,32 @@ export default function DocumentIngestor({
   }
 
   const successfulResults = results.filter((document) => document.status === 'success')
+  const canRestartWorkflow = showRestartAction && (selectedFiles.length > 0 || results.length > 0)
 
   return (
-    <section className={[phantomDesign.components.panel, 'h-full'].join(' ')}>
+    <section className={[phantomDesign.components.panel, 'h-full shadow-none'].join(' ')}>
       <div className="mb-4 flex min-h-14 flex-wrap items-center justify-between gap-2 rounded-phantom-card border border-phantom-line bg-phantom-surface-muted/60 px-4 py-3">
         <p className="text-sm font-semibold text-phantom-ink">Dokumentum feltöltés</p>
-        <StatusPill tone={phase === 'done' ? 'success' : 'neutral'}>PDF / DOCX</StatusPill>
+        <div className="flex min-w-0 flex-wrap items-center gap-2">
+          {canRestartWorkflow && (
+            <button
+              type="button"
+              onClick={handleRestartFromIngestor}
+              disabled={phase === 'uploading'}
+              className={[
+                'inline-flex h-7 items-center justify-center gap-1 rounded-phantom-control border border-phantom-line bg-phantom-surface-muted px-2.5 text-xs font-semibold text-phantom-muted transition-phantom duration-phantom-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus',
+                phase === 'uploading'
+                  ? 'cursor-not-allowed opacity-50'
+                  : 'hover:border-phantom-accent hover:text-phantom-ink',
+              ].join(' ')}
+              aria-label="Feltöltési folyamat újrakezdése"
+            >
+              <RotateCcw className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Újrakezdés</span>
+            </button>
+          )}
+          <StatusPill tone={phase === 'done' ? 'success' : 'neutral'}>PDF / DOCX</StatusPill>
+        </div>
       </div>
 
       {phase !== 'done' && phase !== 'uploading' && (

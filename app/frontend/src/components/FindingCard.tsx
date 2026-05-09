@@ -107,7 +107,7 @@ function AttributionRow({
   const hasLegalRefs = (attribution.legal_references?.length ?? 0) > 0
 
   return (
-    <div className="mt-2 border-t border-phantom-line pt-2 space-y-2">
+    <div className="mt-2 space-y-2 border-t border-phantom-line pt-2">
       {/* Evidence chips */}
       <div className="flex flex-wrap items-center gap-1.5">
         <span className="text-[11px] text-phantom-subtle">Hivatkozások:</span>
@@ -137,18 +137,20 @@ function AttributionRow({
       </div>
 
       {/* Confidence bar + human review badge */}
-      <div className="flex items-center gap-2">
-        <div className="h-1 flex-1 overflow-hidden rounded-full bg-phantom-surface ring-1 ring-phantom-line">
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="h-1 w-full overflow-hidden rounded-full bg-phantom-surface ring-1 ring-phantom-line sm:flex-1 sm:w-auto">
           <div
             className="h-full rounded-full bg-phantom-accent"
             style={{ width: `${confidencePct}%` }}
           />
         </div>
-        <span className="shrink-0 text-[11px] text-phantom-subtle">
+        <span className="shrink-0 whitespace-nowrap text-[11px] text-phantom-subtle">
           Megbízhatóság: {confidencePct}%
         </span>
         {attribution.requires_human_review === true && (
-          <StatusPill tone="warning">Emberi felülvizsgálat szükséges</StatusPill>
+          <div className="min-w-0">
+            <StatusPill tone="warning">Emberi felülvizsgálat szükséges</StatusPill>
+          </div>
         )}
       </div>
 
@@ -158,13 +160,13 @@ function AttributionRow({
           <summary className="cursor-pointer select-none text-phantom-subtle hover:text-phantom-ink">
             Ügynök indoklás
           </summary>
-          <p className="mt-1 italic text-phantom-muted leading-relaxed">{attribution.reasoning}</p>
+          <p className="mt-1 break-words italic leading-relaxed text-phantom-muted">{attribution.reasoning}</p>
         </details>
       )}
 
       {/* Uncertainty notes */}
       {attribution.uncertainty_notes && (
-        <p className="text-[11px] text-phantom-subtle border-l-2 border-amber-300 pl-2">
+        <p className="break-words border-l-2 border-amber-300 pl-2 text-[11px] text-phantom-subtle">
           {attribution.uncertainty_notes}
         </p>
       )}
@@ -234,15 +236,15 @@ export default function FindingCard({
   return (
     <article
       className={[
-        'rounded-phantom-card border border-phantom-line bg-phantom-surface-muted p-3',
+        'min-w-0 overflow-hidden rounded-phantom-card border border-phantom-line bg-phantom-surface-muted p-3',
         'border-l-4',
         borderClass,
       ].join(' ')}
     >
-      <div className="flex flex-wrap items-center gap-1.5">
+      <div className="flex min-w-0 flex-wrap items-center gap-1.5">
         <span
           className={[
-            'inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold uppercase',
+            'inline-flex h-6 shrink-0 items-center whitespace-nowrap rounded-full px-2 text-[11px] font-semibold uppercase',
             getSeverityTone(severity),
           ].join(' ')}
         >
@@ -260,12 +262,12 @@ export default function FindingCard({
 
       {variant.kind === 'consistency' && (
         <>
-          <p className="mt-2 text-sm text-phantom-ink">{variant.finding.description}</p>
+          <p className="mt-2 break-words text-sm leading-6 text-phantom-ink">{variant.finding.description}</p>
           {variant.finding.evidence && (
-            <p className="mt-1 text-xs italic text-phantom-muted">{variant.finding.evidence}</p>
+            <p className="mt-1 break-words text-xs italic text-phantom-muted">{variant.finding.evidence}</p>
           )}
           {variant.finding.locations.length > 0 && (
-            <p className="mt-1 text-xs text-phantom-subtle">
+            <p className="mt-1 break-words text-xs text-phantom-subtle">
               {variant.finding.locations
                 .map((loc) =>
                   loc.line_numbers && loc.line_numbers.length > 0
@@ -280,26 +282,26 @@ export default function FindingCard({
 
       {variant.kind === 'benchmark' && (
         <>
-          <p className="mt-2 text-sm font-medium text-phantom-ink">{variant.finding.metric}</p>
-          <p className="mt-1 text-xs text-phantom-muted">
+          <p className="mt-2 break-words text-sm font-medium text-phantom-ink">{variant.finding.metric}</p>
+          <p className="mt-1 break-words text-xs text-phantom-muted">
             Érték: {variant.finding.observed_value} | Tartomány:{' '}
             {variant.finding.benchmark_range[0]} – {variant.finding.benchmark_range[1]}
           </p>
-          <p className="mt-1 text-xs text-phantom-ink">{variant.finding.rationale}</p>
+          <p className="mt-1 break-words text-xs text-phantom-ink">{variant.finding.rationale}</p>
         </>
       )}
 
       {variant.kind === 'missing' && (
         <>
-          <p className="mt-2 text-sm text-phantom-ink">{variant.finding.description}</p>
-          <p className="mt-1 text-xs text-phantom-muted">
+          <p className="mt-2 break-words text-sm leading-6 text-phantom-ink">{variant.finding.description}</p>
+          <p className="mt-1 break-words text-xs text-phantom-muted">
             Várható: {variant.finding.expected_in} · Kötelező: {variant.finding.required_by}
           </p>
         </>
       )}
 
       {primaryChunk && onCitationClick && (
-        <div className="mt-3 flex flex-wrap items-center gap-2">
+        <div className="mt-3 flex min-w-0 flex-wrap items-center gap-2">
           <button
             type="button"
             onClick={() => onCitationClick(chunkToCitation(primaryChunk, sessionId))}

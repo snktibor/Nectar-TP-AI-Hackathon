@@ -61,6 +61,7 @@ export default function App(): JSX.Element {
   const [auditReport, setAuditReport] = useState<BackendAuditReport | null>(null)
   const [auditError, setAuditError] = useState<string | null>(null)
   const [activeCitation, setActiveCitation] = useState<CitationTarget | null>(null)
+  const [ingestorRenderKey, setIngestorRenderKey] = useState(0)
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const hasReadyAuditCoverage = hasCompleteRequiredCoverage(ingestedDocuments)
@@ -216,12 +217,17 @@ export default function App(): JSX.Element {
     setWorkspacePhase(ingestedDocuments.length > 0 ? 'blocked' : 'empty')
   }
 
+  function handleCloseCitationViewer(): void {
+    setActiveCitation(null)
+  }
+
   function handleResetWorkspaceFromLeft(): void {
     clearPolling()
     clearAuditState()
     setActiveCitation(null)
     setIngestedDocuments([])
     setWorkspacePhase('empty')
+    setIngestorRenderKey((previousKey) => previousKey + 1)
   }
 
   return (
@@ -229,18 +235,25 @@ export default function App(): JSX.Element {
       <main className="h-full w-full">
         <DashboardShell
           leftPanel={
-            activeCitation !== null ? (
-              <DocumentViewer
-                citation={activeCitation}
-                onClose={handleCloseReport}
-              />
-            ) : (
-              <DocumentIngestor
-                sessionId={SESSION_ID}
-                onIngestComplete={handleIngestComplete}
-                onResetWorkspace={handleResetWorkspaceFromLeft}
-              />
-            )
+            <div className="h-full min-h-0">
+              <div className={activeCitation === null ? 'h-full min-h-0' : 'hidden h-full min-h-0'}>
+                <DocumentIngestor
+                  key={`ingestor-${ingestorRenderKey}`}
+                  sessionId={SESSION_ID}
+                  onIngestComplete={handleIngestComplete}
+                  onResetWorkspace={handleResetWorkspaceFromLeft}
+                  showRestartAction={workspacePhase === 'completed'}
+                />
+              </div>
+              {activeCitation !== null && (
+                <div className="h-full min-h-0">
+                  <DocumentViewer
+                    citation={activeCitation}
+                    onClose={handleCloseCitationViewer}
+                  />
+                </div>
+              )}
+            </div>
           }
           rightPanel={(
             <AnalysisWorkspace

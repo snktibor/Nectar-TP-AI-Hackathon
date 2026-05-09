@@ -74,7 +74,7 @@ export const phantomDesign = {
     panelTitle: 'text-base font-semibold leading-6 text-phantom-ink',
     panelDescription: 'text-sm leading-5 text-phantom-muted',
     subtleCard: 'rounded-phantom-card border border-phantom-line bg-phantom-surface-muted p-3 sm:p-4',
-    statusPill: 'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold leading-5 ring-1 ring-inset',
+    statusPill: 'inline-flex h-7 shrink-0 items-center rounded-full px-2.5 text-xs font-semibold leading-none whitespace-nowrap ring-1 ring-inset',
     metaPill: 'rounded-full bg-phantom-surface-muted px-2 py-0.5 text-xs font-medium text-phantom-muted ring-1 ring-phantom-line',
     tag: 'rounded-phantom-control bg-phantom-surface-muted px-1.5 py-0.5 font-mono text-xs text-phantom-muted ring-1 ring-phantom-line',
     buttonBase:

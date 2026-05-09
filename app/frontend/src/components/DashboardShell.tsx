@@ -145,8 +145,8 @@ export default function DashboardShell({
         <MinimalSidebar />
 
         <div className="grid h-full min-h-0 gap-3 p-2 sm:p-3 lg:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)] lg:p-4">
-          <div className="min-h-0 min-w-0 overflow-auto">{leftPanel}</div>
-          <div className="min-h-0 min-w-0 overflow-auto">{rightPanel}</div>
+          <div className="min-h-0 min-w-0 overflow-x-hidden overflow-y-auto [scrollbar-gutter:stable]">{leftPanel}</div>
+          <div className="min-h-0 min-w-0 overflow-x-hidden overflow-y-scroll [scrollbar-gutter:stable]">{rightPanel}</div>
         </div>
       </div>
     </div>

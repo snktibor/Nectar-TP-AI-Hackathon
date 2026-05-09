@@ -28,6 +28,30 @@ import { EmptyPanel, MetricCard, StatusPill } from './ui/DashboardPrimitives'
 type TabId = 'findings' | 'agent_runs' | 'telemetry'
 type StatusPillTone = 'neutral' | 'accent' | 'success' | 'warning' | 'danger' | 'info'
 
+const headerStatusToneClasses: Record<StatusPillTone, string> = {
+  neutral: 'bg-phantom-surface-muted text-phantom-muted',
+  accent: 'bg-phantom-accent-soft text-phantom-accent',
+  success: 'bg-phantom-success-soft text-phantom-success-text',
+  warning: 'bg-phantom-severity-medium-soft text-phantom-severity-medium-text',
+  danger: 'bg-phantom-danger-soft text-phantom-danger-text',
+  info: 'bg-blue-50 text-blue-700',
+}
+
+function getSeverityFilterTone(severity: BackendRiskSeverity): string {
+  switch (severity) {
+    case 'critical':
+      return 'bg-phantom-severity-critical-soft text-phantom-severity-critical-text'
+    case 'high':
+      return 'bg-phantom-severity-high-soft text-phantom-severity-high-text'
+    case 'medium':
+      return 'bg-phantom-severity-medium-soft text-phantom-severity-medium-text'
+    case 'low':
+      return 'bg-phantom-severity-low-soft text-phantom-severity-low-text'
+    default:
+      return 'bg-phantom-surface-muted text-phantom-muted'
+  }
+}
+
 interface AnalysisWorkspaceProps {
   readonly documents: IngestedDocument[]
   readonly phase: WorkspacePhase
@@ -97,6 +121,29 @@ type AnyFinding =
   | { kind: 'benchmark'; finding: BackendBenchmarkRisk }
   | { kind: 'missing'; finding: BackendMissingElement }
 
+function normalizeSeverityValue(
+  severity: string,
+): BackendRiskSeverity | null {
+  const normalized = severity.trim().toLowerCase()
+  if (normalized === 'critical' || normalized === 'high' || normalized === 'medium' || normalized === 'low') {
+    return normalized
+  }
+  return null
+}
+
+function matchesSeverityFilter(
+  finding: AnyFinding,
+  severityFilter: BackendRiskSeverity | null,
+): boolean {
+  if (severityFilter === null) return true
+  return normalizeSeverityValue(finding.finding.severity) === severityFilter
+}
+
+function isKnownAgentId(value: string | null | undefined): value is AgentId {
+  if (!value) return false
+  return ALL_AGENT_IDS.includes(value as AgentId)
+}
+
 function flattenFindings(report: BackendAuditReport): AnyFinding[] {
   const all: AnyFinding[] = [
     ...report.consistency_errors.map((f): AnyFinding => ({ kind: 'consistency', finding: f })),
@@ -116,7 +163,7 @@ function groupFindingsByAgent(findings: AnyFinding[]): Map<AgentId | 'other', An
   const map = new Map<AgentId | 'other', AnyFinding[]>()
   for (const f of findings) {
     const agentId = f.finding.attribution?.agent_id
-    const key: AgentId | 'other' = agentId ?? 'other'
+    const key: AgentId | 'other' = isKnownAgentId(agentId) ? agentId : 'other'
     const bucket = map.get(key) ?? []
     bucket.push(f)
     map.set(key, bucket)
@@ -140,9 +187,7 @@ function FindingsView({
   const [severityFilter, setSeverityFilter] = useState<BackendRiskSeverity | null>(null)
 
   const allFindings = flattenFindings(report)
-  const filteredFindings = severityFilter
-    ? allFindings.filter((f) => f.finding.severity === severityFilter)
-    : allFindings
+  const filteredFindings = allFindings.filter((f) => matchesSeverityFilter(f, severityFilter))
 
   const grouped = groupFindingsByAgent(allFindings)
 
@@ -151,12 +196,12 @@ function FindingsView({
   return (
     <div className="space-y-3">
       {/* Summary banner */}
-      <section className="rounded-phantom-card border border-phantom-line bg-phantom-surface p-4 shadow-sm">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <p className="text-sm leading-6 text-phantom-ink">{report.summary}</p>
+      <section className="min-w-0 overflow-hidden rounded-phantom-card border border-phantom-line bg-phantom-surface p-4">
+        <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
+          <p className="min-w-0 flex-1 break-words text-sm leading-6 text-phantom-ink">{report.summary}</p>
           <span
             className={[
-              'inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold uppercase',
+              'inline-flex h-7 shrink-0 items-center rounded-full px-3 text-xs font-semibold uppercase whitespace-nowrap',
               getSeverityTone(report.overall_risk),
             ].join(' ')}
           >
@@ -166,34 +211,34 @@ function FindingsView({
       </section>
 
       {/* Metric cards */}
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-1 gap-2 xs:grid-cols-2 sm:grid-cols-3">
         <MetricCard
           icon={AlertCircle}
-          label="Konzisztencia hibák"
+          label={'Konzisztencia\nhibák'}
           value={String(report.consistency_errors.length)}
         />
         <MetricCard
           icon={BarChart2}
-          label="Benchmark kockázatok"
+          label={'Benchmark\nkockázatok'}
           value={String(report.benchmark_risks.length)}
         />
         <MetricCard
           icon={ClipboardList}
-          label="Hiányzó elemek"
+          label={'Hiányzó\nelemek'}
           value={String(report.missing_elements.length)}
         />
       </div>
 
       {/* Severity filter */}
-      <div className="flex flex-wrap gap-1.5">
+      <div className="grid min-w-0 grid-cols-2 gap-1.5 sm:grid-cols-3 xl:grid-cols-5">
         <button
           type="button"
           onClick={() => setSeverityFilter(null)}
           className={[
-            'rounded-full px-3 py-1 text-xs font-medium ring-1 ring-inset transition-phantom',
+            'inline-flex h-7 w-full items-center justify-center whitespace-nowrap rounded-full px-3 text-xs font-medium transition-phantom focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus',
             severityFilter === null
-              ? 'bg-phantom-accent-soft text-phantom-accent ring-phantom-accent/30'
-              : 'bg-phantom-surface-muted text-phantom-muted ring-phantom-line hover:bg-phantom-surface',
+              ? 'bg-phantom-accent-soft text-phantom-accent'
+              : 'bg-phantom-surface-muted text-phantom-muted',
           ].join(' ')}
         >
           Mind
@@ -204,10 +249,10 @@ function FindingsView({
             type="button"
             onClick={() => setSeverityFilter(severityFilter === s ? null : s)}
             className={[
-              'rounded-full px-3 py-1 text-xs font-medium ring-1 ring-inset transition-phantom',
+              'inline-flex h-7 w-full items-center justify-center whitespace-nowrap rounded-full px-3 text-xs font-medium transition-phantom focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus',
               severityFilter === s
-                ? getSeverityTone(s)
-                : 'bg-phantom-surface-muted text-phantom-muted ring-phantom-line hover:bg-phantom-surface',
+                ? getSeverityFilterTone(s)
+                : 'bg-phantom-surface-muted text-phantom-muted',
             ].join(' ')}
           >
             {severityLabel(s)}
@@ -220,9 +265,7 @@ function FindingsView({
         {ALL_AGENT_IDS.map((agentId) => {
           const bucket = grouped.get(agentId)
           if (!bucket || bucket.length === 0) return null
-          const filtered = severityFilter
-            ? bucket.filter((f) => f.finding.severity === severityFilter)
-            : bucket
+          const filtered = bucket.filter((f) => matchesSeverityFilter(f, severityFilter))
           if (filtered.length === 0) return null
 
           return (
@@ -231,8 +274,8 @@ function FindingsView({
               className="rounded-phantom-card border border-phantom-line bg-phantom-surface"
               open
             >
-              <summary className="flex cursor-pointer select-none items-center justify-between gap-2 p-3">
-                <span className="text-sm font-semibold text-phantom-ink">
+              <summary className="flex min-w-0 cursor-pointer select-none items-center justify-between gap-2 p-3">
+                <span className="min-w-0 flex-1 break-words text-sm font-semibold leading-5 text-phantom-ink">
                   {AGENT_LABELS[agentId]}
                 </span>
                 <StatusPill tone="neutral">{filtered.length}</StatusPill>
@@ -256,17 +299,15 @@ function FindingsView({
         {(() => {
           const bucket = grouped.get('other')
           if (!bucket || bucket.length === 0) return null
-          const filtered = severityFilter
-            ? bucket.filter((f) => f.finding.severity === severityFilter)
-            : bucket
+          const filtered = bucket.filter((f) => matchesSeverityFilter(f, severityFilter))
           if (filtered.length === 0) return null
           return (
             <details
               className="rounded-phantom-card border border-phantom-line bg-phantom-surface"
               open
             >
-              <summary className="flex cursor-pointer select-none items-center justify-between gap-2 p-3">
-                <span className="text-sm font-semibold text-phantom-ink">Nincs ügynök</span>
+              <summary className="flex min-w-0 cursor-pointer select-none items-center justify-between gap-2 p-3">
+                <span className="min-w-0 flex-1 break-words text-sm font-semibold leading-5 text-phantom-ink">Nincs ügynök</span>
                 <StatusPill tone="neutral">{filtered.length}</StatusPill>
               </summary>
               <div className="space-y-2 border-t border-phantom-line p-3">
@@ -285,14 +326,14 @@ function FindingsView({
         })()}
       </div>
 
-      {/* Flat severity list */}
-      {filteredFindings.length > 0 && (
-        <section className="rounded-phantom-card border border-phantom-line bg-phantom-surface p-4">
-          <p className="mb-2 text-sm font-semibold text-phantom-ink">
-            Összes megállapítás ({filteredFindings.length})
-          </p>
-          <div className="space-y-2">
-            {filteredFindings.map((f) => (
+      {/* Flat severity list (single section-level scrollbar) */}
+      <section className="min-w-0 overflow-hidden rounded-phantom-card border border-phantom-line bg-phantom-surface p-4">
+        <p className="mb-2 break-words text-sm font-semibold text-phantom-ink">
+          Összes megállapítás ({filteredFindings.length})
+        </p>
+        <div className="space-y-2">
+          {filteredFindings.length > 0 ? (
+            filteredFindings.map((f) => (
               <FindingCard
                 key={findingKey(f)}
                 variant={f}
@@ -300,10 +341,17 @@ function FindingsView({
                 sessionId={sessionId}
                 onCitationClick={onCitationClick}
               />
-            ))}
-          </div>
-        </section>
-      )}
+            ))
+          ) : (
+            <p className="break-words text-sm font-normal text-phantom-ink">
+              {severityFilter
+                ? `${severityLabel(severityFilter)} szinten nincs megállapítás.`
+                : 'Nincs megállapítás.'}
+            </p>
+          )}
+        </div>
+      </section>
+
     </div>
   )
 }
@@ -326,29 +374,34 @@ function AgentRunsView({ report }: Readonly<{ report: BackendAuditReport }>): JS
   return (
     <div className="space-y-2">
       {report.agent_runs.map((run) => {
-        const statusTone: StatusPillTone =
-          run.status === 'ok' ? 'success' : run.status === 'timeout' ? 'warning' : 'danger'
-        const statusText =
-          run.status === 'ok' ? 'Kész' : run.status === 'timeout' ? 'Időtúllépés' : 'Hiba'
+        let statusTone: StatusPillTone = 'danger'
+        let statusText = 'Hiba'
+        if (run.status === 'ok') {
+          statusTone = 'success'
+          statusText = 'Kész'
+        } else if (run.status === 'timeout') {
+          statusTone = 'warning'
+          statusText = 'Időtúllépés'
+        }
         const findingCount =
           run.consistency_errors.length + run.benchmark_risks.length + run.missing_elements.length
 
         return (
           <article
             key={run.agent_id}
-            className="rounded-phantom-card border border-phantom-line bg-phantom-surface p-4"
+            className="min-w-0 overflow-hidden rounded-phantom-card border border-phantom-line bg-phantom-surface p-4"
           >
             <div className="flex min-w-0 flex-wrap items-start justify-between gap-2">
-              <p className="min-w-0 truncate text-sm font-semibold text-phantom-ink">
+              <p className="min-w-0 break-words text-sm font-semibold leading-5 text-phantom-ink">
                 {AGENT_LABELS[run.agent_id]}
               </p>
               <StatusPill tone={statusTone}>{statusText}</StatusPill>
             </div>
 
-            <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-phantom-muted sm:grid-cols-3">
-              <span className="min-w-0 truncate">Modell: {run.model}</span>
-              <span className="min-w-0 truncate">Prompt: {run.prompt_version}</span>
-              <span className="min-w-0 truncate">Időtartam: {formatDurationMs(run.started_at, run.finished_at)}</span>
+            <div className="mt-2 grid grid-cols-1 gap-x-4 gap-y-1 text-xs text-phantom-muted xs:grid-cols-2 lg:grid-cols-3">
+              <span className="break-words">Modell: {run.model}</span>
+              <span className="break-words">Prompt: {run.prompt_version}</span>
+              <span className="break-words">Időtartam: {formatDurationMs(run.started_at, run.finished_at)}</span>
             </div>
 
             <div className="mt-2 flex flex-wrap gap-3 text-xs text-phantom-ink">
@@ -359,7 +412,7 @@ function AgentRunsView({ report }: Readonly<{ report: BackendAuditReport }>): JS
             </div>
 
             {run.status === 'error' && run.error && (
-              <div className="mt-2 rounded-phantom-control border border-phantom-severity-critical-border bg-phantom-severity-critical-soft px-3 py-2 text-xs text-phantom-severity-critical-text">
+              <div className="mt-2 break-words rounded-phantom-control border border-phantom-severity-critical-border bg-phantom-severity-critical-soft px-3 py-2 text-xs text-phantom-severity-critical-text">
                 {run.error.code}: {run.error.message}
               </div>
             )}
@@ -402,11 +455,11 @@ function TelemetryView({ report }: Readonly<{ report: BackendAuditReport }>): JS
         <MetricCard icon={Cpu} label="Bemenet (token)" value={formatTokenCount(totals.input)} />
         <MetricCard icon={Cpu} label="Kimenet (token)" value={formatTokenCount(totals.output)} />
         <MetricCard icon={DatabaseZap} label="Cache olvasás" value={formatTokenCount(totals.cacheRead)} />
-        <MetricCard icon={Wrench} label="Eszközhívások" value={formatTokenCount(totals.toolCalls)} />
+        <MetricCard icon={Wrench} label={'Eszköz\nhívások'} value={formatTokenCount(totals.toolCalls)} />
       </div>
 
-      <section className="rounded-phantom-card border border-phantom-line bg-phantom-surface p-4">
-        <p className="mb-3 text-xs font-semibold uppercase tracking-[0.06em] text-phantom-subtle">
+      <section className="min-w-0 overflow-hidden rounded-phantom-card border border-phantom-line bg-phantom-surface p-4">
+        <p className="mb-3 break-words text-xs font-semibold uppercase tracking-[0.06em] text-phantom-subtle">
           Token felhasználás ügynökönként
         </p>
         <div className="overflow-x-auto">
@@ -430,7 +483,7 @@ function TelemetryView({ report }: Readonly<{ report: BackendAuditReport }>): JS
                   run.cache_creation_tokens
                 return (
                   <tr key={run.agent_id} className="text-phantom-ink">
-                    <td className="py-2 pr-3">{AGENT_LABELS[run.agent_id]}</td>
+                    <td className="py-2 pr-3 break-words">{AGENT_LABELS[run.agent_id]}</td>
                     <td className="py-2 pr-3 text-right tabular-nums">
                       {formatTokenCount(run.input_tokens)}
                     </td>
@@ -506,12 +559,19 @@ export default function AnalysisWorkspace({
   ]
 
   return (
-    <section className={[phantomDesign.components.panel, 'h-full min-w-0 overflow-x-hidden'].join(' ')}>
+    <section className={[phantomDesign.components.panel, 'h-full min-w-0 overflow-x-hidden shadow-none'].join(' ')}>
       <div className="mb-4 min-h-14 rounded-phantom-card border border-phantom-line bg-phantom-surface px-4 py-3">
         <div className="flex min-w-0 flex-wrap items-center justify-between gap-3">
           <p className="min-w-0 truncate text-sm font-semibold text-phantom-ink">Riport</p>
           <div className="flex min-w-0 flex-wrap items-center gap-2">
-            <StatusPill tone={status.tone}>{status.label}</StatusPill>
+            <span
+              className={[
+                'inline-flex h-7 shrink-0 items-center rounded-full px-2.5 text-xs font-semibold leading-none whitespace-nowrap',
+                headerStatusToneClasses[status.tone],
+              ].join(' ')}
+            >
+              {status.label}
+            </span>
             {canCloseReport && (
               <button
                 type="button"
@@ -552,7 +612,7 @@ export default function AnalysisWorkspace({
             className={[
               phantomDesign.components.buttonBase,
               phantomDesign.components.buttonPrimary,
-              'mt-3 w-full sm:w-auto',
+              'mt-3 w-full min-h-9 px-3 py-2 text-xs shadow-phantom-soft hover:translate-y-0 hover:shadow-phantom-soft active:shadow-phantom-soft sm:w-auto',
             ].join(' ')}
           >
             <span className="inline-flex items-center gap-2">
@@ -598,10 +658,10 @@ export default function AnalysisWorkspace({
                 aria-selected={activeTab === tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={[
-                  'max-w-full rounded-phantom-control px-3 py-1.5 text-xs font-medium ring-1 ring-inset transition-phantom',
+                  'h-7 shrink-0 whitespace-nowrap rounded-phantom-control px-3 text-xs font-medium transition-phantom focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus',
                   activeTab === tab.id
-                    ? 'bg-phantom-accent-soft text-phantom-accent ring-phantom-accent/30'
-                    : 'bg-phantom-surface-muted text-phantom-muted ring-phantom-line hover:bg-phantom-surface',
+                    ? 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200'
+                    : 'bg-phantom-surface-muted text-phantom-muted',
                 ].join(' ')}
               >
                 {tab.label}
