@@ -59,10 +59,10 @@ function StatusIcon({
     case 'running':
       return <LoaderCircle className="force-spin h-3.5 w-3.5 animate-spin" />
     case 'ok':
-      return <CheckCircle2 className="h-3.5 w-3.5" />
+      return <CheckCircle2 className="h-3.5 w-3.5 animate-phantom-bounce-in" />
     case 'timeout':
     case 'error':
-      return <AlertCircle className="h-3.5 w-3.5" />
+      return <AlertCircle className="h-3.5 w-3.5 animate-phantom-pulse-soft" />
     default:
       return <Clock className="h-3.5 w-3.5 opacity-40" />
   }
@@ -90,15 +90,18 @@ export default function AgentStatusStrip(props: AgentStatusStripProps): JSX.Elem
       : resolveCompletedStatuses(props.agentRuns)
 
   return (
-    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6">
-      {ALL_AGENT_IDS.map((id) => {
+    <div className="grid grid-cols-1 gap-2 animate-phantom-fade-in sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6">
+      {ALL_AGENT_IDS.map((id, index) => {
         const { status, toolCalls } = statuses[id]
+        const isActive = status === 'running'
         return (
           <div
             key={id}
+            style={{ animationDelay: `${index * 50}ms` }}
             className={[
-              'min-w-0 overflow-hidden rounded-phantom-card border p-2.5 transition-phantom',
+              'min-w-0 overflow-hidden rounded-phantom-card border p-2.5 transition-phantom duration-phantom-base animate-phantom-fade-in-up hover:-translate-y-0.5 hover:shadow-phantom-soft',
               cellClasses(status),
+              isActive ? 'ring-2 ring-phantom-accent/40 animate-phantom-pulse-soft' : '',
             ].join(' ')}
           >
             <div className="flex min-w-0 items-center gap-1.5">

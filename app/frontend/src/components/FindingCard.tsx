@@ -1,4 +1,4 @@
-import { MapPin } from 'lucide-react'
+import { ChevronDown, MapPin } from 'lucide-react'
 import {
   AGENT_LABELS,
   getSeverityBorderClass,
@@ -119,7 +119,7 @@ function AttributionRow({
   const hasLegalRefs = legalReferences.length > 0
 
   return (
-    <div className="mt-2 space-y-2 border-t border-phantom-line pt-2">
+    <div className="mt-2 space-y-2 border-t border-phantom-line pt-2 animate-phantom-fade-in-up">
       {/* Evidence chips */}
       <div className="flex flex-wrap items-center gap-1.5">
         <span className="text-[11px] text-phantom-subtle">Hivatkozások:</span>
@@ -135,12 +135,17 @@ function AttributionRow({
               quote: chunk.quote ?? null,
             }
             return (
-              <EvidenceChip
+              <span
                 key={`${chunk.filename}-${chunk.page}-${chunk.chunk_index}-${i}`}
-                chunk={chunk}
-                isCrossDoc={isCrossDoc}
-                onClick={onCitationClick ? () => onCitationClick(target) : undefined}
-              />
+                style={{ animationDelay: `${i * 40}ms` }}
+                className="inline-flex animate-phantom-scale-in"
+              >
+                <EvidenceChip
+                  chunk={chunk}
+                  isCrossDoc={isCrossDoc}
+                  onClick={onCitationClick ? () => onCitationClick(target) : undefined}
+                />
+              </span>
             )
           })
         ) : (
@@ -152,7 +157,7 @@ function AttributionRow({
       <div className="flex flex-wrap items-center gap-2">
         <div className="h-1 w-full overflow-hidden rounded-full bg-phantom-surface ring-1 ring-phantom-line sm:flex-1 sm:w-auto">
           <div
-            className="h-full rounded-full bg-phantom-accent"
+            className="h-full rounded-full bg-phantom-accent transition-[width] duration-700 ease-out"
             style={{ width: `${confidencePct}%` }}
           />
         </div>
@@ -168,9 +173,10 @@ function AttributionRow({
 
       {/* Reasoning (collapsible) */}
       {attribution.reasoning && (
-        <details className="text-xs">
-          <summary className="cursor-pointer select-none text-phantom-subtle hover:text-phantom-ink">
-            Ügynök indoklás
+        <details className="phantom-accordion text-xs">
+          <summary className="group inline-flex cursor-pointer select-none items-center gap-1 text-phantom-subtle transition-colors duration-phantom-base hover:text-phantom-ink">
+            <ChevronDown className="phantom-accordion-chevron h-3 w-3" />
+            <span>Ügynök indoklás</span>
           </summary>
           <p className="mt-1 break-words italic leading-relaxed text-phantom-muted">{attribution.reasoning}</p>
         </details>
@@ -185,9 +191,10 @@ function AttributionRow({
 
       {/* Legal references */}
       {hasLegalRefs && (
-        <details className="text-xs">
-          <summary className="cursor-pointer select-none text-phantom-subtle hover:text-phantom-ink">
-            Jogszabályi hivatkozások
+        <details className="phantom-accordion text-xs">
+          <summary className="group inline-flex cursor-pointer select-none items-center gap-1 text-phantom-subtle transition-colors duration-phantom-base hover:text-phantom-ink">
+            <ChevronDown className="phantom-accordion-chevron h-3 w-3" />
+            <span>Jogszabályi hivatkozások</span>
           </summary>
           <div className="mt-1 flex flex-wrap gap-1">
             {legalReferences.map((ref) => (
@@ -246,16 +253,18 @@ export default function FindingCard({
   return (
     <article
       className={[
-        'min-w-0 overflow-hidden rounded-phantom-card border border-phantom-line bg-phantom-surface-muted p-3',
-        'border-l-4',
+        'group min-w-0 overflow-hidden rounded-phantom-card border border-phantom-line bg-phantom-surface-muted p-3',
+        'border-l-4 transition-phantom duration-phantom-base animate-phantom-fade-in-up',
+        'hover:-translate-y-0.5 hover:bg-phantom-surface hover:shadow-phantom-soft hover:border-phantom-line-strong',
         borderClass,
       ].join(' ')}
     >
       <div className="flex min-w-0 flex-wrap items-center gap-1.5">
         <span
           className={[
-            'inline-flex h-6 shrink-0 items-center whitespace-nowrap rounded-full px-2 text-[11px] font-semibold uppercase',
+            'inline-flex h-6 shrink-0 items-center whitespace-nowrap rounded-full px-2 text-[11px] font-semibold uppercase transition-transform duration-phantom-base group-hover:scale-105',
             getSeverityTone(severity),
+            severity === 'critical' ? 'animate-phantom-pulse-soft' : '',
           ].join(' ')}
         >
           {severityLabel(severity)}
@@ -315,10 +324,10 @@ export default function FindingCard({
           <button
             type="button"
             onClick={() => onCitationClick(chunkToCitation(primaryChunk, sessionId, fallbackQuote))}
-            className="inline-flex items-center gap-1.5 rounded-phantom-control bg-phantom-accent px-3 py-1.5 text-xs font-semibold text-white shadow-phantom-button transition-phantom duration-phantom-base hover:-translate-y-px hover:bg-phantom-accent-hover hover:shadow-phantom-lift active:translate-y-0 active:bg-phantom-accent-pressed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus focus-visible:ring-offset-2 focus-visible:ring-offset-phantom-surface"
+            className="group/btn inline-flex items-center gap-1.5 rounded-phantom-control bg-phantom-accent px-3 py-1.5 text-xs font-semibold text-white shadow-phantom-button transition-phantom duration-phantom-base hover:-translate-y-px hover:scale-[1.03] hover:bg-phantom-accent-hover hover:shadow-phantom-lift active:translate-y-0 active:scale-95 active:bg-phantom-accent-pressed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus focus-visible:ring-offset-2 focus-visible:ring-offset-phantom-surface"
             title={`${primaryChunk.filename} · oldal ${primaryChunk.page + 1}`}
           >
-            <MapPin className="h-3.5 w-3.5" />
+            <MapPin className="h-3.5 w-3.5 transition-transform duration-phantom-base group-hover/btn:-translate-y-0.5 group-hover/btn:scale-110" />
             <span>Mutasd meg hol van</span>
           </button>
         </div>
