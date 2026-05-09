@@ -54,7 +54,7 @@ class Settings(BaseSettings):
     )
 
     # ---- Runtime budgets --------------------------------------------------
-    agent_timeout_s: float = Field(default=300.0, ge=1.0, le=600.0)
+    agent_timeout_s: float = Field(default=600.0, ge=1.0, le=1200.0)
     agent_max_concurrency: int = Field(
         default=1,
         ge=1,
@@ -67,25 +67,29 @@ class Settings(BaseSettings):
         ),
     )
     max_tool_iterations: int = Field(
-        default=5,
+        default=10,
         ge=1,
         le=50,
         description=(
-            "Hard cap on tool-use turns per agent. Each turn adds tokens to the "
-            "conversation history; 5 gives 2-3 search_context calls + 1-2 "
-            "record_finding calls, which is enough for focused PoC findings "
-            "without exploding token spend."
+            "Hard cap on tool-use turns per agent. Headroom for: (a) 3-4 "
+            "search_context calls to build evidence (cross-doc agent fans out "
+            "and may need extra), (b) 2-4 record_finding calls (one per detected "
+            "issue), (c) optional verify_tax_number for invoice/contract agents, "
+            "(d) a final end_turn. 10 leaves slack even when the model retries "
+            "after a hallucinated-citation rejection."
         ),
     )
-    inter_turn_delay_s: float = Field(
-        default=3.0,
+    min_call_interval_s: float = Field(
+        default=10.0,
         ge=0.0,
-        le=30.0,
+        le=60.0,
         description=(
-            "Seconds to sleep between consecutive LLM turns within a single agent. "
-            "Haiku Tier-1 allows 25 RPM (= 2.4 s/req minimum). A 3 s delay keeps "
-            "throughput at ~20 RPM and prevents cascading 429s during the tool-use "
-            "loop. Set to 0 to disable when using a higher-tier API key."
+            "Minimum seconds between consecutive LLM API calls — applied GLOBALLY "
+            "across all agents in the same process. Haiku Tier-1 allows 5 000 OTPM "
+            "(output tokens / minute); with ~750 output tokens per turn, 10 s "
+            "spacing keeps us at ~4 500 OTPM, comfortably under the limit and "
+            "preventing cascading 429s. Set to 0 on tier-2+ keys with higher OTPM "
+            "headroom; raise to 12-15 s if 429s persist."
         ),
     )
     rag_n_results: int = Field(
@@ -98,7 +102,20 @@ class Settings(BaseSettings):
         ),
     )
     llm_max_retries: int = Field(default=3, ge=0, le=10)
-    llm_max_tokens: int = Field(default=2048, ge=256, le=64000)
+    llm_max_tokens: int = Field(
+        default=2048,
+        ge=256,
+        le=64000,
+        description=(
+            "Per-call output cap. Must fit a record_finding tool call: reasoning "
+            "(≤2000 chars ≈ 500 t), uncertainty_notes (≤1000 chars ≈ 250 t), "
+            "evidence_chunks (~150 t each), payload (~300 t), plus intra-turn "
+            "deliberation. 1024 is too tight — record_finding gets truncated "
+            "mid-call (stop_reason=max_tokens), the partial tool_use is discarded, "
+            "and the finding is silently lost. 2048 covers typical record_finding "
+            "calls while keeping average output-TPM consumption near 4 500/min."
+        ),
+    )
 
     # ---- Feature flags ----------------------------------------------------
     use_real_agents: bool = Field(
@@ -113,6 +130,42 @@ class Settings(BaseSettings):
     log_redact_keys: tuple[str, ...] = Field(
         default=("text", "quote", "document", "content"),
         description="Field names whose values are redacted in structured log records.",
+    )
+
+    # ---- File logging ----------------------------------------------------
+    log_file_path: Path | None = Field(
+        default=_BACKEND_ROOT.parent.parent / "logs.txt",
+        description=(
+            "Absolute path of the structured log file. The file is truncated "
+            "on every process start and each record is flushed immediately, "
+            "so a Ctrl+C still leaves a complete log on disk. Set to None to "
+            "disable file logging entirely (stdout still works)."
+        ),
+    )
+    log_file_truncate_on_start: bool = Field(
+        default=True,
+        description=(
+            "Open the log file with mode='w' on startup so each run begins "
+            "with an empty file. Set to False to append across runs."
+        ),
+    )
+    log_level: str = Field(
+        default="INFO",
+        description=(
+            "Root log level. DEBUG adds Anthropic SDK request/response details "
+            "and very verbose internal traces."
+        ),
+    )
+
+    # ---- Audit report persistence ----------------------------------------
+    audit_report_dir: Path | None = Field(
+        default=_BACKEND_ROOT.parent.parent / "audit_reports",
+        description=(
+            "Directory where every completed (or failed) audit report is "
+            "auto-dumped as a timestamped JSON file. Filename pattern: "
+            "audit_<YYYY-MM-DD_HH-MM-SS>_<task_id_first8>.json. "
+            "Set to None to disable."
+        ),
     )
 
 

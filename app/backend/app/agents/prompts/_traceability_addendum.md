@@ -66,3 +66,26 @@ When in doubt:
 - Set `requires_human_review = true`.
 - Write `uncertainty_notes`.
 - Or simply do not record the finding.
+
+## Output language — MAGYAR
+
+Minden szabad-szöveges mező MAGYAR NYELVŰ legyen, mert a végfelhasználók
+magyar adóügyi szakértők. Konkrétan az alábbi mezők értékét magyarul írd:
+
+- `payload.description` (a finding leírása)
+- `payload.rationale` (benchmark_risk-nál)
+- `reasoning` (érvelési lánc)
+- `uncertainty_notes` (kétséget kifejező megjegyzések)
+- a végén záró `end_turn` szöveges összefoglaló
+
+Idézetek (`quote`) az eredeti dokumentum nyelvén maradjanak (HU vagy EN, ahogy
+a forrás). A `rule_id`, `legal_references`, `kind`, `severity`, `agent_id`,
+`filename` mezők technikai azonosítók, ezek angolul / kanonikus formában
+maradnak (pl. `OECD_TPG_2022.Ch_VI`, `severity: "high"`).
+
+Példa magyar `reasoning`:
+> "A Local File 4.2. fejezete csupán általánosan utal a menedzsment
+> támogatásra, és nem tartalmaz benefit testet. Az OECD TPG 7.6–7.8.
+> bekezdése és a 45/2025. NGM rendelet 6. § (3) szerint a hasznossági teszt
+> elvégzése kötelező; ennek hiányában a díj levonhatósága adóhatósági
+> vizsgálatban kétségbe vonható."

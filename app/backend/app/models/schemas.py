@@ -364,9 +364,16 @@ class FindingAttribution(BaseModel):
 
 
 class ErrorLocation(BaseModel):
-    """Precise source location of a finding within the document set."""
+    """Precise source location of a finding within the document set.
 
-    model_config = ConfigDict(extra="forbid")
+    Uses ``extra="ignore"`` on purpose: agent-generated payloads frequently
+    duplicate fields from evidence_chunks (most often ``page`` and
+    ``chunk_index``) inside locations entries.  Treating those as fatal
+    rejection costs an entire iteration without changing the substance of
+    the finding, so we silently drop unknown keys here.
+    """
+
+    model_config = ConfigDict(extra="ignore")
 
     filename: str = Field(..., description="Name of the file containing the issue.")
     line_numbers: Optional[list[int]] = Field(
@@ -376,9 +383,14 @@ class ErrorLocation(BaseModel):
 
 
 class ConsistencyError(BaseModel):
-    """Inconsistency detected across documents (e.g. mismatched figures)."""
+    """Inconsistency detected across documents (e.g. mismatched figures).
 
-    model_config = ConfigDict(extra="forbid")
+    Uses ``extra="ignore"`` so schema-noise in agent payloads (e.g. extra
+    ``page`` or ``chunk_index`` fields the model carries over from evidence
+    chunks) does not silently lose otherwise valid findings.
+    """
+
+    model_config = ConfigDict(extra="ignore")
 
     error_id: UUID = Field(default_factory=uuid4)
     description: str
@@ -394,7 +406,7 @@ class ConsistencyError(BaseModel):
 class BenchmarkRisk(BaseModel):
     """Risk identified versus comparable benchmark studies."""
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="ignore")
 
     risk_id: UUID = Field(default_factory=uuid4)
     metric: str = Field(..., description="E.g. operating margin, markup, royalty rate.")
@@ -412,7 +424,7 @@ class BenchmarkRisk(BaseModel):
 class MissingElement(BaseModel):
     """Mandatory element absent from the documentation set."""
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="ignore")
 
     element_id: UUID = Field(default_factory=uuid4)
     description: str = Field(..., description="Human-readable explanation of what is missing.")

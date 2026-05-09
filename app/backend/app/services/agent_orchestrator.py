@@ -15,9 +15,11 @@ failing agents leave error rows in `agent_runs`).
 from __future__ import annotations
 
 import asyncio
+import json
 import logging
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Protocol, runtime_checkable
 from uuid import UUID, uuid4
 
@@ -146,6 +148,7 @@ class AgentOrchestrator:
         async def _run_one(cls: type[DocumentTypeAgent]) -> AgentRunResult:
             agent = cls(llm=self._llm, rag=self._rag, settings=self._settings)
             await self._mark_agent(task_id, agent.agent_id, "running")
+            logger.info("agent starting agent_id=%s", agent.agent_id)
             try:
                 async with self._api_sem:
                     result = await asyncio.wait_for(
@@ -170,6 +173,27 @@ class AgentOrchestrator:
                     message=f"{type(exc).__name__}: {exc}",
                     status="error",
                 )
+            n_consistency = len(result.consistency_errors)
+            n_benchmark = len(result.benchmark_risks)
+            n_missing = len(result.missing_elements)
+            n_total = n_consistency + n_benchmark + n_missing
+            err_code = result.error.code if result.error else None
+            logger.info(
+                "agent finished agent_id=%s status=%s findings=%d (cons=%d bench=%d miss=%d) "
+                "tool_calls=%d in_tok=%d out_tok=%d cache_r=%d cache_c=%d error=%s",
+                agent.agent_id,
+                result.status,
+                n_total,
+                n_consistency,
+                n_benchmark,
+                n_missing,
+                result.tool_calls,
+                result.input_tokens,
+                result.output_tokens,
+                result.cache_read_tokens,
+                result.cache_creation_tokens,
+                err_code,
+            )
             await self._mark_agent(
                 task_id,
                 agent.agent_id,
@@ -184,7 +208,15 @@ class AgentOrchestrator:
         # Aggregate.
         report = _aggregate_report(state, results)
         successful = sum(1 for r in results if r.status == "ok")
-        if successful == 0:
+        # An agent that hit the iteration cap with TOOL_ITER_CAP still
+        # contributes validated findings; treat the audit as completed if
+        # ANY agent recorded a finding, even partially.
+        total_findings = (
+            len(report.consistency_errors)
+            + len(report.benchmark_risks)
+            + len(report.missing_elements)
+        )
+        if successful == 0 and total_findings == 0:
             await self._update(
                 task_id,
                 status=AuditStatus.FAILED,
@@ -197,6 +229,11 @@ class AgentOrchestrator:
                 ),
             )
             logger.error("audit failed task_id=%s — all agents errored or timed out", task_id)
+            _dump_report_to_disk(
+                report=report,
+                target_dir=self._settings.audit_report_dir,
+                audit_status=AuditStatus.FAILED,
+            )
             return
 
         await self._update(
@@ -206,11 +243,26 @@ class AgentOrchestrator:
             progress=100,
             report=report,
         )
+        # Per-agent finding count makes "1/6 agents work" debugging trivial.
+        per_agent_summary = ", ".join(
+            f"{r.agent_id}={r.status}/{len(r.consistency_errors) + len(r.benchmark_risks) + len(r.missing_elements)}"
+            for r in results
+        )
         logger.info(
-            "audit completed task_id=%s successful_agents=%d/%d",
+            "audit completed task_id=%s ok=%d/%d findings=%d (cons=%d bench=%d miss=%d) [%s]",
             task_id,
             successful,
             len(results),
+            total_findings,
+            len(report.consistency_errors),
+            len(report.benchmark_risks),
+            len(report.missing_elements),
+            per_agent_summary,
+        )
+        _dump_report_to_disk(
+            report=report,
+            target_dir=self._settings.audit_report_dir,
+            audit_status=AuditStatus.COMPLETED,
         )
 
     # ---- Internal ----------------------------------------------------
@@ -247,6 +299,41 @@ class AgentOrchestrator:
 # ---------------------------------------------------------------------------
 
 
+def _dump_report_to_disk(
+    report: AuditReport,
+    target_dir: Path | None,
+    audit_status: AuditStatus,
+) -> None:
+    """Persist a completed audit report as a timestamped JSON file.
+
+    Filename pattern: ``audit_<YYYY-MM-DD_HH-MM-SS>_<task_id_first8>.json``.
+    Hungarian text is preserved (``ensure_ascii=False``) so the file is
+    immediately human-readable. Write failures are logged but never raised —
+    the audit must complete even if disk persistence fails.
+    """
+    if target_dir is None:
+        return
+    try:
+        target_dir.mkdir(parents=True, exist_ok=True)
+        ts = datetime.now(timezone.utc).strftime("%Y-%m-%d_%H-%M-%S")
+        short_id = str(report.audit_task_id)[:8]
+        path = target_dir / f"audit_{ts}_{short_id}.json"
+        envelope = {
+            "audit_status": audit_status.value,
+            "report": report.model_dump(mode="json"),
+        }
+        with path.open("w", encoding="utf-8") as fh:
+            json.dump(envelope, fh, ensure_ascii=False, indent=2)
+        logger.info("audit report saved path=%s", path)
+    except Exception as exc:  # noqa: BLE001 — never crash the audit on disk I/O
+        logger.warning(
+            "failed to save audit report to %s: %s: %s",
+            target_dir,
+            type(exc).__name__,
+            exc,
+        )
+
+
 def _synthetic_failure(
     agent_cls: type[DocumentTypeAgent],
     settings: Settings,
@@ -269,12 +356,24 @@ def _synthetic_failure(
 
 
 def _aggregate_report(state: _AgentTaskState, results: list[AgentRunResult]) -> AuditReport:
-    """Flatten findings from successful agent runs into the canonical report."""
+    """Flatten findings from agent runs into the canonical report.
+
+    Findings from agents that hit the tool-iteration cap are still included:
+    each finding was validated by `record_finding`'s schema check at the moment
+    it was recorded, so the cap is a *budget* exhaustion, not a correctness
+    failure. Only hard failures (timeout, unhandled exception) are excluded
+    from the aggregate, since those agent states are unreliable.
+    """
+    INCLUDE_STATUSES = {"ok", "error"}  # "error" carries TOOL_ITER_CAP partials
     consistency: list[ConsistencyError] = []
     benchmark: list[BenchmarkRisk] = []
     missing: list[MissingElement] = []
     for r in results:
-        if r.status != "ok":
+        if r.status not in INCLUDE_STATUSES:
+            continue
+        # Skip error-status agents whose error is unrelated to budget exhaustion —
+        # exceptions during validation may have left findings half-built.
+        if r.status == "error" and r.error and r.error.code != "TOOL_ITER_CAP":
             continue
         consistency.extend(r.consistency_errors)
         benchmark.extend(r.benchmark_risks)

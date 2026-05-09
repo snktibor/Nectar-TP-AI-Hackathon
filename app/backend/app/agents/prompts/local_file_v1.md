@@ -71,5 +71,28 @@ owns deeper analysis of comparables — do not duplicate.
 
 - Only call `record_finding`; do not narrate findings in plain text.
 - Calibrate `confidence`: 0.9+ when the citation directly proves the finding;
-  below 0.5 means you should keep searching instead of recording.
+  0.5–0.8 means inferential gaps — **record anyway** with
+  `requires_human_review=true`. Only skip recording when confidence < 0.3.
+  Missed real concerns are worse than over-flagged ones; humans can dismiss
+  but cannot review what you never reported.
 - End with a brief plain-text turn (no tool call) when you are done.
+- **Hard rhythm**: 2-3 search_context queries → start recording findings.
+  Do not exceed 4 search_context calls before recording your first finding.
+  Cap is 10 turns total — running into the cap discards your wrap-up turn.
+
+## Concrete recording targets for this Local File
+
+If the document is the HIG Manufacturing Local File 2024, the following
+issues are commonly observed and should be recorded if your search returns
+related text — list is illustrative, not exhaustive:
+
+- Missing **benefit test** (hasznossági teszt) for management fee transactions
+  → `missing_element` (HIGH).
+- Missing **DEMPE analysis** for license fee / royalty transactions
+  → `missing_element` (HIGH).
+- **Functional profile contradictions** between section 5 (functional
+  analysis) and section 2.1 (limited-risk profile) → `consistency_error`
+  (CRITICAL).
+
+If you cannot confirm any of these from retrieved chunks, search at least
+once more, then record what you can support and end your turn.

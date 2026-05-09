@@ -14,7 +14,9 @@ network call.
 
 from __future__ import annotations
 
+import asyncio
 import logging
+import time
 from typing import Literal, TypedDict, Union, cast
 
 import anthropic
@@ -156,7 +158,15 @@ def _is_retryable(exc: BaseException) -> bool:
 
 
 class LlmClient:
-    """Async, retrying, prompt-cache-aware wrapper around AsyncAnthropic."""
+    """Async, retrying, prompt-cache-aware wrapper around AsyncAnthropic.
+
+    Includes a process-wide call throttle so that, regardless of how many agents
+    invoke the client concurrently, consecutive calls are spaced at least
+    `settings.min_call_interval_s` apart.  This is essential on low-tier API
+    keys where OTPM (output tokens per minute) is the binding limit and naive
+    parallelism causes cascading 429s that the SDK's Retry-After backoff alone
+    cannot recover from within an agent's wall-clock budget.
+    """
 
     def __init__(
         self,
@@ -166,6 +176,11 @@ class LlmClient:
         self._settings = settings or get_settings()
         self._client: AsyncAnthropic | None = client
         self._logger = logging.getLogger("redline.llm")
+        # Throttle state — `time.monotonic()` units so wall-clock changes
+        # cannot break the spacing.  `_last_call_started_at = 0` means "no
+        # call yet" and the first invocation skips the wait.
+        self._last_call_started_at: float = 0.0
+        self._throttle_lock = asyncio.Lock()
 
     def _ensure_client(self) -> AsyncAnthropic:
         """Build the SDK client on first use; raise a clear error if the key is missing."""
@@ -218,6 +233,8 @@ class LlmClient:
 
         client = self._ensure_client()
 
+        await self._throttle_before_call()
+
         async for attempt in retrying:
             with attempt:
                 raw = await client.messages.create(
@@ -228,10 +245,49 @@ class LlmClient:
                     max_tokens=max_tokens_eff,
                     temperature=temperature,
                 )
-                return _to_llm_turn(raw)
+                turn = _to_llm_turn(raw)
+                self._logger.info(
+                    "llm call ok model=%s stop=%s in=%d out=%d cache_r=%d cache_c=%d "
+                    "blocks=%d max_tokens_cap=%d",
+                    turn.model,
+                    turn.stop_reason,
+                    turn.usage.input_tokens,
+                    turn.usage.output_tokens,
+                    turn.usage.cache_read_input_tokens,
+                    turn.usage.cache_creation_input_tokens,
+                    len(turn.content),
+                    max_tokens_eff,
+                )
+                return turn
 
         # Defensive: tenacity's reraise=True ensures we never reach this line.
         raise RuntimeError("LlmClient.create exhausted retries without surfacing an error")
+
+    async def _throttle_before_call(self) -> None:
+        """Block until at least `min_call_interval_s` has passed since the last call started.
+
+        Serializes the *start* of API calls — actual in-flight calls remain
+        concurrent.  The lock is held only during the (possibly empty) sleep,
+        not during the API roundtrip, so a slow API call never delays the next
+        agent's throttle decision more than the configured interval.
+        """
+        interval = self._settings.min_call_interval_s
+        if interval <= 0:
+            return
+        async with self._throttle_lock:
+            now = time.monotonic()
+            if self._last_call_started_at > 0:
+                elapsed = now - self._last_call_started_at
+                wait = interval - elapsed
+                if wait > 0:
+                    self._logger.info(
+                        "llm throttle waiting %.2fs (last call %.2fs ago, interval %.1fs)",
+                        wait,
+                        elapsed,
+                        interval,
+                    )
+                    await asyncio.sleep(wait)
+            self._last_call_started_at = time.monotonic()
 
 
 def _to_llm_turn(raw: object) -> LlmTurn:

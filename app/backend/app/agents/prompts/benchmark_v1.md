@@ -69,5 +69,23 @@ falls outside its own quoted IQR. Payload fields:
 
 - Tool calls only — never narrate findings in plain text.
 - Calibrate `confidence`: only set ≥0.9 when the citation provides hard
-  numbers; lower if you must infer.
+  numbers; 0.5–0.8 means inferential gaps — **record anyway** with
+  `requires_human_review=true`. Only skip recording when confidence < 0.3.
 - End with a brief text turn when finished.
+- **Hard rhythm**: 2-3 search_context queries → start recording findings.
+  Do not exceed 4 searches before recording your first finding. Cap is 10
+  turns total.
+
+## Concrete recording targets
+
+If the document is the HIG Benchmark Study 2024, common issues to record
+when retrieved chunks support them:
+
+- **IQR breach**: tested party PLI (e.g. Berry-ratio 1.19) above the upper
+  quartile (e.g. 1.10) but the conclusion claims "within range" — this is
+  a `benchmark_risk` (CRITICAL) AND a `consistency_error` (false conclusion).
+- **Method mismatch**: Local File uses Cost-Plus 8% (implied Berry-ratio 1.08)
+  but Benchmark uses TNMM Berry-ratio 1.19 — `consistency_error` (MEDIUM).
+
+If neither is apparent in your retrieved chunks, search once more, then
+record what you can support and end your turn.

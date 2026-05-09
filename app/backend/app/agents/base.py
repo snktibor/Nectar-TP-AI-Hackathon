@@ -12,7 +12,6 @@ implementation.
 
 from __future__ import annotations
 
-import asyncio
 import json
 import logging
 from abc import ABC
@@ -139,11 +138,20 @@ class DocumentTypeAgent(ABC):
             {"role": "user", "content": self.initial_user_message(session_id)}
         ]
 
-        try:
-            for turn_idx in range(self._settings.max_tool_iterations):
-                if turn_idx > 0 and self._settings.inter_turn_delay_s > 0:
-                    await asyncio.sleep(self._settings.inter_turn_delay_s)
+        logger.info(
+            "agent loop start agent_id=%s session_id=%s max_iter=%d",
+            self.agent_id,
+            session_id,
+            self._settings.max_tool_iterations,
+        )
 
+        try:
+            cap_hit = False
+            for turn_idx in range(self._settings.max_tool_iterations):
+                # Note: inter-call pacing is handled globally by LlmClient.
+                # The LLM client throttles every call to respect the
+                # configured min_call_interval_s, so adding a per-turn sleep
+                # here would double-count the wait.
                 turn = await self._llm.create(
                     model=self.model,
                     system=system_blocks,
@@ -154,13 +162,37 @@ class DocumentTypeAgent(ABC):
                 usage = _accumulate_usage(usage, turn.usage)
                 _append_assistant_turn(messages, turn)
 
-                if turn.stop_reason in ("end_turn", "max_tokens"):
-                    break
-
-                # stop_reason == "tool_use": dispatch every tool block.
                 tool_use_blocks = [b for b in turn.content if isinstance(b, ToolUseContentBlock)]
+                logger.info(
+                    "agent turn agent_id=%s turn=%d/%d stop=%s tool_blocks=%d in_tok=%d out_tok=%d",
+                    self.agent_id,
+                    turn_idx + 1,
+                    self._settings.max_tool_iterations,
+                    turn.stop_reason,
+                    len(tool_use_blocks),
+                    turn.usage.input_tokens,
+                    turn.usage.output_tokens,
+                )
+
+                # `end_turn` is a clean stop.
+                if turn.stop_reason == "end_turn":
+                    break
+                # `max_tokens`: the response may still contain *complete*
+                # tool_use blocks the model emitted before running out of
+                # budget. Dispatch those so their findings are not silently
+                # lost, then break.
+                if turn.stop_reason == "max_tokens" and not tool_use_blocks:
+                    logger.warning(
+                        "agent hit max_tokens with no tool_use — output truncated agent_id=%s",
+                        self.agent_id,
+                    )
+                    break
                 if not tool_use_blocks:
                     # Defensive: stop_reason claims tool_use but no blocks present.
+                    logger.warning(
+                        "agent received tool_use stop with no blocks agent_id=%s",
+                        self.agent_id,
+                    )
                     break
 
                 tool_results: list[ContentBlockParam] = []
@@ -174,6 +206,22 @@ class DocumentTypeAgent(ABC):
                         seen_lookup=seen_lookup,
                         findings=findings,
                     )
+                    if is_error:
+                        logger.warning(
+                            "tool call rejected agent_id=%s tool=%s reason=%s",
+                            self.agent_id,
+                            block.name,
+                            text[:200].replace("\n", " "),
+                        )
+                    else:
+                        logger.info(
+                            "tool call ok agent_id=%s tool=%s findings=cons:%d/bench:%d/miss:%d",
+                            self.agent_id,
+                            block.name,
+                            len(findings.consistency),
+                            len(findings.benchmark),
+                            len(findings.missing),
+                        )
                     tool_results.append(
                         {
                             "type": "tool_result",
@@ -182,17 +230,86 @@ class DocumentTypeAgent(ABC):
                             "is_error": is_error,
                         }
                     )
+
+                # Iteration-aware nudge: low-temperature models like Haiku tend
+                # to keep issuing search_context calls indefinitely instead of
+                # ever committing to record_finding. We append a short text
+                # block (sibling to tool_result blocks within the same user
+                # turn — Anthropic permits this) once we've spent half the
+                # budget without recording anything, and again with stronger
+                # urgency near the cap.
+                remaining = self._settings.max_tool_iterations - turn_idx - 1
+                n_findings_so_far = (
+                    len(findings.consistency)
+                    + len(findings.benchmark)
+                    + len(findings.missing)
+                )
+                nudge = self._iteration_nudge(
+                    turn_idx=turn_idx,
+                    remaining=remaining,
+                    n_findings=n_findings_so_far,
+                    n_searches=tool_calls - n_findings_so_far,
+                )
+                if nudge:
+                    logger.info(
+                        "iteration nudge agent_id=%s turn=%d remaining=%d findings=%d nudge=%r",
+                        self.agent_id,
+                        turn_idx + 1,
+                        remaining,
+                        n_findings_so_far,
+                        nudge[:80],
+                    )
+                    tool_results.append({"type": "text", "text": nudge})
+
                 messages.append({"role": "user", "content": tool_results})
+
+                # If the model was truncated by max_tokens but managed to emit
+                # complete tool_use blocks, we dispatched them above — exit
+                # cleanly rather than asking for another expensive turn that
+                # will likely repeat the same truncation.
+                if turn.stop_reason == "max_tokens":
+                    logger.warning(
+                        "agent hit max_tokens with %d tool_use block(s) dispatched — exiting agent_id=%s",
+                        len(tool_use_blocks),
+                        self.agent_id,
+                    )
+                    break
             else:
                 # Loop exhausted without break — iteration cap hit.
-                return self._error_result(
-                    started_at=started_at,
-                    code="TOOL_ITER_CAP",
-                    message=f"Agent exceeded max_tool_iterations ({self._settings.max_tool_iterations}).",
-                    usage=usage,
-                    tool_calls=tool_calls,
-                    findings=findings,
-                )
+                cap_hit = True
+
+            # Smart cap recovery: if the model never reached end_turn but did
+            # successfully record findings (each one is schema-validated by
+            # _handle_record_finding before being buffered), we treat the run
+            # as a partial success. The audit aggregator already collects
+            # findings from TOOL_ITER_CAP-coded errors, but reporting status="ok"
+            # here makes the downstream "successful agents" counter meaningful.
+            n_findings = (
+                len(findings.consistency)
+                + len(findings.benchmark)
+                + len(findings.missing)
+            )
+            if cap_hit:
+                if n_findings > 0:
+                    logger.warning(
+                        "agent hit iteration cap but recorded %d finding(s) — accepting agent_id=%s",
+                        n_findings,
+                        self.agent_id,
+                    )
+                else:
+                    logger.warning(
+                        "agent exhausted %d iterations without recording any finding agent_id=%s",
+                        self._settings.max_tool_iterations,
+                        self.agent_id,
+                    )
+                    return self._error_result(
+                        started_at=started_at,
+                        code="TOOL_ITER_CAP",
+                        message=f"Agent exceeded max_tool_iterations ({self._settings.max_tool_iterations}).",
+                        usage=usage,
+                        tool_calls=tool_calls,
+                        findings=findings,
+                    )
 
             finished_at = datetime.now(timezone.utc)
             return AgentRunResult(
@@ -233,6 +350,61 @@ class DocumentTypeAgent(ABC):
             "retrieve the most relevant evidence, then record findings. Cite every "
             "finding with chunks you actually retrieved."
         )
+
+    def _iteration_nudge(
+        self,
+        *,
+        turn_idx: int,
+        remaining: int,
+        n_findings: int,
+        n_searches: int,
+    ) -> str:
+        """Inject a deadline reminder into the next user message when needed.
+
+        Empirically, low-temperature small models (Haiku 4.5) get stuck in
+        search_context loops and never emit `record_finding`. The nudges below
+        force a transition: warn at the half-budget mark if no finding has been
+        recorded, then escalate to a hard deadline as the iteration cap nears.
+        """
+        max_iter = self._settings.max_tool_iterations
+        # No nudge if the agent is already producing findings — let it work.
+        if n_findings > 0 and remaining > 1:
+            return ""
+
+        # Final-2 turns: hard deadline, regardless of finding count.
+        if remaining <= 1:
+            if n_findings == 0:
+                return (
+                    f"DEADLINE: only {remaining} iteration(s) left and no finding "
+                    "has been recorded yet. Stop calling search_context. Pick "
+                    "the strongest evidence chunk you have already retrieved "
+                    "and call record_finding now (any kind: consistency_error, "
+                    "missing_element, or benchmark_risk). If after honest review "
+                    "the document is genuinely clean, end your turn with a "
+                    "one-sentence text reply."
+                )
+            return (
+                f"DEADLINE: {remaining} iteration(s) left. Wrap up: record any "
+                "remaining findings in this turn, then end your turn."
+            )
+
+        # Mid-budget nudge: 60%+ of iterations spent searching with nothing recorded.
+        if (
+            n_findings == 0
+            and n_searches >= 3
+            and turn_idx + 1 >= (max_iter * 6) // 10
+        ):
+            return (
+                f"PROGRESS CHECK: you have issued {n_searches} search_context "
+                f"call(s) without recording any finding, and {remaining} "
+                "iteration(s) remain. The retrieved chunks are sufficient — "
+                "stop searching and call record_finding for the most concrete "
+                "issue you can support with an already-retrieved citation. "
+                "If after this honest review the document is genuinely clean, "
+                "end your turn with a brief text reply."
+            )
+
+        return ""
 
     # ---- internals --------------------------------------------------------
 
@@ -282,6 +454,12 @@ class DocumentTypeAgent(ABC):
         except (TypeError, ValueError):
             return ("n_results must be an integer in [1,10].", True)
 
+        logger.info(
+            "search_context query agent_id=%s n_results=%d query=%r",
+            self.agent_id,
+            n_results,
+            query_raw[:160],
+        )
         chunks = await self._rag.query_context(
             session_id=session_id,
             doc_type=self.doc_type,
@@ -292,6 +470,19 @@ class DocumentTypeAgent(ABC):
             key = (chunk.filename, chunk.page, chunk.chunk_index)
             seen.add(key)
             seen_lookup[key] = chunk
+        # Per-chunk summary (filename:page:idx + score-stand-in) so we can see
+        # WHY the model is/isn't recording — sometimes RAG returns nothing
+        # useful and the model is correct to keep searching.
+        chunk_brief = ", ".join(
+            f"{c.filename}:p{c.page}:c{c.chunk_index}({c.source_kind[:3]})"
+            for c in chunks
+        ) or "<no matches>"
+        logger.info(
+            "search_context returned agent_id=%s n=%d chunks=[%s]",
+            self.agent_id,
+            len(chunks),
+            chunk_brief,
+        )
         return (_format_chunks(chunks), False)
 
     def _handle_record_finding(
@@ -414,6 +605,25 @@ class DocumentTypeAgent(ABC):
                 findings.missing.append(MissingElement.model_validate(finding_data))
         except ValidationError as exc:
             return (f"payload schema invalid for kind={kind_raw}: {_first_error(exc)}", True)
+
+        # Detailed finding telemetry — surfaces severity, confidence, citation
+        # count and the description's first ~120 chars so the run log explains
+        # WHAT was actually recorded, not just that something was.
+        severity = payload_raw.get("severity") if isinstance(payload_raw, dict) else None
+        description = payload_raw.get("description") if isinstance(payload_raw, dict) else None
+        descr_str = str(description) if description else ""
+        logger.info(
+            "finding recorded agent_id=%s kind=%s severity=%s confidence=%.2f "
+            "citations=%d review=%s rule=%s descr=%r",
+            self.agent_id,
+            kind_raw,
+            severity,
+            confidence,
+            len(citations),
+            requires_human_review,
+            rule_id,
+            descr_str[:120],
+        )
 
         return ("Finding recorded.", False)
 

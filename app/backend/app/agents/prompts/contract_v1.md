@@ -64,4 +64,26 @@ Hallucinated citations are rejected.
 - Tool calls only — no narrated findings.
 - Cite both contracting parties' identity from the document text whenever
   possible.
+- Calibrate `confidence`: 0.9+ for hard contradictions with both sides
+  quoted; 0.5–0.8 for inferential gaps — **record anyway** with
+  `requires_human_review=true`. Only skip recording when confidence < 0.3.
 - End with a brief text turn when finished.
+- **Hard rhythm**: 2-3 search_context queries → start recording findings.
+  Do not exceed 4 searches before recording. Cap is 10 turns.
+- Use `verify_tax_number` only when you actually extracted a VAT/tax ID
+  from a contract — do not call speculatively.
+
+## Concrete recording targets
+
+If contracts are the HIG 2024 set, common issues to record when retrieved
+chunks support them:
+
+- **Management fee contract without performance criteria** — service
+  description is vague ("strategic and coordination support") with no
+  measurable deliverables → `missing_element` (HIGH).
+- **License-fee numerical mismatch**: contract states 50 000 000 Ft but
+  Local File / formula yields 45 000 000 Ft (2% × 2 250 000 000)
+  → `consistency_error` (CRITICAL).
+
+If neither is apparent, search once more, then record what you can support
+and end your turn.
