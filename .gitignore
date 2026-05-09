@@ -58,3 +58,5 @@ settings.local.json
 /app/backend/data/chromadb
 /audit_reports/
 audit_reports/
+/audit_reports
+logs.txt
