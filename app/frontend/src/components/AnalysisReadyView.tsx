@@ -112,7 +112,7 @@ export default function AnalysisReadyView({
 
   return (
     <section className="flex h-full min-h-0 flex-col items-start justify-start rounded-2xl border border-gray-100 bg-white p-8 animate-phantom-fade-in">
-      <div className="w-full rounded-2xl border border-phantom-line bg-white p-5 sm:p-6">
+      <div className="w-full rounded-2xl border border-phantom-line bg-[#f8fafc] p-5 sm:p-6">
         <div className="flex items-start gap-3">
           <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-phantom-accent/20 bg-phantom-accent-soft text-phantom-accent">
             <Sparkles className="h-5 w-5" />
