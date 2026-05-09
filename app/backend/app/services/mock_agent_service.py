@@ -214,32 +214,38 @@ class MockAgentService:
 
         lf_benefit_test_missing = MissingElement(
             description=(
-                "A Local File 4.2. fejezete (Ügylet 2 – Menedzsmentszolgáltatási díj) "
-                "nem tartalmaz hasznossági tesztet (benefit test). Az OECD TPG 7.6–7.8. "
-                "és a 45/2025. NGM rendelet 6. § (3) bek. alapján kötelező azonosítani, "
-                "hogy a fogadó fél számára a szolgáltatás mérhető gazdasági előnnyel "
-                "jár-e, amelyet független féltől is megvásárolt volna."
+                "A Local File 4.2. fejezete (Ügylet 2 – "
+                "Menedzsmentszolgáltatási díj) nem tartalmaz hasznossági tesztet "
+                "(benefit test). Az OECD Irányelvek 7.6–7.8. és a 45/2025. NGM "
+                "rendelet 6.§ alapján kötelező azonosítani, hogy a fogadó fél "
+                "számára a szolgáltatás mérhető gazdasági előnnyel jár-e, "
+                "amelyet független féltől is megvásárolt volna. Enélkül a díj "
+                "levonhatósága kétségbe vonható."
             ),
             expected_in="HIG_LocalFile_2024_FAULTY.pdf",
-            required_by="OECD TPG 7.6–7.8; 45/2025. (XII. 23.) NGM rendelet 6. § (3) bek.",
+            required_by="OECD TPG 7.6–7.8, 2017; 45/2025. (XII. 23.) NGM rendelet 6. § (3) bek.",
             severity=RiskSeverity.HIGH,
             attribution=_attribution(
                 "local_file_agent",
                 DocumentType.LOCAL_FILE,
                 confidence=0.89,
                 rule_id="OECD_TPG_2022.para_7.6-7.8",
-                legal_references=["OECD_TPG_2022.para_7.6-7.8", "45_2025_NGM.section_6(3)"],
+                legal_references=[
+                    "OECD_TPG_2022.para_7.6-7.8",
+                    "OECD TPG 7.6–7.8, 2017",
+                    "45_2025_NGM.section_6(3)",
+                    "45/2025. (XII. 23.) NGM rendelet 6. § (3) bek.",
+                ],
                 prompt_version="local_file_v1",
                 reasoning=(
-                    "A Local File 4.2. fejezete csupán általánosan utal a "
-                    "menedzsment támogatásra ('Az anyavállalat csoportszintű "
-                    "menedzsment támogatást nyújt a Társaság részére'), és nem "
-                    "tartalmaz konkrét szolgáltatáskategóriákat, piaci "
-                    "értékbecslést, sem explicit hasznossági teszt eredményt. "
-                    "Az OECD TPG 7.6–7.8. és a 45/2025. NGM rendelet 6. § (3) "
-                    "bekezdése szerint a benefit test elvégzése kötelező; "
-                    "anélkül a díj levonhatósága adóhatósági vizsgálatban "
-                    "kétségbe vonható."
+                    "Hiányzik: konkrét szolgáltatáskategóriák azonosítása, "
+                    "piaci értékük becsült sávja, és explicit pozitív/negatív "
+                    "teszt eredmény. Helyes megközelítés: azonosítani a kapott "
+                    "szolgáltatásokat (pl. IT-rendszer, jogi támogatás, "
+                    "pénzügyi kontrolling), becsülni piaci értéküket, és "
+                    "levonni, hogy a Társaság ezeket önállóan vagy piacon "
+                    "alacsonyabb áron tudta volna-e beszerezni. Enélkül a díj "
+                    "levonhatósága adóhatósági vizsgálatban kétségbe vonható."
                 ),
                 uncertainty_notes=(
                     "Nem zárható ki, hogy a benefit test egy más fejezetben "
@@ -262,14 +268,16 @@ class MockAgentService:
 
         lf_dempe_missing = MissingElement(
             description=(
-                "A Local File 4.3. fejezete (Ügylet 3 – Licencdíj) nem tartalmaz "
-                "DEMPE-elemzést. Az OECD BEPS 8–10. akciópontja és az OECD TPG 6. fejezete "
-                "alapján immateriális javakkal kapcsolatos ügyleteknél kötelező megvizsgálni, "
-                "melyik entitás végzi az egyes DEMPE-funkciókat (fejlesztés, fokozás, "
-                "fenntartás, védelem, hasznosítás)."
+                "A Local File 4.3. fejezete (Ügylet 3 – Licencdíj) nem "
+                "tartalmaz DEMPE-elemzést (Development, Enhancement, Maintenance, "
+                "Protection, Exploitation). Az OECD BEPS 8–10. akciópontja és az "
+                "OECD TPG 6. fejezete alapján immateriális javakkal kapcsolatos "
+                "ügyleteknél kötelező megvizsgálni, melyik entitás végzi az egyes "
+                "DEMPE-funkciókat, viseli a kapcsolódó kockázatokat, és ennek "
+                "alapján ki jogosult az immateriális javakhoz kapcsolódó hozamra."
             ),
             expected_in="HIG_LocalFile_2024_FAULTY.pdf",
-            required_by="OECD TPG Ch. 6, para. 6.32–6.56; BEPS Actions 8–10; 45/2025. NGM rendelet 6. § (4) bek.",
+            required_by="OECD TPG Ch. 6, paras. 6.32–6.56; BEPS Actions 8–10; 45/2025. (XII. 23.) NGM rendelet 6. § (4) bek.",
             severity=RiskSeverity.HIGH,
             attribution=_attribution(
                 "local_file_agent",
@@ -278,18 +286,26 @@ class MockAgentService:
                 rule_id="OECD_TPG_2022.Ch_VI",
                 legal_references=[
                     "OECD_TPG_2022.para_6.32-6.56",
+                    "OECD TPG Ch. 6, paras. 6.32–6.56",
                     "BEPS_Actions_8-10",
+                    "BEPS Actions 8–10",
                     "45_2025_NGM.section_6(4)",
+                    "45/2025. (XII. 23.) NGM rendelet 6. § (4) bek.",
                 ],
                 prompt_version="local_file_v1",
                 reasoning=(
-                    "A Local File 4.3. fejezete a licencdíjat egyetlen mondatban "
-                    "tárgyalja ('a licencdíj a know-how használatának ellenértéke'), "
-                    "és nem elemzi, melyik entitás végzi a DEMPE-funkciókat. Az "
-                    "OECD TPG 6. fejezete és a 45/2025. NGM rendelet 6. § (4) "
-                    "bekezdése szerint immateriális javakkal kapcsolatos ügyleteknél "
-                    "a DEMPE-elemzés elvégzése kötelező; anélkül a licencdíj piaci "
-                    "megfelelősége nem igazolható."
+                    "Hiányzik: a szellemi tulajdon fejlesztésének, fokozásának, "
+                    "fenntartásának, védelmének és hasznosításának vállalatok "
+                    "közötti elosztása; az egyes funkciókhoz kapcsolódó "
+                    "ráfordítások és kockázatok azonosítása. Helyes "
+                    "megközelítés: bemutatni, hogy a K+F kizárólag az "
+                    "Anyavállalatnál folyik (Development), a know-how javítása "
+                    "is ott történik (Enhancement), a szabadalmak fenntartása "
+                    "az Anyavállalat feladata (Maintenance), a jogsértések "
+                    "elleni védelem is az Anyavállalatnál van (Protection), és "
+                    "a hasznosításból eredő bevétel is ott keletkezik "
+                    "(Exploitation) — ebből következik, hogy a Társaság passzív "
+                    "felhasználó, a licencdíj piaci szintje indokolt."
                 ),
                 uncertainty_notes=(
                     "A DEMPE-elemzés esetleg a Master File-ban szerepel — "
@@ -312,15 +328,20 @@ class MockAgentService:
 
         mgmt_contract_missing = MissingElement(
             description=(
-                "A management fee szerződés (HIG-MGMT-2024-002) 2. §-a a szolgáltatás "
-                "tartalmát kizárólag általánosan írja le ('csoportszintű stratégiai és "
-                "koordinációs támogatást nyújt'), mérhető teljesítési kritériumok, "
-                "konkrét deliverable-ök és minőségi elvárások nélkül. Az OECD TPG "
-                "7.14–7.15. bekezdése szerint ez nem elegendő a szokásos piaci ár "
-                "elvének igazolásához."
+                "A management fee szerződés (HIG-MGMT-2024-002) 2. § – "
+                "A szerződés tárgya – a szolgáltatás tartalmát kizárólag "
+                "általánosan, mérhető teljesítési kritériumok nélkül írja le: "
+                "'csoportszintű stratégiai és koordinációs támogatást nyújt'. "
+                "Sem a konkrét szolgáltatáskategóriák, sem a teljesítési "
+                "mérföldkövek, sem a minőségi elvárások, sem az egyes "
+                "negyedévekhez rendelt deliverable-ök nem kerülnek "
+                "meghatározásra. Az OECD TPG 7.14–7.15. bekezdése szerint az "
+                "ilyen általános leírás nem elegendő a szokásos piaci ár "
+                "elvének igazolásához; adóhatósági vizsgálat esetén a díj "
+                "levonhatósága kétségbe vonható."
             ),
             expected_in="HIG_Contracts_2024.pdf",
-            required_by="OECD TPG 7.6–7.8, 7.14–7.15; 45/2025. NGM rendelet 6. § (3) bek.",
+            required_by="OECD TPG 7.6–7.8, 7.14–7.15; 45/2025. (XII. 23.) NGM rendelet 6. § (3) bek.",
             severity=RiskSeverity.HIGH,
             attribution=_attribution(
                 "contract_agent",
@@ -330,17 +351,22 @@ class MockAgentService:
                 legal_references=[
                     "OECD_TPG_2022.para_7.6-7.8",
                     "OECD_TPG_2022.para_7.14-7.15",
+                    "OECD TPG 7.6–7.8, 7.14–7.15 (benefit test, specific services)",
                     "45_2025_NGM.section_6(3)",
+                    "45/2025. (XII. 23.) NGM rendelet 6. § (3) bek.",
                 ],
                 prompt_version="contract_v1",
                 reasoning=(
-                    "A management fee szerződés 2. §-ában nem szerepelnek "
-                    "konkrét szolgáltatáskategóriák (pl. IT-infrastruktúra, "
-                    "jogi támogatás, pénzügyi kontrolling), negyedéves "
-                    "deliverable-ök, mérhetővé tett teljesítési feltételek, "
-                    "sem az Igénybe vevőnél realizálódó mérhető előny leírása. "
-                    "Az OECD TPG 7.14–7.15. bekezdése szerint az ilyen általános "
-                    "leírás adóhatósági vizsgálatban nem elegendő."
+                    "Hiányzik: konkrét szolgáltatáskategóriák (pl. "
+                    "IT-infrastruktúra, jogi támogatás, pénzügyi kontrolling), "
+                    "mérhetővé tett teljesítési feltételek, negyedéves "
+                    "deliverable-ök, és az Igénybe vevőnél realizálódó mérhető "
+                    "előny leírása. Helyes megközelítés: a szerződésnek "
+                    "tételesen fel kell sorolni a nyújtott szolgáltatásokat "
+                    "(pl. SAP-rendszer biztosítása, jogi megfelelési támogatás, "
+                    "pénzügyi tervezési szolgáltatás), és minden kategóriánál "
+                    "meg kell határozni a teljesítés mérhetőségét (pl. havi "
+                    "kontrolling riport, negyedéves audit support)."
                 ),
                 uncertainty_notes=(
                     "Lehetséges, hogy egy külön service level agreement (SLA) "
@@ -363,12 +389,19 @@ class MockAgentService:
 
         lf_functional_contradiction = ConsistencyError(
             description=(
-                "A Local File 5. fejezete (Funkcionális elemzés) azt állítja, hogy a "
-                "HIG Manufacturing Kft. részt vesz a beszállítói kiválasztásban, "
-                "önállóan dönt a termelési kapacitás bővítéséről, és aktívan "
-                "közreműködik az árstratégia kialakításában. Ez közvetlen ellentmondásban "
-                "áll a Master File 1.3. fejezetében és a Local File 2.1. fejezetében "
-                "rögzített 'korlátozott kockázatú szerződéses gyártó' profillal."
+                "A Local File 5. fejezete (Funkcionális elemzés) azt "
+                "állítja, hogy a HIG Manufacturing Kft. részt vesz a "
+                "beszállítói kiválasztásban, önállóan dönt a termelési "
+                "kapacitás bővítéséről, és aktívan közreműködik az árstratégia "
+                "kialakításában. Ez közvetlen ellentmondásban áll a Master "
+                "File-ban (1.3. fejezet) és a Local File 2.1. fejezetében "
+                "rögzített 'korlátozott kockázatú szerződéses gyártó' "
+                "profillal, ahol az ilyen döntési jogkörök kizárólag az "
+                "Anyavállalatnál koncentrálódnak. Az ellentmondás "
+                "következménye: ha a Társaság valóban önálló stratégiai "
+                "döntéseket hoz, nem minősülhet rutin gyártónak, és a "
+                "magasabb funkciókat tükröző, magasabb megtérülés lenne "
+                "indokolt – ami az egész cost-plus 8%-os árazást aláássa."
             ),
             severity=RiskSeverity.CRITICAL,
             locations=[
@@ -384,7 +417,9 @@ class MockAgentService:
                 legal_references=[
                     "OECD_TPG_2022.para_1.51-1.106",
                     "OECD_TPG_2022.para_1.60",
+                    "OECD TPG 1.51–1.106 (functional analysis), 1.60 (risk allocation)",
                     "45_2025_NGM.section_4(2)",
+                    "45/2025. (XII. 23.) NGM rendelet 4. § (2) bek.",
                 ],
                 prompt_version="local_file_v1",
                 requires_human_review=True,
@@ -394,11 +429,16 @@ class MockAgentService:
                     "(beszállítói kiválasztás, kapacitásbővítés, árstratégia). "
                     "Ezzel közvetlen ellentmondásban áll ugyanazon Local File "
                     "2.1. fejezete ('önálló stratégiai döntéshozatali jogköre "
-                    "korlátozott') és a Master File 1.3. fejezete ('korlátozott "
-                    "kockázatú… Anyavállalat irányítja'). Ha a Társaság valóban "
-                    "önálló stratégiai döntéseket hoz, nem minősülhet rutin "
-                    "gyártónak, és a cost-plus 8%-os árazás alátámasztottsága "
-                    "megkérdőjelezhető."
+                    "korlátozott; a beruházási, finanszírozási és "
+                    "termékportfólió-döntések az Anyavállalat jóváhagyásához "
+                    "kötöttek') és a Master File 1.3. fejezete ('üzleti és "
+                    "pénzügyi kockázatprofilja korlátozott... az Anyavállalat "
+                    "irányítja'). Helyes megközelítés: a Társaságot "
+                    "konzisztensen korlátozott kockázatú, operatív gyártói "
+                    "profillal kell leírni — operatív termelési döntések "
+                    "(műszak, karbantartási ütemezés) a Társaságnál maradnak, "
+                    "stratégiai döntések (kapacitásbővítés, árstratégia, "
+                    "szállítói keretszerződések) az Anyavállalat hatásköre."
                 ),
                 uncertainty_notes=(
                     "Nem zárható ki, hogy az 5. fejezet szövegezése félreérthető "
@@ -422,7 +462,7 @@ class MockAgentService:
                         char_start=5210,
                         char_end=5312,
                         source_kind="document",
-                        quote="A HIG Manufacturing Kft. üzleti és pénzügyi kockázatprofilja korlátozott… az Anyavállalat irányítja",
+                        quote="A HIG Manufacturing Kft. üzleti és pénzügyi kockázatprofilja korlátozott... az Anyavállalat irányítja",
                     ),
                 ],
             ),
@@ -430,32 +470,52 @@ class MockAgentService:
 
         lic_royalty_contract_mismatch = ConsistencyError(
             description=(
-                "A licencszerződés (HIG-LIC-2024-003) 3. §-a az éves licencdíjat "
-                "50 000 000 Ft-ban rögzíti. A Local File 7.1. fejezetében lekönyvelt "
-                "összeg 45 000 000 Ft (2,0% × 2 250 000 000 Ft = 45 000 000 Ft). "
-                "Az 5 000 000 Ft-os eltérés (11,1%) nem magyarázott."
+                "A licencszerződés (HIG-LIC-2024-003) 3. §-a az éves "
+                "licencdíj összegét 50.000.000 Ft-ban rögzíti. A helyi "
+                "dokumentum (HIG-LF-2024-001) és a transzferár-nyilvántartás "
+                "azonban 45.000.000 Ft-ot mutat ki (2,0% × 2.250.000.000 Ft "
+                "árbevétel = 45.000.000 Ft). Az 5.000.000 Ft eltérés (11,1%) "
+                "két lehetséges forrása: (1) a szerződésben minimális "
+                "licencdíjként rögzített 50 MFt aktívvá vált, mivel a 2%-os "
+                "számítás alacsonyabb összeget ad — de ez ellentmond a Local "
+                "File-ban lekönyvelt 45 MFt-os tényleges kifizetésnek; (2) a "
+                "szerződés és a könyvelés inkonzisztens, és az adónyilvántartás "
+                "és a tényleges szerződéses kötelezettség eltér egymástól."
             ),
             severity=RiskSeverity.CRITICAL,
             locations=[
                 ErrorLocation(filename="HIG_Contracts_2024.pdf"),
                 ErrorLocation(filename="HIG_LocalFile_2024_FAULTY.pdf"),
             ],
-            evidence="Licencszerződés 3. § (50 MFt) vs. Local File 7.1. fejezet (45 MFt)",
+            evidence=(
+                "Licencszerződés 3. § (50.000.000 Ft) vs. Local File 7.1. fejezet "
+                "(45.000.000 Ft). Numerikus tények: contract_fixed_amount=50000000, "
+                "local_file_booked_amount=45000000, formula_result='2.0% × "
+                "2.250.000.000 = 45.000.000', discrepancy=5000000 (11,1%)."
+            ),
             attribution=_attribution(
                 "contract_agent",
                 DocumentType.CONTRACT,
                 confidence=0.94,
                 rule_id="OECD_TPG_2022.para_1.10",
-                legal_references=["OECD_TPG_2022.para_1.10", "45_2025_NGM.section_3"],
+                legal_references=[
+                    "OECD_TPG_2022.para_1.10",
+                    "OECD TPG 1.10 (consistency between contracts and actual conduct)",
+                    "45_2025_NGM.section_3",
+                    "45/2025. (XII. 23.) NGM rendelet 3. § (kapcsolt ügylet azonosítása)",
+                ],
                 prompt_version="contract_v1",
                 requires_human_review=True,
                 reasoning=(
-                    "A licencszerződés 3. §-a fix 50 000 000 Ft-os éves licencdíjat "
-                    "állapít meg. A Local File 7.1. fejezete 45 000 000 Ft-ot könyvel "
-                    "el (2% × 2 250 000 000 = 45 000 000). Az 5 000 000 Ft eltérés "
-                    "(11,1%) nem magyarázott; az OECD TPG 1.10. bekezdése szerint a "
-                    "tényleges magatartásnak és a szerződéses feltételeknek összhangban "
-                    "kell lenniük."
+                    "A licencszerződés 3. §-a fix 50.000.000 Ft-os éves "
+                    "licencdíjat állapít meg. A Local File 7.1. fejezete "
+                    "45.000.000 Ft-ot könyvel el (2% × 2.250.000.000 = "
+                    "45.000.000). A Local File 7.1. fejezete kifejezetten "
+                    "'licencdíj (HIG Holding GmbH): 45.000.000 Ft' tételként "
+                    "nevesíti. Helyes megközelítés: a szerződéses összegnek és "
+                    "a nyilvántartásban szereplő összegnek egyeznie kell. Ha a "
+                    "minimum-díjklauzula alkalmazandó, a Local File-ban is 50 "
+                    "MFt-ot kell szerepeltetni és indokolni."
                 ),
                 uncertainty_notes=(
                     "Lehetséges, hogy a szerződésben rögzített 50 MFt "
@@ -470,7 +530,7 @@ class MockAgentService:
                         char_start=4210,
                         char_end=4298,
                         source_kind="document",
-                        quote="A 2024. adóévre vonatkozó éves licencdíj összege: 50 000 000 Ft (ötvenmillió forint)",
+                        quote="A 2024. adóévre vonatkozó éves licencdíj összege: 50.000.000 Ft (ötvenmillió forint)",
                     ),
                     EvidenceChunk(
                         filename="HIG_LocalFile_2024_FAULTY.pdf",
@@ -479,7 +539,7 @@ class MockAgentService:
                         char_start=22640,
                         char_end=22710,
                         source_kind="document",
-                        quote="licencdíj (HIG Holding GmbH): 45 000 000 Ft",
+                        quote="licencdíj (HIG Holding GmbH): 45.000.000 Ft",
                     ),
                 ],
             ),
@@ -487,11 +547,14 @@ class MockAgentService:
 
         inv_royalty_mismatch = ConsistencyError(
             description=(
-                "A licencdíj számla (HIG-LIC-2024-001) nettó összege 50 000 000 Ft, "
-                "míg a Local File 4.3. fejezetében számított összeg 2% × 2 250 000 000 "
-                "= 45 000 000 Ft. Az 5 000 000 Ft eltérés (11,1%) háromirányú "
-                "inkonzisztenciát alkot: szerződés (50 MFt), számla (50 MFt), "
-                "Local File (45 MFt)."
+                "A licencdíj számlán (HIG-LIC-2024-001) 50.000.000 Ft "
+                "szerepel. A helyes összeg a HIG-LIC-2024-003 szerződésben "
+                "rögzített 2%-os kulcs és a HIG Manufacturing Kft. 2024. évi "
+                "2.250.000.000 Ft nettó árbevétele alapján: 2% × 2.250.000.000 "
+                "= 45.000.000 Ft. Az 5.000.000 Ft eltérés (11,1% túlszámlázás) "
+                "azonos a szerződéses LIC-01 hibával, és a Local File-ban is "
+                "45.000.000 Ft van könyvelve — három dokumentum keresztbe "
+                "mutat, amelyek nem konzisztensek egymással."
             ),
             severity=RiskSeverity.CRITICAL,
             locations=[
@@ -499,22 +562,35 @@ class MockAgentService:
                 ErrorLocation(filename="HIG_LocalFile_2024_FAULTY.pdf"),
                 ErrorLocation(filename="HIG_Contracts_2024.pdf"),
             ],
-            evidence="Licencdíj számla (50 MFt) vs. Local File 4.3. fejezet (45 MFt)",
+            evidence=(
+                "Licencdíj számla (50.000.000 Ft) vs. szerződés HIG-LIC-2024-003 "
+                "3. § (50.000.000 Ft) vs. Local File 4.3. és 7.1. fejezet "
+                "(45.000.000 Ft). Helyes érték: 45.000.000 Ft (2,0% × "
+                "2.250.000.000 Ft árbevétel)."
+            ),
             attribution=_attribution(
                 "invoice_agent",
                 DocumentType.INVOICE,
                 confidence=0.93,
                 rule_id="OECD_TPG_2022.para_1.10",
-                legal_references=["OECD_TPG_2022.para_1.10", "45_2025_NGM.section_3"],
+                legal_references=[
+                    "OECD_TPG_2022.para_1.10",
+                    "OECD TPG 1.10 (consistency between contracts, invoices and accounting)",
+                    "45_2025_NGM.section_3",
+                    "45/2025. (XII. 23.) NGM rendelet 3. § (ellenőrzött ügylet összege)",
+                ],
                 prompt_version="invoice_v1",
                 requires_human_review=True,
                 reasoning=(
-                    "A licencdíj számla 50 000 000 Ft-ot tartalmaz. A Local File "
-                    "4.3. fejezetének számítása szerint a licencdíj 45 000 000 Ft. "
-                    "A 11,1%-os eltérés háromirányú inkonzisztenciát alkot a "
-                    "szerződéssel (50 MFt), a számlával (50 MFt) és a Local "
-                    "File-lal (45 MFt). Az OECD TPG 1.10. bekezdése szerint "
-                    "egységes képet kell mutatniuk."
+                    "A licencdíj számla 50.000.000 Ft-ot tartalmaz. A szerződés "
+                    "HIG-LIC-2024-003 3. §-a szintén 50.000.000 Ft-ot rögzít "
+                    "(LIC-01 hiba). A Local File 4.3. fejezetének számítása "
+                    "(2% × 2.250.000.000 = 45.000.000 Ft) és 7.1. fejezete "
+                    "(könyvelt: 45.000.000 Ft) ugyanakkor 45 MFt-ot mutat. A "
+                    "11,1%-os eltérés háromirányú inkonzisztenciát alkot a "
+                    "szerződés, a számla és a Local File között. Az OECD TPG "
+                    "1.10. bekezdése szerint a szerződéseknek, számláknak és "
+                    "a könyvelésnek egységes képet kell mutatniuk."
                 ),
                 uncertainty_notes=(
                     "Ha a minimum-díjklauzula aktívvá vált, a Local File-t is "
@@ -538,7 +614,7 @@ class MockAgentService:
                         char_start=16210,
                         char_end=16250,
                         source_kind="document",
-                        quote="2% × 2 250 000 000 = 45 000 000 Ft",
+                        quote="2% × 2.250.000.000 = 45.000.000 Ft",
                     ),
                 ],
             ),
@@ -546,18 +622,27 @@ class MockAgentService:
 
         inv_date_mismatch = ConsistencyError(
             description=(
-                "A Q4 management fee számla (HIG-MGMT-2024-Q4) kiállítási dátuma "
-                "2024. október 1., miközben a HIG-MGMT-2024-002 szerződés 4. §-a "
-                "szerint a számlázás 'minden negyedév végén' történik "
-                "(Q4 esetén: 2024. december 31.). A számla 91 nappal korábban lett "
-                "kiállítva, mint a szerződéses határidő."
+                "A management fee Q4 számla (HIG-MGMT-2024-Q4) "
+                "kiállítási dátuma 2024. október 1., miközben a "
+                "HIG-MGMT-2024-002 számú szerződés 4. §-a kifejezetten rögzíti, "
+                "hogy a számlázás 'minden negyedév végén' történik (március "
+                "31., június 30., szeptember 30., december 31.). A Q4 időszak "
+                "vége december 31.; az október 1-jei kiállítás azt jelenti, "
+                "hogy a számla a Q4 szolgáltatási időszak megkezdése előtt, "
+                "illetve annak legelején kerül kiállításra, ami sérti a "
+                "teljesítés-alapú számlázás elvét és a szerződéses feltételt. "
+                "Eltérés: 91 nap."
             ),
             severity=RiskSeverity.MEDIUM,
             locations=[
                 ErrorLocation(filename="HIG_Invoices_2024.pdf"),
                 ErrorLocation(filename="HIG_Contracts_2024.pdf"),
             ],
-            evidence="Számla kiállítása: 2024-10-01 vs. szerződéses számlázási dátum: 2024-12-31 (4. §)",
+            evidence=(
+                "invoice_issue_date=2024-10-01; contract_required_date=2024-12-31; "
+                "service_period=2024-10-01..2024-12-31; days_early=91. "
+                "Helyes érték: 2024. december 31."
+            ),
             attribution=_attribution(
                 "invoice_agent",
                 DocumentType.INVOICE,
@@ -565,7 +650,9 @@ class MockAgentService:
                 rule_id="HU_VAT_Act_CXXVII_2007.section_58",
                 legal_references=[
                     "OECD_TPG_2022.para_7.14",
+                    "OECD TPG 7.14 (service fee billing consistency with contract)",
                     "HU_VAT_Act_CXXVII_2007.section_58",
+                    "2007. évi CXXVII. tv. (Áfa tv.) 58. § (időszakos elszámolás)",
                 ],
                 prompt_version="invoice_v1",
                 reasoning=(
@@ -609,10 +696,17 @@ class MockAgentService:
             benchmark_range=(1.05, 1.10),
             severity=RiskSeverity.CRITICAL,
             rationale=(
-                "A HIG Manufacturing Kft. Berry-rátája (1,19) az összehasonlítható minta "
-                "interkvartilis tartományának felső határa (Q3 = 1,10) felett van. "
-                "A Benchmark tanulmány 5. fejezetének következtetése ezzel szemben azt "
-                "állítja, hogy az érték az IQR-be esik — ez matematikailag téves."
+                "A Benchmark tanulmány 5. fejezetének (Következtetés) "
+                "állítása szerint a HIG Manufacturing Kft. Berry-rátája (1,19) "
+                "az interkvartilis tartományba esik, ezért az árazás szokásos "
+                "piaci árnak minősül. Ez matematikailag téves: 1,19 > Q3 (1,10), "
+                "tehát az érték az IQR FELETT van, az interkvartilis "
+                "tartományon kívül. Helyes következtetés: az árazás a szokásos "
+                "piaci ár-tartomány felső határát meghaladja — az 1,19-es "
+                "Berry-ráta az IQR felső határát (1,10) 8,2%-kal meghaladja; "
+                "az alkalmazott árazás nem felel meg automatikusan a szokásos "
+                "piaci ár elvének, és adóhatósági vizsgálat esetén az IQR-en "
+                "kívüli pozíció indoklása szükséges."
             ),
             locations=[
                 ErrorLocation(filename="HIG_Benchmark_2024.pdf"),
@@ -625,17 +719,24 @@ class MockAgentService:
                 legal_references=[
                     "OECD_TPG_2022.para_3.57",
                     "OECD_TPG_2022.para_3.62",
+                    "OECD TPG 3.57, 3.62 (arm's length range, IQR)",
                     "45_2025_NGM.section_8(3)",
+                    "45/2025. (XII. 23.) NGM rendelet 8. § (3) bek.",
                 ],
                 prompt_version="benchmark_v1",
                 requires_human_review=True,
                 reasoning=(
-                    "A Benchmark tanulmány IQR-je [1,05; 1,10]. A tesztelt fél "
-                    "Berry-rátája 1,19, ami 1,19 > Q3 (1,10) feltétel miatt az "
-                    "IQR FELETT van. A tanulmány 5. fejezetének következtetése "
-                    "('az interkvartilis tartományba esik') matematikailag téves; "
-                    "adóhatósági vizsgálatban az IQR-en kívüli pozíció indoklása "
-                    "szükséges."
+                    "Numerikus tények: tested_party_berry_ratio=1,19; "
+                    "iqr_lower_q1=1,05; iqr_upper_q3=1,10; position=ABOVE IQR. "
+                    "1,19 > 1,10, tehát az IQR-en KÍVÜL van, ~8,2%-kal a felső "
+                    "kvartilis felett. A Benchmark 5. fejezetének szövege "
+                    "ennek ellenére azt állítja, hogy 'az interkvartilis "
+                    "tartományba esik' — ez matematikailag téves. Helyes "
+                    "megközelítés: ha a tesztelt fél mutatója az IQR-en kívül "
+                    "esik, a dokumentációnak vagy (a) ki kell igazítani az "
+                    "árazást az IQR-be, vagy (b) be kell mutatni, miért "
+                    "indokolt az IQR feletti eredmény (egyedi kockázatok, "
+                    "különleges eszközök stb.)."
                 ),
                 uncertainty_notes=(
                     "A Berry-ráta számításának alapja (teljes vs. tesztelt "
@@ -659,7 +760,7 @@ class MockAgentService:
                         char_start=12840,
                         char_end=12884,
                         source_kind="document",
-                        quote="IQR: Q1 = 1,05; Q3 = 1,10; mediána: 1,07",
+                        quote="IQR: Q1 = 1,05; Q3 = 1,10",
                     ),
                 ],
             ),
@@ -667,32 +768,51 @@ class MockAgentService:
 
         bench_method_mismatch = ConsistencyError(
             description=(
-                "A Local File a gyártási ügyletnél cost-plus módszert alkalmaz "
-                "8%-os haszonkulccsal (Berry-ráta implikált értéke: 1,08). A Benchmark "
-                "tanulmány ugyanakkor TNMM-et alkalmaz Berry-rátával, és a tesztelt fél "
-                "Berry-rátáját 1,19-ben állapítja meg. A két érték (1,08 vs. 1,19) "
-                "nem konzisztens."
+                "A Local File (HIG-LF-2024-001) a gyártási ügyletnél "
+                "elsődleges módszerként a Cost-Plus módszert alkalmazza 8%-os "
+                "haszonkulccsal, és a TNMM-et csak kontrollként nevezi meg. A "
+                "Benchmark tanulmány ezzel szemben TNMM-et alkalmaz "
+                "Berry-rátával, és a számított Berry-ráta (1,19) nem "
+                "konzisztens a Local File-beli 8%-os cost-plus haszonkulccsal "
+                "(ami 1,08-as Berry-rátának felelne meg). A két dokumentum "
+                "egymásnak ellentmondó eredményszintet tükröz, ami azt jelzi, "
+                "hogy a Local File-ban bemutatott 8%-os haszonkulcs valójában "
+                "nem az elvégzett benchmark eredményéből következik."
             ),
             severity=RiskSeverity.MEDIUM,
             locations=[
                 ErrorLocation(filename="HIG_Benchmark_2024.pdf"),
                 ErrorLocation(filename="HIG_LocalFile_2024_FAULTY.pdf"),
             ],
-            evidence="Local File cost-plus 8% → Berry-ráta 1,08 vs. Benchmark TNMM Berry-ráta 1,19",
+            evidence=(
+                "Local File cost-plus 8% ⇒ implikált Berry-ráta: 1,08; "
+                "Benchmark tesztelt fél Berry-rátája: 1,19; az 1,19 ~19%-os "
+                "implikált cost-plus haszonkulcsnak felel meg. A két érték "
+                "nem konzisztens."
+            ),
             attribution=_attribution(
                 "benchmark_agent",
                 DocumentType.BENCHMARK_STUDY,
                 confidence=0.87,
                 rule_id="OECD_TPG_2022.para_2.59",
-                legal_references=["OECD_TPG_2022.para_2.59", "45_2025_NGM.section_7(1)"],
+                legal_references=[
+                    "OECD_TPG_2022.para_2.59",
+                    "OECD TPG 2.59 (consistency between methods and tested results)",
+                    "45_2025_NGM.section_7(1)",
+                    "45/2025. (XII. 23.) NGM rendelet 7. § (1) bek.",
+                ],
                 prompt_version="benchmark_v1",
                 reasoning=(
                     "Ha a Local File cost-plus 8%-os haszonkulcsot alkalmaz, "
-                    "akkor a tesztelt fél Berry-rátája matematikailag 1 + 0,08 = "
-                    "1,08. A Benchmark azonban 1,19-es Berry-rátát mutat a "
-                    "tesztelt félre, ami ~19%-os implikált cost-plus haszonkulcsnak "
-                    "felel meg. Az OECD TPG 2.59. bekezdése szerint a módszer és "
-                    "a tesztelt eredmény konzisztenciája kötelező."
+                    "akkor a tesztelt fél Berry-rátája matematikailag 1 + 0,08 "
+                    "= 1,08. A Benchmark azonban 1,19-es Berry-rátát mutat a "
+                    "tesztelt félre, ami ~19%-os implikált cost-plus "
+                    "haszonkulcsnak felel meg. Helyes megközelítés: a "
+                    "Benchmark tesztelt fél Berry-rátájának konzisztensnek "
+                    "kell lennie a Local File-ban alkalmazott haszonkulccsal — "
+                    "ha a Local File cost-plus 8%, akkor a Benchmark-ban a "
+                    "tesztelt fél Berry-rátájaként 1,08-at kell szerepeltetni, "
+                    "nem 1,19-et."
                 ),
                 uncertainty_notes=(
                     "Lehetséges, hogy a Benchmark a TNMM-et és a cost-plus "
@@ -716,7 +836,7 @@ class MockAgentService:
                         char_start=9840,
                         char_end=9902,
                         source_kind="document",
-                        quote="a HIG Manufacturing Kft. 2024. évi tényleges Berry-rátája … 1,19",
+                        quote="a HIG Manufacturing Kft. 2024. évi tényleges Berry-rátája ... 1,19",
                     ),
                 ],
             ),
@@ -778,14 +898,30 @@ class MockAgentService:
             missing_elements=missing_elements,
             overall_risk=RiskSeverity.CRITICAL,
             summary=(
-                f"{len(_AGENTS)}/{len(_AGENTS)} ágens sikeresen lefutott; "
-                f"{len(consistency_errors)} konzisztencia-, {len(benchmark_risks)} benchmark- és "
-                f"{len(missing_elements)} teljességi megállapítás. 4 kritikus súlyú finding: "
-                "a Berry-ráta (1,19) az IQR felső határa (1,10) felett van, de a Benchmark "
-                "téves következtetéssel szokásos piaci árnak minősíti; háromirányú "
-                "licencdíj-összegeltérés (szerződés/számla: 50 MFt vs. Local File: 45 MFt); "
-                "a funkcionális elemzés korlátozott kockázatú profillal ellentétes stratégiai "
-                "döntési jogköröket rendel a HIG Manufacturing Kft.-hez."
+                f"{len(_AGENTS)}/{len(_AGENTS)} ágens sikeresen lefutott; 5 dokumentum "
+                f"átvizsgálva (Master File, Local File, Benchmark, szerződések, "
+                f"számlák), 9 megállapítás (4 CRITICAL, 3 HIGH, 2 MEDIUM): "
+                f"{len(consistency_errors)} konzisztencia-, {len(benchmark_risks)} "
+                f"benchmark- és {len(missing_elements)} teljességi finding. "
+                "Kritikus súlyú megállapítások (4): "
+                "a Berry-ráta (1,19) az IQR felső határa (Q3=1,10) "
+                "felett van, a Benchmark mégis téves következtetéssel szokásos "
+                "piaci árnak minősíti az árazást; "
+                "a licencdíj-összegeltérés "
+                "(szerződés/számla: 50.000.000 Ft vs. Local File: 45.000.000 Ft, "
+                "11,1% eltérés); "
+                "a Local File 5. fejezetének funkcionális elemzése "
+                "stratégiai döntési jogköröket rendel a HIG Manufacturing "
+                "Kft.-hez, ami ellentétes a Master File 1.3. és Local File 2.1. "
+                "fejezetében rögzített korlátozott kockázatú gyártói profillal. "
+                "Magas súlyú megállapítások (3): hiányzó benefit test "
+                "a menedzsmentdíjnál, hiányzó DEMPE-elemzés a "
+                "licencdíjnál, mérhető teljesítési kritériumok "
+                "nélküli management fee szerződés. "
+                "Közepes súlyú megállapítások (2): cost-plus 8% ↔ "
+                "Berry 1,19 módszertani inkonzisztencia, Q4 " 
+                "management fee számla 91 nappal a szerződéses határidő előtt "
+                "kiállítva. Az átfogó NAV-kockázat: CRITICAL."
             ),
             agent_runs=agent_runs,
         )
