@@ -216,15 +216,23 @@ function LegalTextPanel({ citation }: Readonly<{ citation: CitationTarget }>): J
             Jogi hivatkozás
           </p>
         </div>
-        <p className="mt-2 text-sm font-medium text-phantom-ink">{citation.filename}</p>
-        <p className="mt-0.5 text-xs text-phantom-subtle">Oldal: {citation.page + 1}</p>
-        {citation.quote ? (
-          <blockquote className="mt-3 border-l-2 border-phantom-accent pl-3 text-sm italic leading-relaxed text-phantom-muted">
-            {citation.quote}
-          </blockquote>
-        ) : (
-          <p className="mt-2 text-xs text-phantom-subtle">Nincs elérhető idézet.</p>
+        {citation.label && (
+          <p className="mt-2 break-all font-mono text-sm font-semibold text-phantom-accent">
+            {citation.label}
+          </p>
         )}
+        <p className={['text-sm text-phantom-muted', citation.label ? 'mt-0.5' : 'mt-2'].join(' ')}>
+          {citation.filename}
+        </p>
+        <p className="mt-0.5 text-xs text-phantom-subtle">
+          A dokumentum PDF-je jelenleg nem elérhető az alkalmazásban.
+        </p>
+        <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2">
+          <p className="text-xs font-semibold text-amber-800">Forrás</p>
+          <p className="mt-0.5 text-xs text-amber-700">
+            Az eredeti jogszabály szövegét keresd fel a hivatalos Magyar Közlönyben vagy az EUR-Lex portálon.
+          </p>
+        </div>
       </div>
     </div>
   )
@@ -417,21 +425,39 @@ function ViewerHeader({
   return (
     <div className="flex shrink-0 items-center justify-between gap-2 border-b border-phantom-line bg-phantom-surface px-4 py-3">
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-semibold text-phantom-ink" title={citation.filename}>
-          {citation.filename}
-        </p>
-        <p className="text-xs text-phantom-subtle">
-          {citation.sourceKind === 'legal' ? 'Jogi hivatkozás · ' : ''}
-          Cél: {citation.page + 1}. oldal
-        </p>
+        {citation.label ? (
+          <>
+            <p
+              className="truncate font-mono text-sm font-semibold text-phantom-accent"
+              title={citation.label}
+            >
+              {citation.label}
+            </p>
+            <p className="truncate text-xs text-phantom-subtle" title={citation.filename}>
+              {citation.filename}
+              {' · '}
+              {citation.page + 1}. oldal (becsült)
+            </p>
+          </>
+        ) : (
+          <>
+            <p className="truncate text-sm font-semibold text-phantom-ink" title={citation.filename}>
+              {citation.filename}
+            </p>
+            <p className="text-xs text-phantom-subtle">
+              {citation.sourceKind === 'legal' ? 'Jogi hivatkozás · ' : ''}
+              Cél: {citation.page + 1}. oldal
+            </p>
+          </>
+        )}
       </div>
       <button
         type="button"
         onClick={onClose}
-        aria-label="Bezárás"
-        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-phantom-control text-phantom-muted transition-phantom hover:bg-phantom-surface-muted hover:text-phantom-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-accent"
+        aria-label="Vissza a globális nézethez"
+        className="inline-flex h-8 shrink-0 items-center justify-center rounded-phantom-control border border-phantom-line bg-phantom-surface-muted px-2.5 text-xs font-semibold text-phantom-muted transition-phantom hover:border-phantom-accent hover:text-phantom-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-accent"
       >
-        <X className="h-4 w-4" />
+        Vissza
       </button>
     </div>
   )

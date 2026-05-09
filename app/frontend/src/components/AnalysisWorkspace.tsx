@@ -372,7 +372,7 @@ function AgentRunsView({ report }: Readonly<{ report: BackendAuditReport }>): JS
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       {report.agent_runs.map((run) => {
         let statusTone: StatusPillTone = 'danger'
         let statusText = 'Hiba'
@@ -386,33 +386,91 @@ function AgentRunsView({ report }: Readonly<{ report: BackendAuditReport }>): JS
         const findingCount =
           run.consistency_errors.length + run.benchmark_risks.length + run.missing_elements.length
 
+        const metricCards = [
+          {
+            label: 'Konzisztencia',
+            value: run.consistency_errors.length,
+            className: 'border-amber-200 bg-amber-50 text-amber-800',
+          },
+          {
+            label: 'Benchmark',
+            value: run.benchmark_risks.length,
+            className: 'border-orange-200 bg-orange-50 text-orange-800',
+          },
+          {
+            label: 'Hiányzó',
+            value: run.missing_elements.length,
+            className: 'border-blue-200 bg-blue-50 text-blue-800',
+          },
+          {
+            label: 'Összesen',
+            value: findingCount,
+            className: 'border-phantom-line bg-phantom-surface-muted text-phantom-ink',
+          },
+        ]
+
         return (
           <article
             key={run.agent_id}
             className="min-w-0 overflow-hidden rounded-phantom-card border border-phantom-line bg-phantom-surface p-4"
           >
-            <div className="flex min-w-0 flex-wrap items-start justify-between gap-2">
-              <p className="min-w-0 break-words text-sm font-semibold leading-5 text-phantom-ink">
-                {AGENT_LABELS[run.agent_id]}
-              </p>
+            <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
+              <div className="flex min-w-0 items-start gap-2.5">
+                <span className="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-phantom-control border border-phantom-line bg-phantom-surface-muted">
+                  <Cpu className="h-4 w-4 text-phantom-accent" />
+                </span>
+                <div className="min-w-0">
+                  <p className="min-w-0 break-words text-sm font-semibold leading-5 text-phantom-ink">
+                    {AGENT_LABELS[run.agent_id]}
+                  </p>
+                  <p className="mt-0.5 break-all font-mono text-[11px] text-phantom-subtle">
+                    {run.agent_id}
+                  </p>
+                </div>
+              </div>
               <StatusPill tone={statusTone}>{statusText}</StatusPill>
             </div>
 
-            <div className="mt-2 grid grid-cols-1 gap-x-4 gap-y-1 text-xs text-phantom-muted xs:grid-cols-2 lg:grid-cols-3">
-              <span className="break-words">Modell: {run.model}</span>
-              <span className="break-words">Prompt: {run.prompt_version}</span>
-              <span className="break-words">Időtartam: {formatDurationMs(run.started_at, run.finished_at)}</span>
-            </div>
+            <div className="mt-3 grid grid-cols-1 gap-2.5 xl:items-stretch xl:grid-cols-[minmax(0,0.68fr)_minmax(0,1.32fr)]">
+              <section className="min-w-0 overflow-hidden rounded-phantom-control border border-phantom-line bg-phantom-surface-muted p-2.5 xl:h-full">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-phantom-subtle">
+                  Futtatás meta
+                </p>
+                <dl className="mt-1.5 grid min-w-0 grid-cols-[auto_1fr] gap-x-2 gap-y-0.5 text-[11px]">
+                  <dt className="font-medium text-phantom-subtle">Modell</dt>
+                  <dd className="min-w-0 break-all font-medium text-phantom-ink">{run.model}</dd>
+                  <dt className="font-medium text-phantom-subtle">Prompt</dt>
+                  <dd className="min-w-0 break-all font-medium text-phantom-ink">{run.prompt_version}</dd>
+                  <dt className="font-medium text-phantom-subtle">Időtartam</dt>
+                  <dd className="font-semibold tabular-nums text-phantom-ink">
+                    {formatDurationMs(run.started_at, run.finished_at)}
+                  </dd>
+                </dl>
+              </section>
 
-            <div className="mt-2 flex flex-wrap gap-3 text-xs text-phantom-ink">
-              <span>Konzisztencia: {run.consistency_errors.length}</span>
-              <span>Benchmark: {run.benchmark_risks.length}</span>
-              <span>Hiányzó: {run.missing_elements.length}</span>
-              <span className="text-phantom-muted">Összesen: {findingCount}</span>
+              <section className="min-w-0 overflow-hidden rounded-phantom-control border border-phantom-line bg-white p-3.5 xl:h-full">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-phantom-subtle">
+                  Megállapítások
+                </p>
+                <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                  {metricCards.map((metric) => (
+                    <div
+                      key={metric.label}
+                      className={[
+                        'min-w-0 rounded-phantom-control border px-2.5 py-2 text-center',
+                        metric.className,
+                      ].join(' ')}
+                    >
+                      <p className="break-words text-[11px] font-medium">{metric.label}</p>
+                      <p className="mt-0.5 text-sm font-semibold tabular-nums">{metric.value}</p>
+                    </div>
+                  ))}
+                </div>
+              </section>
             </div>
 
             {run.status === 'error' && run.error && (
-              <div className="mt-2 break-words rounded-phantom-control border border-phantom-severity-critical-border bg-phantom-severity-critical-soft px-3 py-2 text-xs text-phantom-severity-critical-text">
+              <div className="mt-2.5 break-words rounded-phantom-control border border-phantom-severity-critical-border bg-phantom-severity-critical-soft px-3 py-2 text-xs text-phantom-severity-critical-text">
                 {run.error.code}: {run.error.message}
               </div>
             )}

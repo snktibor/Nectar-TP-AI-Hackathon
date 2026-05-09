@@ -56,11 +56,12 @@ function LegalReferenceBadge({
   const citation: CitationTarget = {
     sessionId,
     filename: target.filename,
-    page: 0,
+    page: target.page,
     charStart: null,
     charEnd: null,
     sourceKind: 'legal',
-    quote: null,
+    quote: target.highlightHint,
+    label: reference,
   }
 
   return (
@@ -71,7 +72,7 @@ function LegalReferenceBadge({
         baseClass,
         'cursor-pointer text-phantom-accent hover:bg-phantom-accent-soft hover:text-phantom-accent hover:ring-phantom-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus',
       ].join(' ')}
-      title={`${target.filename} megnyitása`}
+      title={`Megnyitás: ${reference}`}
     >
       {reference}
     </button>
