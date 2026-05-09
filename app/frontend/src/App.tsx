@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { ShieldAlert } from 'lucide-react'
 import AnalysisReadyView from './components/AnalysisReadyView'
 import AnalysisWorkspace from './components/AnalysisWorkspace'
 import DashboardShell, { type DashboardTab } from './components/DashboardShell'
 import DocumentIngestor from './components/DocumentIngestor'
 import FilteredFindingsPanel from './components/FilteredFindingsPanel'
 import ResultsPanel from './components/ResultsPanel'
+import ReportsTab from './components/report/ReportsTab'
 import { phantomDesign } from './design-system/phantomDesign'
 import type {
   BackendAuditReport,
@@ -311,17 +311,7 @@ export default function App(): JSX.Element {
     }
 
     if (activeTab === 'reports') {
-      return (
-        <section className="flex h-full min-h-0 flex-col items-center justify-center rounded-2xl border border-gray-100 bg-white p-8 text-center shadow-md">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-50 text-gray-400 ring-1 ring-gray-100">
-            <ShieldAlert className="h-7 w-7" />
-          </div>
-          <h2 className="mt-4 text-base font-semibold text-gray-900">Riportok hamarosan</h2>
-          <p className="mt-1 max-w-sm text-sm leading-6 text-gray-500">
-            Ez a fül a következő iterációban érkezik. Az aktuális audit eredmények a jobb oldali panelen, dokumentumonként a Dokumentumok fülről érhetők el.
-          </p>
-        </section>
-      )
+      return <ReportsTab auditReport={auditReport} />
     }
 
     if (selectedDocId !== null) {
