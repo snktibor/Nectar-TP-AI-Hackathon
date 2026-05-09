@@ -1,3 +1,5 @@
+import type { PDFDocumentProxy } from 'pdfjs-dist'
+
 // Maps legal source filenames to publicly served ruleset PDFs.
 // Files live under `app/frontend/public/rulesets/` and are served by Vite at
 // `/rulesets/<filename>`.
@@ -34,10 +36,6 @@ const LEGAL_SECTION_PAGE_MAP: readonly SectionEntry[] = [
   ['OECD_TPG_2022.para_1.51', 47, '1.51'],
   ['OECD_TPG_2022.para_1.36', 23, '1.36'],
   ['OECD_TPG_2022.para_1.1', 16, '1.1'],
-  ['OECD_TPG_2022.Ch_I.D.1', 40, 'D.1'],
-  ['OECD_TPG_2022.Ch_I.D.2', 47, 'D.1.2'],
-  ['OECD_TPG_2022.Ch_I.D.3', 54, 'D.1.3'],
-  ['OECD_TPG_2022.Ch_I.D', 40, 'D.'],
   ['OECD_TPG_2022.Ch_I.C', 25, 'C.'],
   ['OECD_TPG_2022.Ch_I.B', 19, 'B.'],
   ['OECD_TPG_2022.Ch_I.A', 17, 'A.'],
@@ -139,8 +137,6 @@ const LEGAL_REFERENCE_PREFIXES: ReadonlyArray<readonly [string, string]> = [
   ['Tao_tv', 'HU_Act_LXXXI_1996.pdf'],
   ['HU_Act_LXXXI', 'HU_Act_LXXXI_1996.pdf'],
 ]
-
-const FALLBACK_LEGAL_FILENAME = 'Jogszabalyi hivatkozas'
 
 function replaceEvery(value: string, search: string, replacement: string): string {
   return value.split(search).join(replacement)
@@ -288,37 +284,162 @@ function resolveFromNaturalLanguage(reference: string): LegalReferenceTarget | n
       label: reference,
       page,
       highlightHint: hint,
-export function resolveLegalReference(reference: string): LegalReferenceTarget | null {
-  const normalizedReference = normalizeLegalReference(reference)
-  if (!normalizedReference) return null
-
-  for (const [prefix, filename] of LEGAL_REFERENCE_PREFIXES) {
-    if (normalizedReference.startsWith(prefix)) {
-      const { page, hint } = resolvePageForReference(normalizedReference)
-      return { filename, label: reference, page, highlightHint: hint }
     }
   }
-
-  return {
-    filename: FALLBACK_LEGAL_FILENAME,
-    label: reference,
-    page: 0,
-    highlightHint: reference,
-  }
+  return null
 }
 
 export function resolveLegalReference(reference: string): LegalReferenceTarget | null {
   const trimmed = reference.trim()
   if (!trimmed) return null
 
+  // Normalize prefix variants the LLM may emit (e.g. "32_2017_NGM" → "NGM_32_2017")
+  const normalized = normalizeLegalReference(trimmed)
+
   // Path 1: canonical token form (e.g. "OECD_TPG_2022.Ch_VI.B.1").
   for (const [prefix, filename] of LEGAL_REFERENCE_PREFIXES) {
-    if (trimmed.startsWith(prefix)) {
-      const { page, hint } = resolvePageForReference(trimmed)
+    if (normalized.startsWith(prefix)) {
+      const { page, hint } = resolvePageForReference(normalized)
       return { filename, label: trimmed, page, highlightHint: hint }
     }
   }
 
   // Path 2: natural-language fallback (e.g. "45/2025. (XII. 23.) NGM rendelet 6. §").
   return resolveFromNaturalLanguage(trimmed)
+}
+
+// ---------------------------------------------------------------------------
+// Outline-based navigation helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Converts a legal reference label to a short search token used when matching
+ * against PDF outline (bookmark) titles.
+ *   "OECD_TPG_2022.Ch_I.D.1"   → "D.1."
+ *   "OECD_TPG_2022.para_1.60"  → "1.60"
+ *   "OECD_TPG_2022.Ch_VI"      → "Chapter VI"
+ *   "NGM_32_2017.section_4(2)" → "4. §"
+ */
+export function extractSectionSearchHint(label: string): string {
+  const dot = label.indexOf('.')
+  if (dot === -1) return label
+  const fragment = label.slice(dot + 1)
+
+  const chapterWithSub = /^Ch_([IVX]+)\.(.+)$/.exec(fragment)
+  if (chapterWithSub) return chapterWithSub[2].replace(/_/g, '.') + '.'
+
+  const chapter = /^Ch_([IVX]+)$/.exec(fragment)
+  if (chapter) return `Chapter ${chapter[1]}`
+
+  const para = /^para_(\d+\.\d+)/.exec(fragment)
+  if (para) return para[1]
+
+  const section = /^(?:section_)?(\d+)/.exec(fragment)
+  if (section) return `${section[1]}. §`
+
+  const huSection = /^§?(\d+)(?:_([A-Z]))?/.exec(fragment)
+  if (huSection) return huSection[2] ? `${huSection[1]}/${huSection[2]}. §` : `${huSection[1]}. §`
+
+  return fragment.replace(/_/g, ' ')
+}
+
+type OutlineNode = {
+  readonly title: string
+  readonly dest: unknown
+  readonly items: readonly OutlineNode[]
+}
+
+/**
+ * Extracts the PDF bookmark tree into a flat `title → 0-based page index` map
+ * by calling pdfjs `getOutline()` and resolving each destination to a page index.
+ * Returns an empty map when the PDF has no outline or resolution fails.
+ */
+export async function buildOutlinePageMap(
+  pdf: PDFDocumentProxy,
+): Promise<Map<string, number>> {
+  const map = new Map<string, number>()
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const pdfAny = pdf as any
+  let outline: OutlineNode[] | null = null
+  try {
+    outline = (await pdfAny.getOutline()) as OutlineNode[] | null
+  } catch {
+    return map
+  }
+  if (!outline) return map
+
+  async function visit(node: OutlineNode): Promise<void> {
+    const title = node.title?.trim()
+    try {
+      let dest = node.dest
+      if (typeof dest === 'string') dest = await pdfAny.getDestination(dest)
+      if (Array.isArray(dest) && dest.length > 0) {
+        const ref = dest[0] as { num: number; gen: number }
+        if (typeof ref?.num === 'number') {
+          const pageIndex = (await pdfAny.getPageIndex(ref)) as number
+          if (title) map.set(title, pageIndex)
+        }
+      }
+    } catch {
+      // Skip entries with unresolvable destinations
+    }
+    if (Array.isArray(node.items)) {
+      await Promise.all(node.items.map(visit))
+    }
+  }
+
+  await Promise.all(outline.map(visit))
+  return map
+}
+
+/**
+ * Matches a citation label against the outline page map using 4-tier fallback:
+ * 1. Exact title match (case-insensitive)
+ * 2. Title starts with the search hint + word boundary
+ * 3. Title contains the hint surrounded by non-alphanumeric chars
+ * 4. Roman numeral chapter alternate forms
+ *
+ * Returns the 0-based page index, or null if no match found.
+ */
+export function matchLabelToOutlinePage(
+  label: string,
+  map: Map<string, number>,
+): number | null {
+  if (map.size === 0) return null
+  const hint = extractSectionSearchHint(label).toLowerCase().trim()
+  if (!hint) return null
+
+  // 1. Exact match
+  for (const [title, page] of map) {
+    if (title.toLowerCase().trim() === hint) return page
+  }
+
+  // 2. Title starts with hint + word boundary
+  for (const [title, page] of map) {
+    const t = title.toLowerCase().trim()
+    if (t.startsWith(hint)) {
+      const next = t[hint.length]
+      if (next === undefined || next === ' ' || next === '.' || next === ':') return page
+    }
+  }
+
+  // 3. Contains with word-boundary guards
+  const escaped = hint.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const re = new RegExp(`(?:^|[^a-z0-9])${escaped}(?:[^a-z0-9]|$)`, 'i')
+  for (const [title, page] of map) {
+    if (re.test(title)) return page
+  }
+
+  // 4. Roman numeral chapter alternate forms ("Chapter VI" ↔ "VI.", "VI ")
+  const ch = /^chapter\s+([ivx]+)$/i.exec(hint)
+  if (ch) {
+    const num = ch[1].toUpperCase()
+    for (const [title, page] of map) {
+      const t = title.trim()
+      if (t === num || t.startsWith(`${num}.`) || t.startsWith(`${num} `)) return page
+    }
+  }
+
+  return null
 }

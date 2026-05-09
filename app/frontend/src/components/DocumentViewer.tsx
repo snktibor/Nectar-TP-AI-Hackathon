@@ -5,7 +5,8 @@ import 'react-pdf/dist/Page/AnnotationLayer.css'
 import { X, Scale } from 'lucide-react'
 import { phantomDesign } from '../design-system/phantomDesign'
 import type { CitationTarget } from '../types/viewer'
-import { resolveLegalPdfUrl } from '../lib/legalDocs'
+import type { PDFDocumentProxy } from 'pdfjs-dist'
+import { buildOutlinePageMap, matchLabelToOutlinePage, resolveLegalPdfUrl } from '../lib/legalDocs'
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   'pdfjs-dist/build/pdf.worker.min.mjs',
@@ -275,6 +276,7 @@ interface PdfViewerProps {
   readonly targetPage0: number // 0-based
   readonly citation: CitationTarget
   readonly renderAllPages?: boolean
+  readonly onPageResolved?: (page0: number) => void
 }
 
 function getVisiblePageIndices(
@@ -296,18 +298,22 @@ function PdfViewer({
   targetPage0,
   citation,
   renderAllPages = true,
+  onPageResolved,
 }: PdfViewerProps): JSX.Element {
   const [numPages, setNumPages] = useState(0)
   const [loadError, setLoadError] = useState<string | null>(null)
   const [containerWidth, setContainerWidth] = useState(0)
   const [renderedPages, setRenderedPages] = useState<Set<number>>(new Set())
+  const [outlinePage0, setOutlinePage0] = useState<number | null>(null)
 
   const containerRef = useRef<HTMLDivElement>(null)
-  // Map of 0-based page index → wrapper div
   const pageRefs = useRef<Map<number, HTMLDivElement>>(new Map())
+  const pdfProxyRef = useRef<PDFDocumentProxy | null>(null)
+  const outlineCancelRef = useRef(false)
 
-  // Effective 0-based target (clamped silently — no banner shown)
-  const clampedPage0 = numPages > 0 ? Math.min(targetPage0, numPages - 1) : targetPage0
+  // Prefer outline-resolved page; fall back to prop-supplied static page
+  const resolvedPage0 = outlinePage0 ?? targetPage0
+  const clampedPage0 = numPages > 0 ? Math.min(resolvedPage0, numPages - 1) : resolvedPage0
 
   // Measure container width for full-width PDF rendering
   useEffect(() => {
@@ -325,8 +331,26 @@ function PdfViewer({
     setNumPages(0)
     setLoadError(null)
     setRenderedPages(new Set())
+    setOutlinePage0(null)
+    outlineCancelRef.current = true
     pageRefs.current.clear()
   }, [pdfUrl, targetPage0])
+
+  // After PDF loads, extract bookmark outline and resolve the real target page
+  useEffect(() => {
+    const pdf = pdfProxyRef.current
+    if (!pdf || numPages === 0 || !citation.label) return
+
+    outlineCancelRef.current = false
+    buildOutlinePageMap(pdf).then((map) => {
+      if (outlineCancelRef.current) return
+      const matched = matchLabelToOutlinePage(citation.label!, map)
+      if (matched !== null) {
+        setOutlinePage0(matched)
+        onPageResolved?.(matched)
+      }
+    })
+  }, [numPages, citation.label, onPageResolved])
 
   // Scroll to target page once it has rendered
   useEffect(() => {
@@ -372,7 +396,11 @@ function PdfViewer({
       ) : (
         <Document
           file={pdfUrl}
-          onLoadSuccess={({ numPages: n }) => setNumPages(n)}
+          onLoadSuccess={(pdf: PDFDocumentProxy) => {
+            pdfProxyRef.current = pdf
+            outlineCancelRef.current = false
+            setNumPages(pdf.numPages)
+          }}
           onLoadError={(err) => setLoadError(err.message)}
           loading={<LoadingSpinner label="PDF betöltése…" />}
           error={
@@ -425,6 +453,8 @@ function PdfViewer({
 // ---------------------------------------------------------------------------
 
 export default function DocumentViewer({ citation, onClose }: DocumentViewerProps): JSX.Element {
+  const [resolvedPage0, setResolvedPage0] = useState<number | null>(null)
+
   const isDocx = citation.filename.toLowerCase().endsWith('.docx')
   const isLegal = citation.sourceKind === 'legal'
   const legalPdfUrl = isLegal ? resolveLegalPdfUrl(citation.filename) : null
@@ -444,7 +474,7 @@ export default function DocumentViewer({ citation, onClose }: DocumentViewerProp
         'flex h-full flex-col gap-0 !p-0 overflow-hidden animate-phantom-fade-in',
       ].join(' ')}
     >
-      <ViewerHeader citation={citation} onClose={onClose} />
+      <ViewerHeader citation={citation} onClose={onClose} resolvedPage0={resolvedPage0} />
 
       <div className="min-h-0 flex-1 overflow-hidden bg-phantom-canvas animate-phantom-fade-in-up">
         {pdfUrl === null ? (
@@ -457,6 +487,7 @@ export default function DocumentViewer({ citation, onClose }: DocumentViewerProp
             targetPage0={citation.page}
             citation={citation}
             renderAllPages={!isLegal}
+            onPageResolved={setResolvedPage0}
           />
         )}
       </div>
@@ -471,7 +502,12 @@ export default function DocumentViewer({ citation, onClose }: DocumentViewerProp
 function ViewerHeader({
   citation,
   onClose,
-}: Readonly<{ citation: CitationTarget; onClose: () => void }>): JSX.Element {
+  resolvedPage0,
+}: Readonly<{
+  citation: CitationTarget
+  onClose: () => void
+  resolvedPage0?: number | null
+}>): JSX.Element {
   return (
     <div className="flex shrink-0 items-center justify-between gap-2 border-b border-phantom-line bg-phantom-surface px-4 py-3 animate-phantom-fade-in-down">
       <div className="min-w-0 flex-1">
@@ -486,7 +522,9 @@ function ViewerHeader({
             <p className="truncate text-xs text-phantom-subtle" title={citation.filename}>
               {citation.filename}
               {' · '}
-              {citation.page + 1}. oldal (becsült)
+              {resolvedPage0 !== null && resolvedPage0 !== undefined
+                ? `${resolvedPage0 + 1}. oldal`
+                : `${citation.page + 1}. oldal (becsült)`}
             </p>
           </>
         ) : (
