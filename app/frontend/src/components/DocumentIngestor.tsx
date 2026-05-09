@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   AlertCircle,
   AlertTriangle,
@@ -8,7 +8,6 @@ import {
   FileType2,
   FileUp,
   Loader2,
-  Plus,
   RotateCcw,
   Upload,
   X,
@@ -26,6 +25,8 @@ const ACCEPTED_TYPES = '.pdf,.docx'
 const MAX_FILE_SIZE = 50 * 1024 * 1024
 const MAX_FILES = 5
 const FILE_INPUT_ID = 'document-ingest-files'
+const DUPLICATE_FILE_MESSAGE = 'Ez a fájl már ki van választva, nem töltöttük fel újra.'
+const DUPLICATE_MESSAGE_DISMISS_MS = 3000
 
 interface DocumentIngestorProps {
   readonly sessionId: string
@@ -121,6 +122,23 @@ function buildClassificationIssues(documents: IngestedDocument[]): Classificatio
   return issues
 }
 
+function collectReplaceableFilenames(documents: IngestedDocument[]): string[] {
+  const replaceable = new Set<string>()
+
+  for (const document of documents) {
+    if (document.status === 'failed') {
+      replaceable.add(document.filename)
+      continue
+    }
+
+    if (!isRequiredDocumentType(document.detected_type)) {
+      replaceable.add(document.filename)
+    }
+  }
+
+  return Array.from(replaceable)
+}
+
 export default function DocumentIngestor({
   sessionId,
   onIngestComplete,
@@ -132,6 +150,9 @@ export default function DocumentIngestor({
   initialResults,
 }: DocumentIngestorProps): JSX.Element {
   const hasHydratedResults = (initialResults?.length ?? 0) > 0
+  const initialReplaceableFilenames = hasHydratedResults
+    ? collectReplaceableFilenames(initialResults ?? [])
+    : []
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
   const [phase, setPhase] = useState<IngestPhase>(hasHydratedResults ? 'done' : 'empty')
   const [results, setResults] = useState<IngestedDocument[]>(initialResults ?? [])
@@ -139,16 +160,36 @@ export default function DocumentIngestor({
   const [classificationIssues, setClassificationIssues] = useState<ClassificationIssue[]>(
     hasHydratedResults ? buildClassificationIssues(initialResults ?? []) : [],
   )
+  const [hasPendingReclassification, setHasPendingReclassification] = useState(false)
+  const [pendingReplacementFilenames, setPendingReplacementFilenames] = useState<string[]>(
+    initialReplaceableFilenames,
+  )
   const [replacementTargetFilename, setReplacementTargetFilename] = useState<string | null>(null)
   const [isDragOver, setIsDragOver] = useState(false)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
 
   const isSelectionLocked =
-    (phase === 'ready' || phase === 'error') &&
+    phase !== 'uploading' &&
     selectedFiles.length >= MAX_FILES &&
     replacementTargetFilename === null
   const lockedUploadMessage =
-    'Már 5 fájl van kiválasztva. Törölj egyet, ha újat szeretnél feltölteni.'
+    'Maximum 5 fájl tölthető fel. Törölj egyet, ha újat szeretnél kiválasztani.'
+
+  useEffect(() => {
+    if (errorMessage !== DUPLICATE_FILE_MESSAGE) {
+      return
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setErrorMessage((current) =>
+        current === DUPLICATE_FILE_MESSAGE ? null : current,
+      )
+    }, DUPLICATE_MESSAGE_DISMISS_MS)
+
+    return () => {
+      window.clearTimeout(timeoutId)
+    }
+  }, [errorMessage])
 
   const addFiles = useCallback((incoming: FileList | File[]) => {
     const validFiles = Array.from(incoming).filter(
@@ -161,13 +202,17 @@ export default function DocumentIngestor({
     }
 
     let exceededFileLimit = false
+    let duplicateFileDetected = false
 
     setSelectedFiles((previousFiles) => {
       const filesByName = new Map(previousFiles.map((file) => [file.name, file]))
       for (const file of validFiles) {
-        if (!filesByName.has(file.name)) {
-          filesByName.set(file.name, file)
+        if (filesByName.has(file.name)) {
+          duplicateFileDetected = true
+          continue
         }
+
+        filesByName.set(file.name, file)
       }
 
       const nextFiles = Array.from(filesByName.values())
@@ -181,9 +226,13 @@ export default function DocumentIngestor({
 
     setPhase('ready')
     setClassificationIssues([])
+    setHasPendingReclassification(false)
+    setPendingReplacementFilenames([])
     setErrorMessage(
       exceededFileLimit
         ? `Maximum ${MAX_FILES} dokumentum adható meg. A többit a rendszer kihagyta.`
+        : duplicateFileDetected
+          ? DUPLICATE_FILE_MESSAGE
         : null,
     )
   }, [])
@@ -219,7 +268,36 @@ export default function DocumentIngestor({
     }
   }
 
-  function handleFileInput(event: React.ChangeEvent<HTMLInputElement>): void {
+  async function hydrateSelectedFilesFromResults(): Promise<File[] | null> {
+    if (results.length !== MAX_FILES) {
+      return null
+    }
+
+    try {
+      const hydrated = await Promise.all(
+        results.map(async (document) => {
+          const response = await fetch(
+            `${API_BASE}/api/v1/documents/${encodeURIComponent(sessionId)}/file/${encodeURIComponent(document.filename)}`,
+          )
+          if (!response.ok) {
+            throw new Error(`A fájl nem tölthető vissza: ${document.filename}`)
+          }
+
+          const blob = await response.blob()
+          return new File([blob], document.filename, {
+            type: blob.type,
+            lastModified: Date.now(),
+          })
+        }),
+      )
+
+      return hydrated
+    } catch {
+      return null
+    }
+  }
+
+  async function handleFileInput(event: React.ChangeEvent<HTMLInputElement>): Promise<void> {
     const incomingFiles = event.target.files
 
     if (!incomingFiles || incomingFiles.length === 0) {
@@ -233,38 +311,90 @@ export default function DocumentIngestor({
       const replacementFile = incomingFiles[0]
       event.currentTarget.value = ''
 
+      let workingFiles = selectedFiles
+      if (!workingFiles.some((file) => file.name === replacementTargetFilename)) {
+        const hydratedFiles = await hydrateSelectedFilesFromResults()
+        if (!hydratedFiles) {
+          setReplacementTargetFilename(null)
+          setErrorMessage(
+            'A korábban feltöltött fájlok nem érhetők el cseréhez. Töltsd fel újra az 5 dokumentumot.',
+          )
+          return
+        }
+
+        workingFiles = hydratedFiles
+        setSelectedFiles(hydratedFiles)
+      }
+
       if (!isSupportedDocument(replacementFile) || replacementFile.size > MAX_FILE_SIZE) {
         setReplacementTargetFilename(null)
         setErrorMessage('Csak PDF vagy DOCX fájl tölthető fel, maximum 50 MB méretben.')
         return
       }
 
-      const hasDuplicateConflict = selectedFiles.some(
+      const hasDuplicateConflict = workingFiles.some(
         (file) => file.name === replacementFile.name && file.name !== replacementTargetFilename,
       )
       if (hasDuplicateConflict) {
         setReplacementTargetFilename(null)
-        setErrorMessage('Már létezik ugyanezzel a fájlnévvel egy másik kiválasztott dokumentum.')
+        setErrorMessage(null)
         return
       }
 
-      const targetExists = selectedFiles.some((file) => file.name === replacementTargetFilename)
-      if (!targetExists) {
+      const targetFile = workingFiles.find((file) => file.name === replacementTargetFilename)
+      if (!targetFile) {
         setReplacementTargetFilename(null)
         setErrorMessage('A cserélendő fájl már nem található. Kérlek próbáld újra.')
         return
       }
 
-      const nextFiles = selectedFiles.map((file) =>
+      const isSameFileAsTarget =
+        replacementFile.name === targetFile.name &&
+        replacementFile.size === targetFile.size &&
+        replacementFile.lastModified === targetFile.lastModified
+      if (isSameFileAsTarget) {
+        setReplacementTargetFilename(null)
+        setErrorMessage('Ugyanazt a fájlt nem lehet visszacserélni. Válassz másik fájlt.')
+        return
+      }
+
+      const nextFiles = workingFiles.map((file) =>
         file.name === replacementTargetFilename ? replacementFile : file,
       )
 
+      const nextResults = results.map((document) =>
+        document.filename === replacementTargetFilename
+          ? {
+              ...document,
+              filename: replacementFile.name,
+              size_bytes: replacementFile.size,
+              page_count: 0,
+              chunk_count: 0,
+              confidence: 0,
+              detected_type: 'other',
+              status: 'success' as const,
+              error: null,
+            }
+          : document,
+      )
+
       setSelectedFiles(nextFiles)
-      setResults([])
-      setClassificationIssues([])
+      setResults(nextResults)
+      setClassificationIssues(buildClassificationIssues(nextResults))
+      const nextPendingReplacementFilenames = pendingReplacementFilenames.filter(
+        (filename) => filename !== replacementTargetFilename,
+      )
+      setPendingReplacementFilenames(nextPendingReplacementFilenames)
       setErrorMessage(null)
-      setPhase('ready')
       setReplacementTargetFilename(null)
+
+      if (nextPendingReplacementFilenames.length > 0) {
+        setHasPendingReclassification(true)
+        setPhase('done')
+        return
+      }
+
+      setHasPendingReclassification(false)
       void handleIngest(nextFiles)
       return
     }
@@ -291,6 +421,8 @@ export default function DocumentIngestor({
     })
 
     if (shouldResetWorkspace) {
+      setHasPendingReclassification(false)
+      setPendingReplacementFilenames([])
       onResetWorkspace?.()
     }
   }
@@ -319,6 +451,8 @@ export default function DocumentIngestor({
     setSelectedFiles([])
     setResults([])
     setClassificationIssues([])
+    setHasPendingReclassification(false)
+    setPendingReplacementFilenames([])
     setErrorMessage(null)
     setReplacementTargetFilename(null)
     setIsDragOver(false)
@@ -334,6 +468,7 @@ export default function DocumentIngestor({
     }
 
     setPhase('uploading')
+    setHasPendingReclassification(false)
     setErrorMessage(null)
     setClassificationIssues([])
     setResults([])
@@ -360,10 +495,13 @@ export default function DocumentIngestor({
       }
 
       const issues = buildClassificationIssues(json.data.documents)
+      const replaceableFilenames = collectReplaceableFilenames(json.data.documents)
 
       setResults(json.data.documents)
       setPhase('done')
       setClassificationIssues(issues)
+      setHasPendingReclassification(false)
+      setPendingReplacementFilenames(replaceableFilenames)
       setErrorMessage(null)
       onIngestComplete?.(json.data.documents)
     } catch (error) {
@@ -373,6 +511,7 @@ export default function DocumentIngestor({
           : 'A dokumentumok beolvasása sikertelen volt.'
       setErrorMessage(message)
       setClassificationIssues([])
+      setPendingReplacementFilenames([])
       setPhase('error')
     }
   }
@@ -406,45 +545,49 @@ export default function DocumentIngestor({
         </div>
       </div>
 
-      {phase !== 'done' && phase !== 'uploading' && (
-        isSelectionLocked ? (
+      {phase !== 'uploading' && phase !== 'done' && (
+        <label
+          htmlFor={FILE_INPUT_ID}
+          title={isSelectionLocked ? lockedUploadMessage : undefined}
+          aria-disabled={isSelectionLocked}
+          onClick={handleUploadAreaClick}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+          className={[
+            'group flex flex-col items-center justify-center gap-4 rounded-2xl border border-dashed p-6 text-center transition-phantom duration-phantom-base sm:p-8',
+            isSelectionLocked
+              ? 'cursor-not-allowed border-gray-200 bg-slate-50/70'
+              : 'cursor-pointer',
+            !isSelectionLocked && isDragOver
+              ? 'border-phantom-accent bg-phantom-accent-soft shadow-phantom-soft'
+              : '',
+            !isSelectionLocked && !isDragOver
+              ? 'border-gray-200 bg-slate-50 hover:border-phantom-accent hover:bg-phantom-accent-soft hover:shadow-phantom-soft'
+              : '',
+          ].join(' ')}
+        >
           <div
-            title={lockedUploadMessage}
-            className="flex items-center gap-3 rounded-xl border border-dashed border-gray-200 bg-slate-50/70 px-4 py-3 text-sm text-gray-500"
-          >
-            <Plus className="h-4 w-4 shrink-0 text-gray-400" />
-            <span className="flex-1 truncate">További fájlok hozzáadása</span>
-            <span className="text-xs font-medium text-gray-400">5/5 kiválasztva</span>
-          </div>
-        ) : (
-          <label
-            htmlFor={FILE_INPUT_ID}
-            onClick={handleUploadAreaClick}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
             className={[
-              'group flex cursor-pointer flex-col items-center justify-center gap-4 rounded-2xl border border-dashed p-6 text-center transition-phantom duration-phantom-base sm:p-8',
-              isDragOver
-                ? 'border-phantom-accent bg-phantom-accent-soft shadow-phantom-soft'
-                : 'border-gray-200 bg-slate-50 hover:border-phantom-accent hover:bg-phantom-accent-soft hover:shadow-phantom-soft',
+              'flex h-14 w-14 items-center justify-center rounded-2xl bg-white shadow-phantom-soft ring-1 ring-gray-100 transition-phantom duration-phantom-base',
+              isSelectionLocked
+                ? 'text-gray-400'
+                : 'text-phantom-accent group-hover:-translate-y-0.5',
             ].join(' ')}
           >
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-phantom-accent shadow-phantom-soft ring-1 ring-gray-100 transition-phantom duration-phantom-base group-hover:-translate-y-0.5">
-              <Upload className="h-7 w-7" />
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-gray-900">
-                {isDragOver
-                  ? 'Engedd el itt a dokumentumokat'
-                  : 'Húzd ide a dokumentumokat, vagy kattints'}
-              </p>
-              <p className="mt-1 text-xs leading-5 text-gray-500">
-                {`PDF vagy DOCX, max 50 MB / fájl. Pontosan ${MAX_FILES} dokumentum szükséges.`}
-              </p>
-            </div>
-          </label>
-        )
+            <Upload className="h-7 w-7" />
+          </div>
+          <div>
+            <p className={['text-sm font-semibold', isSelectionLocked ? 'text-gray-500' : 'text-gray-900'].join(' ')}>
+              {isDragOver
+                ? 'Engedd el itt a dokumentumokat'
+                : 'Húzd ide a dokumentumokat, vagy kattints'}
+            </p>
+            <p className="mt-1 text-xs leading-5 text-gray-500">
+              {`PDF vagy DOCX, max 50 MB / fájl. Pontosan ${MAX_FILES} dokumentum szükséges.`}
+            </p>
+          </div>
+        </label>
       )}
 
       <input
@@ -457,7 +600,7 @@ export default function DocumentIngestor({
         onChange={handleFileInput}
       />
 
-      {(phase === 'ready' || phase === 'error' || phase === 'uploading') && selectedFiles.length > 0 && (
+      {(phase === 'ready' || phase === 'error' || phase === 'uploading' || (phase === 'done' && hasPendingReclassification)) && selectedFiles.length > 0 && (
         <div className="mt-4 space-y-2">
           <div className="mb-1 rounded-xl border border-gray-100 bg-white px-4 py-2.5">
             <div className="flex flex-wrap items-center justify-between gap-2">
@@ -486,43 +629,47 @@ export default function DocumentIngestor({
             return (
             <div
               key={file.name}
-              className="flex items-center gap-3 rounded-xl border border-gray-100 bg-white p-3 shadow-sm"
+              className={[
+                'flex items-center gap-3 rounded-xl border p-3 shadow-sm',
+                phase === 'error'
+                  ? 'border-phantom-danger-border bg-phantom-danger-soft'
+                  : 'border-gray-100 bg-white',
+              ].join(' ')}
             >
               <div className={['flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ring-1', iconWrapClass].join(' ')}>
                 <FileIcon className="h-4 w-4" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium text-phantom-ink" title={file.name}>
+                <p
+                  className={[
+                    'truncate text-sm font-medium',
+                    phase === 'error' ? 'text-phantom-danger-text' : 'text-phantom-ink',
+                  ].join(' ')}
+                  title={file.name}
+                >
                   {file.name}
                 </p>
                 <p className="text-xs text-phantom-muted">{formatBytes(file.size)}</p>
               </div>
-              <button
-                type="button"
-                onClick={() => removeFile(file.name)}
-                disabled={phase === 'uploading'}
-                className={[
-                  'shrink-0 rounded-phantom-control p-2 text-phantom-subtle transition-phantom duration-phantom-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus',
-                  phase === 'uploading'
-                    ? 'cursor-not-allowed opacity-50'
-                    : 'hover:bg-phantom-surface-muted hover:text-phantom-ink',
-                ].join(' ')}
-                aria-label={`Eltávolítás: ${file.name}`}
-              >
-                <X className="h-4 w-4" />
-              </button>
+              <div className="flex shrink-0 items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => removeFile(file.name)}
+                  disabled={phase === 'uploading'}
+                  className={[
+                    'shrink-0 rounded-phantom-control p-2 text-phantom-subtle transition-phantom duration-phantom-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus',
+                    phase === 'uploading'
+                      ? 'cursor-not-allowed opacity-50'
+                      : 'hover:bg-phantom-surface-muted hover:text-phantom-ink',
+                  ].join(' ')}
+                  aria-label={`Eltávolítás: ${file.name}`}
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
             </div>
             )
           })}
-        </div>
-      )}
-
-      {phase === 'uploading' && (
-        <div className="mt-4 rounded-phantom-card border border-phantom-line bg-phantom-surface-muted p-4">
-          <div className="flex items-center gap-3">
-            <div className="force-spin h-5 w-5 animate-spin rounded-full border-2 border-phantom-accent border-t-transparent" />
-            <p className="text-sm font-semibold text-phantom-ink">Beolvasás folyamatban...</p>
-          </div>
         </div>
       )}
 
@@ -572,6 +719,19 @@ export default function DocumentIngestor({
                   </li>
                 ))}
               </ul>
+            </div>
+          )}
+
+          {hasPendingReclassification && (
+            <div className="rounded-phantom-card border border-amber-200 bg-amber-50 p-4">
+              <p className="text-sm font-semibold text-amber-800">
+                Fájlcsere megtörtént
+              </p>
+              <p className="mt-1 text-xs text-amber-700">
+                {pendingReplacementFilenames.length > 0
+                  ? `Még ${pendingReplacementFilenames.length} hibás fájl cseréje szükséges. Az utolsó csere után automatikusan újraindul az osztályozás.`
+                  : 'Folyamatban: automatikus újraosztályozás indul.'}
+              </p>
             </div>
           )}
 
@@ -704,17 +864,6 @@ export default function DocumentIngestor({
                               Fájl csere
                             </button>
                           )}
-                          <button
-                            type="button"
-                            onClick={(event) => {
-                              event.stopPropagation()
-                              replaceSingleFile(document.filename)
-                            }}
-                            className="shrink-0 rounded-md p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400"
-                            aria-label={`Eltávolítás: ${document.filename}`}
-                          >
-                            <X className="h-4 w-4" />
-                          </button>
                         </div>
                       </div>
 
@@ -764,13 +913,13 @@ export default function DocumentIngestor({
         >
           {phase === 'uploading' ? (
             <>
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <Loader2 className="force-spin h-4 w-4 animate-spin" />
               AI Elemzés folyamatban...
             </>
           ) : (
             <>
               <FileUp className="h-4 w-4" />
-              Beolvasás indítása ({selectedFiles.length}/{MAX_FILES})
+              {`Beolvasás indítása (${selectedFiles.length}/${MAX_FILES})`}
             </>
           )}
         </button>
