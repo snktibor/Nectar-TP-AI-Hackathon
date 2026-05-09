@@ -86,9 +86,9 @@ async def test_all_agents_succeed(monkeypatch, fake_rag: FakeRagService) -> None
     assert state is not None
     assert state.status == AuditStatus.COMPLETED
     assert state.report is not None
-    assert len(state.report.agent_runs) == 5
+    assert len(state.report.agent_runs) == len(AGENT_CLASSES)
     assert all(r.status == "ok" for r in state.report.agent_runs)
-    assert len(state.report.consistency_errors) == 5
+    assert len(state.report.consistency_errors) == len(AGENT_CLASSES)
     # agent_progress reflects every agent's terminal state.
     assert all(v == "ok" for v in state.agent_progress.values())
 
@@ -126,11 +126,11 @@ async def test_one_agent_times_out(monkeypatch, fake_rag: FakeRagService) -> Non
     state = await orch.get_task(task_id)
 
     assert state is not None
-    assert state.status == AuditStatus.COMPLETED  # 4 succeeded → audit OK
+    assert state.status == AuditStatus.COMPLETED  # remainder succeeded → audit OK
     assert state.report is not None
     statuses = {r.agent_id: r.status for r in state.report.agent_runs}
     assert statuses["master_file_agent"] == "timeout"
-    assert sum(1 for s in statuses.values() if s == "ok") == 4
+    assert sum(1 for s in statuses.values() if s == "ok") == len(AGENT_CLASSES) - 1
     assert state.agent_progress["master_file_agent"] == "timeout"
 
 

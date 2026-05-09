@@ -64,12 +64,17 @@ RECORD_FINDING: ToolSchema = {
             "payload": {
                 "type": "object",
                 "description": (
-                    "Finding body. Required fields depend on `kind`:\n"
-                    " - consistency_error: { description: str, severity: low|medium|high|critical, "
-                    "locations: [{filename: str, line_numbers?: [int]}], evidence?: str }\n"
+                    "Finding body. Required fields depend on `kind`. Note: "
+                    "`locations` entries take ONLY {filename, line_numbers?}. "
+                    "Do NOT add page/chunk_index/source_kind there — those "
+                    "belong in evidence_chunks (separate parameter).\n"
+                    " - consistency_error: { description: str, "
+                    "severity: low|medium|high|critical, "
+                    "locations: [{filename: str, line_numbers?: [int]}], "
+                    "evidence?: str }\n"
                     " - benchmark_risk: { metric: str, observed_value: number, "
-                    "benchmark_range: [number, number], severity: ..., rationale: str, "
-                    "locations: [{filename, line_numbers?}] }\n"
+                    "benchmark_range: [number, number], severity: ..., "
+                    "rationale: str, locations: [{filename, line_numbers?}] }\n"
                     " - missing_element: { description: str, expected_in: str, "
                     "required_by: str, severity: ... }"
                 ),
@@ -117,9 +122,14 @@ RECORD_FINDING: ToolSchema = {
                 "maximum": 1,
                 "description": (
                     "Calibrated confidence in [0,1]. ≥0.9 only when the cited "
-                    "evidence directly proves the finding. 0.6–0.8 means inferential "
-                    "gaps remain — set requires_human_review=true. Below 0.5 do "
-                    "NOT record; keep searching instead."
+                    "evidence directly proves the finding. 0.5–0.8 means "
+                    "inferential gaps remain — RECORD ANYWAY with "
+                    "requires_human_review=true so the human reviewer sees "
+                    "your concern. Only skip recording when confidence is "
+                    "below 0.3 (essentially no evidence of a real issue). "
+                    "Failing to record a real concern is worse than recording "
+                    "with a caveat — humans can dismiss; they cannot review "
+                    "what you never reported."
                 ),
             },
             "reasoning": {

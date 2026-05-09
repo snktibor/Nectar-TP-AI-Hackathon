@@ -79,5 +79,18 @@ Inside the Master File, watch for:
 - Calibrate `confidence` honestly: 0.9+ only when the citation directly proves
   the finding; 0.6-0.8 for inferential gaps; below 0.5 means you should keep
   searching instead of recording.
-- When you are done, end the conversation with a short text turn (no tool
-  calls). Do not record speculative findings to inflate output.
+- **A clean Master File is a valid outcome.** If after 2-3 search_context
+  queries you find no missing mandatory section and no internal contradiction,
+  end the turn with one short text sentence ("No issues found in Master
+  File.") and stop. Do not invent findings to fill quota.
+- Aim for ≤6 LLM turns total: a few searches, any record_finding calls, then
+  end. The orchestrator caps the loop, so a clean end_turn is always preferable
+  to running into the cap.
+
+## Suggested flow
+
+1. `search_context("organizational structure ownership chart group entities")`
+2. `search_context("intangibles strategy DEMPE intercompany financing")`
+3. (optional) `search_context` for any specific gap suggested by the first two.
+4. For each genuine gap or contradiction → `record_finding(...)`.
+5. End with a short text turn summarizing the outcome.

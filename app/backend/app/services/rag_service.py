@@ -15,6 +15,7 @@ scores remain comparable across legal and uploaded-document queries.
 from __future__ import annotations
 
 import asyncio
+import logging
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -24,6 +25,8 @@ import chromadb
 from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunction
 
 from app.models.schemas import DocumentType, EvidenceChunk
+
+logger = logging.getLogger("redline.rag")
 
 CHROMA_PATH = Path(__file__).parent.parent.parent / "data" / "chromadb"
 EMBED_MODEL = "paraphrase-multilingual-MiniLM-L12-v2"
@@ -72,10 +75,15 @@ class RagService:
             collection = self._client.get_collection(
                 LEGAL_COLLECTION, embedding_function=self._embed
             )
-        except Exception:
+            results = collection.query(query_texts=[query], n_results=n_results)
+            return self._parse_results(results, source_kind="legal")
+        except Exception as exc:  # noqa: BLE001 — never crash an agent on legal-RAG hiccups
+            logger.warning(
+                "legal rag query skipped: error=%s: %s",
+                type(exc).__name__,
+                exc,
+            )
             return []
-        results = collection.query(query_texts=[query], n_results=n_results)
-        return self._parse_results(results, source_kind="legal")
 
     def query_document(
         self, document_id: UUID, query: str, n_results: int = 5
@@ -86,17 +94,25 @@ class RagService:
             collection = self._client.get_collection(
                 collection_name, embedding_function=self._embed
             )
-        except Exception:
+            results = collection.query(query_texts=[query], n_results=n_results)
+            return self._parse_results(results)
+        except Exception as exc:  # noqa: BLE001 — survive missing/broken collections
+            logger.warning(
+                "doc rag query skipped: collection=%s error=%s: %s",
+                collection_name,
+                type(exc).__name__,
+                exc,
+            )
             return []
-        results = collection.query(query_texts=[query], n_results=n_results)
-        return self._parse_results(results)
 
     def query_session_documents(
         self, session_id: UUID, query: str, n_results_per_doc: int = 3
     ) -> list[RagChunk]:
         """Fan-out query across every per-document RAG in a session.
 
-        Used by the cross-document consistency agent.
+        Used by the cross-document consistency agent. Same robustness contract
+        as ``_query_session_by_doc_type``: broken collections are logged and
+        skipped, never raised.
         """
         merged: list[RagChunk] = []
         target = str(session_id)
@@ -108,10 +124,17 @@ class RagService:
                 collection = self._client.get_collection(
                     col_summary.name, embedding_function=self._embed
                 )
-            except Exception:
+                results = collection.query(query_texts=[query], n_results=n_results_per_doc)
+                merged.extend(self._parse_results(results))
+            except Exception as exc:  # noqa: BLE001 — chromadb raises a wide tree
+                logger.warning(
+                    "cross-doc rag query skipped: collection=%s session=%s error=%s: %s",
+                    col_summary.name,
+                    target,
+                    type(exc).__name__,
+                    exc,
+                )
                 continue
-            results = collection.query(query_texts=[query], n_results=n_results_per_doc)
-            merged.extend(self._parse_results(results))
         merged.sort(key=lambda c: -c.score)
         return merged
 
@@ -208,7 +231,14 @@ class RagService:
         query: str,
         n_results: int,
     ) -> list[RagChunk]:
-        """Sync: fan-out query across per-document collections matching doc_type."""
+        """Sync: fan-out query across per-document collections matching doc_type.
+
+        Robust against broken / partially-persisted collections: ChromaDB can
+        list a collection whose HNSW segment is missing on disk (typical after
+        an interrupted ingest). Querying such a collection raises
+        ``InternalError: Nothing found on disk``. We log and skip — losing one
+        broken collection is far better than crashing the whole agent.
+        """
         target_session = str(session_id)
         target_type = doc_type.value
         merged: list[RagChunk] = []
@@ -222,10 +252,18 @@ class RagService:
                 collection = self._client.get_collection(
                     col_summary.name, embedding_function=self._embed
                 )
-            except Exception:
+                results = collection.query(query_texts=[query], n_results=n_results)
+                merged.extend(self._parse_results(results))
+            except Exception as exc:  # noqa: BLE001 — chromadb raises a wide tree
+                logger.warning(
+                    "rag query skipped: collection=%s session=%s doc_type=%s error=%s: %s",
+                    col_summary.name,
+                    target_session,
+                    target_type,
+                    type(exc).__name__,
+                    exc,
+                )
                 continue
-            results = collection.query(query_texts=[query], n_results=n_results)
-            merged.extend(self._parse_results(results))
         merged.sort(key=lambda c: -c.score)
         return merged
 

@@ -35,12 +35,15 @@ def test_settings_accepts_anthropic_api_key_alias(monkeypatch) -> None:
 
 
 def test_settings_optional_key_does_not_crash(monkeypatch) -> None:
-    """Missing key must not crash imports — only call-time errors are acceptable."""
+    """Missing key must not crash imports — only call-time errors are acceptable.
+
+    Construct Settings directly with `_env_file=None` so the developer's local
+    `.env` (which legitimately contains an API key) cannot leak into this test.
+    """
     monkeypatch.delenv("REDLINE_ANTHROPIC_API_KEY", raising=False)
     monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
 
-    get_settings.cache_clear()
-    s = get_settings()
+    s = Settings(_env_file=None)  # type: ignore[call-arg]
     assert s.anthropic_api_key is None
 
 

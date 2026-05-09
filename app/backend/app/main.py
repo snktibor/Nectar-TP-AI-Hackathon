@@ -18,7 +18,7 @@ from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.api.v1.endpoints import audits, documents
-from app.core.logging import configure_logging
+from app.core.logging import configure_logging, rebind_external_loggers
 from app.core.settings import get_settings
 from app.api.v1.endpoints import audits, documents, rag
 from app.models.schemas import ApiResponse, ErrorDetail, ResponseMeta
@@ -58,6 +58,18 @@ def create_app() -> FastAPI:
             "{success, data, error, meta}."
         ),
     )
+
+    # Re-bind uvicorn / httpx loggers AFTER uvicorn has applied its own log
+    # config. configure_logging() at module import time truncated the file
+    # and set propagate=True, but uvicorn injects its own handlers between
+    # import and startup which can re-detach our file handler. Re-binding on
+    # startup wins the race deterministically — does NOT truncate the file.
+    @app.on_event("startup")
+    async def _rebind_loggers() -> None:
+        rebind_external_loggers()
+        logger.info(
+            "FastAPI startup complete — log file is being written by AutoFlushFileHandler"
+        )
 
     # CORS — permissive defaults for the PoC; tighten origins before production.
     app.add_middleware(

@@ -105,3 +105,6 @@ Compare across the package:
 - Prefer fewer, well-documented findings to many speculative ones.
 - When you are done, end the conversation with a short text turn (no tool
   calls).
+- Budget: aim for ≤8 LLM turns. Cross-doc fan-out RAG is expensive — pick
+  3-4 high-leverage queries (entity roles, transaction values, intangible
+  ownership, dates) rather than many narrow searches.

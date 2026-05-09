@@ -65,3 +65,5 @@ quote both the invoice value and the range.
 - Tool calls only — never narrate findings.
 - Always quote the exact invoice number when describing a finding.
 - End with a brief text turn when finished.
+- Aim for ≤8 LLM turns total. Use `verify_tax_number` only when you actually
+  extracted a VAT/tax ID from an invoice — do not call speculatively.
