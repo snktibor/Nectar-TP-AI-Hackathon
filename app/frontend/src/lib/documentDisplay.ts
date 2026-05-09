@@ -6,7 +6,7 @@ export interface DocumentTypeDisplay {
 export const DOCUMENT_TYPE_DISPLAY: Record<string, DocumentTypeDisplay> = {
   master_file: {
     label: 'Fő Fájl',
-    badgeClassName: 'bg-blue-50 text-blue-700 ring-blue-600/20',
+    badgeClassName: 'bg-blue-50 text-blue-700 ring-phantom-line',
   },
   local_file: {
     label: 'Helyi Fájl',

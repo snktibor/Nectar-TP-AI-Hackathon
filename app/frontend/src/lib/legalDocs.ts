@@ -24,16 +24,16 @@ type SectionEntry = readonly [string, number, string]
 
 const LEGAL_SECTION_PAGE_MAP: readonly SectionEntry[] = [
   // OECD TPG 2022 — Chapter I: The Arm's Length Principle (pp. 17-67)
-  ['OECD_TPG_2022.para_1.106', 42, '1.106'],
-  ['OECD_TPG_2022.para_1.51-1.106', 27, '1.51'],
-  ['OECD_TPG_2022.para_1.60', 29, '1.60'],
-  ['OECD_TPG_2022.para_1.51', 27, '1.51'],
+  ['OECD_TPG_2022.para_1.51-1.106', 47, '1.51'],
+  ['OECD_TPG_2022.para_1.106', 58, '1.106'],
+  ['OECD_TPG_2022.para_1.60', 49, '1.60'],
+  ['OECD_TPG_2022.para_1.51', 47, '1.51'],
   ['OECD_TPG_2022.para_1.36', 23, '1.36'],
   ['OECD_TPG_2022.para_1.1', 16, '1.1'],
-  ['OECD_TPG_2022.Ch_I.D.1', 30, 'D.1'],
-  ['OECD_TPG_2022.Ch_I.D.2', 33, 'D.2'],
-  ['OECD_TPG_2022.Ch_I.D.3', 36, 'D.3'],
-  ['OECD_TPG_2022.Ch_I.D', 30, 'D.'],
+  ['OECD_TPG_2022.Ch_I.D.1', 40, 'D.1'],
+  ['OECD_TPG_2022.Ch_I.D.2', 47, 'D.1.2'],
+  ['OECD_TPG_2022.Ch_I.D.3', 54, 'D.1.3'],
+  ['OECD_TPG_2022.Ch_I.D', 40, 'D.'],
   ['OECD_TPG_2022.Ch_I.C', 25, 'C.'],
   ['OECD_TPG_2022.Ch_I.B', 19, 'B.'],
   ['OECD_TPG_2022.Ch_I.A', 17, 'A.'],
@@ -44,6 +44,8 @@ const LEGAL_SECTION_PAGE_MAP: readonly SectionEntry[] = [
   ['OECD_TPG_2022.Ch_II.A', 69, 'A.'],
   ['OECD_TPG_2022.Ch_II', 68, 'Chapter II'],
   // OECD TPG 2022 — Chapter III: Comparability Analysis (pp. 95-119)
+  ['OECD_TPG_2022.para_3.62', 167, '3.62'],
+  ['OECD_TPG_2022.para_3.57', 166, '3.57'],
   ['OECD_TPG_2022.Ch_III', 94, 'Chapter III'],
   // OECD TPG 2022 — Chapter IV: Administrative Approaches (pp. 121-159)
   ['OECD_TPG_2022.Ch_IV', 120, 'Chapter IV'],
@@ -93,9 +95,29 @@ const LEGAL_SECTION_PAGE_MAP: readonly SectionEntry[] = [
 const LEGAL_REFERENCE_PREFIXES: ReadonlyArray<readonly [string, string]> = [
   ['OECD_TPG_2022', 'OECD_TPG_2022.pdf'],
   ['NGM_32_2017', '32_2017_NGM.pdf'],
+  ['32_2017_NGM', '32_2017_NGM.pdf'],
   ['45_2025_NGM', '45_2025_NGM.pdf'],
   ['HU_Act_LXXXI_1996', 'HU_Act_LXXXI_1996.pdf'],
 ]
+
+const FALLBACK_LEGAL_FILENAME = 'Jogszabalyi hivatkozas'
+
+function replaceEvery(value: string, search: string, replacement: string): string {
+  return value.split(search).join(replacement)
+}
+
+function normalizeLegalReference(reference: string): string {
+  const normalizedReference = reference
+    .trim()
+    .replace(/^32_2017_NGM(?:_rendelet)?/, 'NGM_32_2017')
+    .replace(/^45_2025_NGM(?:_rendelet)?/, '45_2025_NGM')
+
+  return replaceEvery(
+    replaceEvery(normalizedReference, '.Sec_', '.section_'),
+    '.Section_',
+    '.section_',
+  )
+}
 
 export interface LegalReferenceTarget {
   readonly filename: string
@@ -117,11 +139,20 @@ function resolvePageForReference(reference: string): { page: number; hint: strin
 }
 
 export function resolveLegalReference(reference: string): LegalReferenceTarget | null {
+  const normalizedReference = normalizeLegalReference(reference)
+  if (!normalizedReference) return null
+
   for (const [prefix, filename] of LEGAL_REFERENCE_PREFIXES) {
-    if (reference.startsWith(prefix)) {
-      const { page, hint } = resolvePageForReference(reference)
+    if (normalizedReference.startsWith(prefix)) {
+      const { page, hint } = resolvePageForReference(normalizedReference)
       return { filename, label: reference, page, highlightHint: hint }
     }
   }
-  return null
+
+  return {
+    filename: FALLBACK_LEGAL_FILENAME,
+    label: reference,
+    page: 0,
+    highlightHint: reference,
+  }
 }

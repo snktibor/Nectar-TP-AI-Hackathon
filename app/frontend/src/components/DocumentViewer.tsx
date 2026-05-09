@@ -46,22 +46,40 @@ const QUOTE_STOPWORDS = new Set([
   'for',
 ])
 
+const QUOTE_ALLOWED_CHAR_RE = /^[0-9a-záéíóöőúüű%.,\- ]$/i
+
+type SpanRange = { readonly span: HTMLElement; readonly start: number; readonly end: number }
+
+function collapseWhitespace(value: string): string {
+  return value.trim().split(/\s+/).join(' ')
+}
+
 function normalizeText(value: string): string {
-  return value.toLowerCase().replace(/\s+/g, ' ').trim()
+  return collapseWhitespace(value.toLowerCase())
+}
+
+function sanitizeQuoteText(value: string): string {
+  return Array.from(value)
+    .map((char) => (QUOTE_ALLOWED_CHAR_RE.test(char) ? char : ' '))
+    .join('')
+}
+
+function trimTokenPunctuation(token: string): string {
+  let start = 0
+  let end = token.length
+  while (start < end && ',.-'.includes(token[start])) start += 1
+  while (end > start && ',.-'.includes(token[end - 1])) end -= 1
+  return token.slice(start, end).trim()
 }
 
 function extractQuoteKeywords(quote: string): string[] {
-  const normalized = quote
-    .toLowerCase()
-    .replace(/\s+/g, ' ')
-    .replace(/[^0-9a-záéíóöőúüű%.,\- ]/gi, ' ')
-    .trim()
+  const normalized = collapseWhitespace(sanitizeQuoteText(quote.toLowerCase()))
 
   if (!normalized) return []
 
   const tokens = normalized
     .split(' ')
-    .map((token) => token.replace(/^[,.-]+|[,.-]+$/g, '').trim())
+    .map(trimTokenPunctuation)
     .filter(Boolean)
     .filter((token) => {
       const hasDigit = /\d/.test(token)
@@ -79,17 +97,13 @@ function markSpan(span: HTMLElement): void {
   span.style.borderRadius = '2px'
 }
 
-function highlightByQuote(spans: HTMLElement[], quote: string): boolean {
-  const needle = normalizeText(quote)
-  if (needle.length < 3) return false
-
-  type SpanRange = { span: HTMLElement; start: number; end: number }
+function buildSpanTextRanges(spans: HTMLElement[]): { readonly ranges: SpanRange[]; readonly pageText: string } {
   const ranges: SpanRange[] = []
   let pageText = ''
 
   for (const span of spans) {
     const raw = span.textContent ?? ''
-    const norm = raw.toLowerCase().replace(/\s+/g, ' ')
+    const norm = normalizeText(raw)
     if (norm.length === 0) continue
     const sep = pageText.length > 0 && !pageText.endsWith(' ') ? ' ' : ''
     const start = pageText.length + sep.length
@@ -97,23 +111,37 @@ function highlightByQuote(spans: HTMLElement[], quote: string): boolean {
     ranges.push({ span, start, end: pageText.length })
   }
 
-  // Try full quote first, then a 60-char prefix as fallback for long quotes
-  // that may be split across text chunks differently on screen.
+  return { ranges, pageText }
+}
+
+function getQuoteCandidates(needle: string): string[] {
   const candidates = [needle]
   if (needle.length > 60) candidates.push(needle.slice(0, 60))
+  return candidates
+}
 
-  for (const candidate of candidates) {
+function markMatchingRanges(ranges: readonly SpanRange[], matchStart: number, matchEnd: number): boolean {
+  let matched = false
+  for (const range of ranges) {
+    if (range.start < matchEnd && range.end > matchStart) {
+      markSpan(range.span)
+      matched = true
+    }
+  }
+  return matched
+}
+
+function highlightByQuote(spans: HTMLElement[], quote: string): boolean {
+  const needle = normalizeText(quote)
+  if (needle.length < 3) return false
+
+  const { ranges, pageText } = buildSpanTextRanges(spans)
+
+  for (const candidate of getQuoteCandidates(needle)) {
     const matchStart = pageText.indexOf(candidate)
     if (matchStart === -1) continue
     const matchEnd = matchStart + candidate.length
-    let matched = false
-    for (const range of ranges) {
-      if (range.start < matchEnd && range.end > matchStart) {
-        markSpan(range.span)
-        matched = true
-      }
-    }
-    if (matched) return true
+    if (markMatchingRanges(ranges, matchStart, matchEnd)) return true
   }
 
   return false
@@ -246,9 +274,29 @@ interface PdfViewerProps {
   readonly pdfUrl: string
   readonly targetPage0: number // 0-based
   readonly citation: CitationTarget
+  readonly renderAllPages?: boolean
 }
 
-function PdfViewer({ pdfUrl, targetPage0, citation }: PdfViewerProps): JSX.Element {
+function getVisiblePageIndices(
+  numPages: number,
+  targetPage0: number,
+  renderAllPages: boolean,
+): number[] {
+  if (renderAllPages) {
+    return Array.from({ length: numPages }, (_, index) => index)
+  }
+
+  const start = Math.max(0, targetPage0 - 1)
+  const end = Math.min(numPages - 1, targetPage0 + 1)
+  return Array.from({ length: end - start + 1 }, (_, index) => start + index)
+}
+
+function PdfViewer({
+  pdfUrl,
+  targetPage0,
+  citation,
+  renderAllPages = true,
+}: PdfViewerProps): JSX.Element {
   const [numPages, setNumPages] = useState(0)
   const [loadError, setLoadError] = useState<string | null>(null)
   const [containerWidth, setContainerWidth] = useState(0)
@@ -278,7 +326,7 @@ function PdfViewer({ pdfUrl, targetPage0, citation }: PdfViewerProps): JSX.Eleme
     setLoadError(null)
     setRenderedPages(new Set())
     pageRefs.current.clear()
-  }, [pdfUrl])
+  }, [pdfUrl, targetPage0])
 
   // Scroll to target page once it has rendered
   useEffect(() => {
@@ -333,7 +381,7 @@ function PdfViewer({ pdfUrl, targetPage0, citation }: PdfViewerProps): JSX.Eleme
           className="flex flex-col items-stretch gap-2 px-1 py-2"
         >
           {numPages > 0 &&
-            Array.from({ length: numPages }, (_, i) => (
+            getVisiblePageIndices(numPages, clampedPage0, renderAllPages).map((i) => (
               <div
                 key={i}
                 ref={setPageRef(i)}
@@ -382,11 +430,12 @@ export default function DocumentViewer({ citation, onClose }: DocumentViewerProp
   const legalPdfUrl = isLegal ? resolveLegalPdfUrl(citation.filename) : null
   const showTextPanel = isDocx || (isLegal && legalPdfUrl === null)
 
-  const pdfUrl = showTextPanel
-    ? null
-    : isLegal
-      ? legalPdfUrl!
-      : `${API_BASE}/api/v1/documents/${encodeURIComponent(citation.sessionId)}/file/${encodeURIComponent(citation.filename)}`
+  let pdfUrl: string | null = null
+  if (!showTextPanel && isLegal && legalPdfUrl !== null) {
+    pdfUrl = legalPdfUrl
+  } else if (!showTextPanel && !isLegal) {
+    pdfUrl = `${API_BASE}/api/v1/documents/${encodeURIComponent(citation.sessionId)}/file/${encodeURIComponent(citation.filename)}`
+  }
 
   return (
     <section
@@ -398,15 +447,16 @@ export default function DocumentViewer({ citation, onClose }: DocumentViewerProp
       <ViewerHeader citation={citation} onClose={onClose} />
 
       <div className="min-h-0 flex-1 overflow-hidden bg-phantom-canvas animate-phantom-fade-in-up">
-        {showTextPanel ? (
+        {pdfUrl === null ? (
           <div className="h-full overflow-y-auto overflow-x-hidden">
             <LegalTextPanel citation={citation} />
           </div>
         ) : (
           <PdfViewer
-            pdfUrl={pdfUrl!}
+            pdfUrl={pdfUrl}
             targetPage0={citation.page}
             citation={citation}
+            renderAllPages={!isLegal}
           />
         )}
       </div>

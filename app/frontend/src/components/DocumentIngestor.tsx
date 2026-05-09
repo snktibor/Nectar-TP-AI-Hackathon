@@ -632,7 +632,7 @@ export default function DocumentIngestor({
             const FileIcon = isPdf ? FileText : FileType2
             const iconWrapClass = isPdf
               ? 'bg-red-50 text-red-600 ring-red-100'
-              : 'bg-blue-50 text-blue-600 ring-blue-100'
+              : 'bg-blue-50 text-blue-600 ring-gray-200'
             return (
             <RevealOnScroll
               key={file.name}

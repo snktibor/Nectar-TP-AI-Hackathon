@@ -187,7 +187,7 @@ function FindingsView({
   const [severityFilter, setSeverityFilter] = useState<BackendRiskSeverity | null>(null)
 
   const allFindings = flattenFindings(report)
-  const filteredFindings = allFindings.filter((f) => matchesSeverityFilter(f, severityFilter))
+  const hasFilteredFindings = allFindings.some((f) => matchesSeverityFilter(f, severityFilter))
 
   const grouped = groupFindingsByAgent(allFindings)
 
@@ -233,10 +233,10 @@ function FindingsView({
           type="button"
           onClick={() => setSeverityFilter(null)}
           className={[
-            'inline-flex h-7 w-full items-center justify-center whitespace-nowrap rounded-full px-3 text-xs font-medium transition-phantom duration-phantom-base hover:-translate-y-px hover:shadow-phantom-soft active:translate-y-0 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus',
+            'inline-flex h-7 w-full items-center justify-center whitespace-nowrap rounded-full border px-3 text-xs font-medium transition-phantom duration-phantom-base hover:-translate-y-px hover:shadow-phantom-soft active:translate-y-0 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus',
             severityFilter === null
-              ? 'bg-phantom-accent-soft text-phantom-accent ring-1 ring-inset ring-phantom-accent/30 scale-[1.02]'
-              : 'bg-phantom-surface-muted text-phantom-muted hover:bg-phantom-accent-soft/60 hover:text-phantom-accent',
+              ? 'border-amber-300 bg-phantom-accent-soft text-phantom-accent scale-[1.02] shadow-phantom-soft'
+              : 'border-phantom-line bg-phantom-surface-muted text-phantom-muted hover:border-amber-200 hover:bg-phantom-accent-soft/60 hover:text-phantom-accent',
           ].join(' ')}
         >
           Mind
@@ -247,10 +247,10 @@ function FindingsView({
             type="button"
             onClick={() => setSeverityFilter(severityFilter === s ? null : s)}
             className={[
-              'inline-flex h-7 w-full items-center justify-center whitespace-nowrap rounded-full px-3 text-xs font-medium transition-phantom duration-phantom-base hover:-translate-y-px hover:shadow-phantom-soft active:translate-y-0 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus',
+              'inline-flex h-7 w-full items-center justify-center whitespace-nowrap rounded-full border px-3 text-xs font-medium transition-phantom duration-phantom-base hover:-translate-y-px hover:shadow-phantom-soft active:translate-y-0 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus',
               severityFilter === s
-                ? `${getSeverityFilterTone(s)} scale-[1.02] shadow-phantom-soft ring-1 ring-inset ring-current/20`
-                : 'bg-phantom-surface-muted text-phantom-muted',
+                ? `${getSeverityFilterTone(s)} border-phantom-line scale-[1.02] shadow-phantom-soft`
+                : 'border-phantom-line bg-phantom-surface-muted text-phantom-muted',
             ].join(' ')}
           >
             {severityLabel(s)}
@@ -331,31 +331,13 @@ function FindingsView({
         })()}
       </div>
 
-      {/* Flat severity list (single section-level scrollbar) */}
-      <section className="min-w-0 overflow-hidden rounded-phantom-card border border-phantom-line bg-phantom-surface p-4 animate-phantom-fade-in-up" style={{ animationDelay: '720ms' }}>
-        <p className="mb-2 break-words text-sm font-semibold text-phantom-ink">
-          Összes megállapítás ({filteredFindings.length})
-        </p>
-        <div className="space-y-2">
-          {filteredFindings.length > 0 ? (
-            filteredFindings.map((f) => (
-              <FindingCard
-                key={findingKey(f)}
-                variant={f}
-                showAgentBadge={true}
-                sessionId={sessionId}
-                onCitationClick={onCitationClick}
-              />
-            ))
-          ) : (
-            <p className="break-words text-sm font-normal text-phantom-ink">
-              {severityFilter
-                ? `${severityLabel(severityFilter)} szinten nincs megállapítás.`
-                : 'Nincs megállapítás.'}
-            </p>
-          )}
-        </div>
-      </section>
+      {!hasFilteredFindings && (
+        <EmptyPanel
+          icon={SearchCheck}
+          title={severityFilter ? `${severityLabel(severityFilter)} szinthez nincs találat` : 'Nincs találat'}
+          description={severityFilter ? 'Nincs olyan megállapítás, ami megfelel a kiválasztott súlyossági szintnek.' : 'Jelenleg nincs megjeleníthető megállapítás.'}
+        />
+      )}
 
     </div>
   )
@@ -378,7 +360,7 @@ function AgentRunsView({ report }: Readonly<{ report: BackendAuditReport }>): JS
 
   return (
     <div className="space-y-3">
-      {report.agent_runs.map((run) => {
+      {report.agent_runs.map((run, index) => {
         let statusTone: StatusPillTone = 'danger'
         let statusText = 'Hiba'
         if (run.status === 'ok') {
@@ -405,7 +387,7 @@ function AgentRunsView({ report }: Readonly<{ report: BackendAuditReport }>): JS
           {
             label: 'Hiányzó',
             value: run.missing_elements.length,
-            className: 'border-blue-200 bg-blue-50 text-blue-800',
+            className: 'border-gray-200 bg-blue-50 text-blue-800',
           },
           {
             label: 'Összesen',
@@ -765,7 +747,7 @@ export default function AnalysisWorkspace({
                 className={[
                   'relative h-7 shrink-0 whitespace-nowrap rounded-phantom-control px-3 text-xs font-medium transition-phantom duration-phantom-base hover:-translate-y-px hover:shadow-phantom-soft active:translate-y-0 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus',
                   activeTab === tab.id
-                    ? 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200 shadow-phantom-soft'
+                    ? 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-gray-300 shadow-phantom-soft'
                     : 'bg-phantom-surface-muted text-phantom-muted hover:bg-blue-50/60 hover:text-blue-700',
                 ].join(' ')}
               >
