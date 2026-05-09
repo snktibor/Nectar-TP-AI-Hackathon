@@ -15,8 +15,8 @@ export default function EvidenceChip({ chunk, isCrossDoc = false, onClick }: Evi
     : 'bg-phantom-surface-muted text-phantom-muted ring-phantom-line'
 
   const interactiveClasses = onClick
-    ? 'cursor-pointer hover:ring-phantom-accent hover:text-phantom-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-accent'
-    : ''
+    ? 'cursor-pointer transition-phantom duration-phantom-base hover:-translate-y-px hover:scale-105 hover:ring-phantom-accent hover:text-phantom-accent hover:shadow-phantom-soft active:translate-y-0 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-accent'
+    : 'transition-phantom duration-phantom-base hover:scale-[1.02]'
 
   const inner = (
     <>

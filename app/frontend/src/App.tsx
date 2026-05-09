@@ -298,7 +298,7 @@ export default function App(): JSX.Element {
     setActiveTab(nextTab)
   }
 
-  const leftPanel = (() => {
+  const leftPanelContent = (() => {
     if (activeTab === 'analysis') {
       return (
         <AnalysisReadyView
@@ -340,7 +340,14 @@ export default function App(): JSX.Element {
     )
   })()
 
-  const rightPanel =
+  const leftPanelKey = `${activeTab}:${selectedDocId ?? 'none'}`
+  const leftPanel = (
+    <div key={leftPanelKey} className="h-full animate-phantom-fade-in-up">
+      {leftPanelContent}
+    </div>
+  )
+
+  const rightPanelContent =
     selectedDocId !== null ? (
       <FilteredFindingsPanel
         selectedDocId={selectedDocId}
@@ -362,6 +369,13 @@ export default function App(): JSX.Element {
         onCloseReport={handleCloseGlobalReport}
       />
     )
+
+  const rightPanelKey = selectedDocId !== null ? `filtered:${selectedDocId}` : 'workspace'
+  const rightPanel = (
+    <div key={rightPanelKey} className="h-full animate-phantom-fade-in-up">
+      {rightPanelContent}
+    </div>
+  )
 
   return (
     <div className={[phantomDesign.layout.page, 'h-screen'].join(' ')}>

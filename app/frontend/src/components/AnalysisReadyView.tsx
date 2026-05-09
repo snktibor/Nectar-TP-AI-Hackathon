@@ -110,11 +110,13 @@ export default function AnalysisReadyView({
   })()
 
   return (
-    <section className="flex h-full min-h-0 flex-col items-center justify-center rounded-2xl border border-gray-100 bg-white p-8 shadow-md">
-      <div className="flex flex-col items-center gap-6 text-center">
-        <CircularGauge percent={gaugePercent} />
+    <section className="flex h-full min-h-0 flex-col items-center justify-center rounded-2xl border border-gray-100 bg-white p-8 shadow-md animate-phantom-fade-in">
+      <div className="flex flex-col items-center gap-6 text-center animate-phantom-fade-in">
+        <div className={isRunning ? 'animate-phantom-pulse-soft' : 'animate-phantom-bounce-in'}>
+          <CircularGauge percent={gaugePercent} />
+        </div>
 
-        <div className="space-y-1">
+        <div key={headline} className="space-y-1 animate-phantom-fade-in-up">
           <h2 className="text-xl font-semibold text-gray-900">{headline}</h2>
           <p className="max-w-sm text-sm leading-6 text-gray-500">{subline}</p>
         </div>
@@ -124,13 +126,14 @@ export default function AnalysisReadyView({
           onClick={onAnalyze}
           disabled={!isReady}
           className={[
-            'mt-2 inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold text-white',
+            'group/start mt-2 inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold text-white',
             'bg-gradient-to-r from-orange-500 to-orange-400 shadow-lg shadow-orange-500/30',
             'transition-all duration-200 ease-out',
-            'hover:from-orange-600 hover:to-orange-500 hover:shadow-orange-500/40 hover:-translate-y-0.5',
-            'active:translate-y-0 active:shadow-orange-500/20',
+            'hover:from-orange-600 hover:to-orange-500 hover:shadow-orange-500/40 hover:-translate-y-0.5 hover:scale-[1.03]',
+            'active:translate-y-0 active:scale-95 active:shadow-orange-500/20',
             'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 focus-visible:ring-offset-2',
-            'disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0',
+            'disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 disabled:hover:scale-100',
+            isRunning ? 'animate-phantom-progress-glow' : '',
           ].join(' ')}
         >
           {isRunning ? (
@@ -140,21 +143,21 @@ export default function AnalysisReadyView({
             </>
           ) : (
             <>
-              <FileUp className="h-4 w-4" />
+              <FileUp className="h-4 w-4 transition-transform duration-phantom-base group-hover/start:-translate-y-0.5 group-hover/start:scale-110" />
               Beolvasás indítása
             </>
           )}
         </button>
 
         {isRunning && auditStatus && (
-          <div className="w-full max-w-sm">
+          <div className="w-full max-w-sm animate-phantom-fade-in-up">
             <div className="h-2 overflow-hidden rounded-full bg-gray-100">
               <div
-                className="h-full rounded-full bg-gradient-to-r from-orange-500 to-orange-400 transition-all duration-500 ease-out"
+                className="phantom-progress-stripes h-full rounded-full bg-gradient-to-r from-orange-500 to-orange-400 transition-[width] duration-700 ease-out"
                 style={{ width: `${Math.max(0, Math.min(100, auditStatus.progress))}%` }}
               />
             </div>
-            <p className="mt-2 text-xs font-medium text-gray-500">
+            <p className="mt-2 text-xs font-medium text-gray-500 tabular-nums">
               {Math.round(auditStatus.progress)}%
             </p>
           </div>
