@@ -88,27 +88,28 @@ export default function ReportGeneratorModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="report-modal-title"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-phantom-ink/50 px-4 py-6 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-phantom-ink/50 px-4 py-6 backdrop-blur-sm animate-phantom-fade-in"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-phantom-line"
+        className="w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-phantom-line animate-phantom-scale-in"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-start justify-between gap-3 border-b border-phantom-line bg-phantom-surface-muted px-6 py-4">
+        <div className="flex items-start justify-between gap-3 border-b border-phantom-line bg-phantom-surface-muted px-6 py-4 animate-phantom-fade-in-down">
           <div className="flex items-center gap-3">
-            <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-phantom-accent/10 text-phantom-accent">
+            <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-phantom-accent/10 text-phantom-accent animate-phantom-bounce-in">
               <FileText className="h-5 w-5" />
             </span>
             <div>
               <h2
                 id="report-modal-title"
-                className="font-serif text-base font-semibold text-phantom-ink"
+                className="font-serif text-base font-semibold text-phantom-ink animate-phantom-fade-in-up"
+                style={{ animationDelay: '80ms' }}
               >
                 Megfelelőségi jelentés generálása
               </h2>
-              <p className="text-xs text-phantom-muted">
+              <p className="text-xs text-phantom-muted animate-phantom-fade-in-up" style={{ animationDelay: '140ms' }}>
                 Munkamenet {report.session_id.slice(0, 8)} · A4 PDF dokumentum
               </p>
             </div>
@@ -117,9 +118,9 @@ export default function ReportGeneratorModal({
             type="button"
             onClick={onClose}
             aria-label="Bezárás"
-            className="rounded-md p-1 text-phantom-muted transition-colors hover:bg-white hover:text-phantom-ink"
+            className="group rounded-md p-1 text-phantom-muted transition-phantom duration-phantom-base hover:bg-white hover:text-phantom-ink active:scale-90"
           >
-            <X className="h-5 w-5" />
+            <X className="h-5 w-5 transition-transform duration-phantom-base group-hover:rotate-90" />
           </button>
         </div>
 
@@ -130,7 +131,11 @@ export default function ReportGeneratorModal({
               const isDone = idx < completedCount
               const isActive = idx === completedCount && !isReady
               return (
-                <li key={step.id} className="flex items-center gap-3">
+                <li
+                  key={step.id}
+                  style={{ animationDelay: `${180 + idx * 80}ms` }}
+                  className="flex items-center gap-3 animate-phantom-slide-in-right"
+                >
                   <span
                     className={[
                       'flex h-6 w-6 shrink-0 items-center justify-center rounded-full ring-1 transition-colors',
@@ -142,9 +147,9 @@ export default function ReportGeneratorModal({
                     ].join(' ')}
                   >
                     {isDone ? (
-                      <Check className="h-3.5 w-3.5" strokeWidth={3} />
+                      <Check className="h-3.5 w-3.5 animate-phantom-bounce-in" strokeWidth={3} />
                     ) : isActive ? (
-                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      <Loader2 className="force-spin h-3.5 w-3.5 animate-spin" />
                     ) : (
                       <span className="text-[10px] font-semibold">{idx + 1}</span>
                     )}
@@ -167,16 +172,19 @@ export default function ReportGeneratorModal({
           </ol>
 
           {/* Progress bar */}
-          <div className="mt-6 h-1.5 w-full overflow-hidden rounded-full bg-phantom-surface-muted">
+          <div
+            className="mt-6 h-1.5 w-full overflow-hidden rounded-full bg-phantom-surface-muted animate-phantom-fade-in-up"
+            style={{ animationDelay: `${180 + STEPS.length * 80}ms` }}
+          >
             <div
-              className="h-full rounded-full bg-phantom-accent transition-all duration-500 ease-out"
+              className="phantom-progress-stripes h-full rounded-full bg-phantom-accent transition-[width] duration-500 ease-out"
               style={{ width: `${(completedCount / STEPS.length) * 100}%` }}
             />
           </div>
         </div>
 
         {/* Footer / CTA */}
-        <div className="border-t border-phantom-line bg-white px-6 py-5">
+        <div className="border-t border-phantom-line bg-white px-6 py-5 animate-phantom-fade-in-up" style={{ animationDelay: `${260 + STEPS.length * 80}ms` }}>
           {isReady ? (
             <PDFDownloadLink
               document={documentElement}

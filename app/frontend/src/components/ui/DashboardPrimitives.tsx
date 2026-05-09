@@ -70,7 +70,7 @@ export function SectionHeader({
   action,
 }: SectionHeaderProps): JSX.Element {
   return (
-    <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+    <div className="mb-5 flex flex-col gap-3 animate-phantom-fade-in-down sm:flex-row sm:items-start sm:justify-between">
       <div className="min-w-0 space-y-1">
         {eyebrow ? (
           <p className="text-xs font-semibold uppercase tracking-[0.08em] text-phantom-accent">
@@ -91,7 +91,7 @@ export function StatusPill({ tone = 'neutral', children }: StatusPillProps): JSX
   return (
     <span
       className={[
-        'inline-flex h-7 shrink-0 items-center rounded-full px-2.5 text-xs font-semibold leading-none whitespace-nowrap ring-1 ring-inset',
+        'inline-flex h-7 shrink-0 items-center rounded-full px-2.5 text-xs font-semibold leading-none whitespace-nowrap ring-1 ring-inset transition-transform duration-phantom-base hover:scale-105',
         toneClasses[tone],
       ].join(' ')}
     >
@@ -108,17 +108,17 @@ export function MetricCard({
   tone = 'neutral',
 }: MetricCardProps): JSX.Element {
   return (
-    <div className="min-w-0 rounded-phantom-card border border-phantom-line bg-phantom-surface p-4 shadow-sm">
+    <div className="group min-w-0 rounded-phantom-card border border-phantom-line bg-phantom-surface p-4 shadow-sm transition-phantom duration-phantom-base animate-phantom-fade-in-up hover:-translate-y-0.5 hover:border-phantom-accent/30 hover:shadow-phantom-soft">
       <div className="flex min-w-0 items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="break-words whitespace-pre-line text-xs font-semibold uppercase tracking-[0.08em] text-phantom-subtle">
             {label}
           </p>
-          <p className="mt-2 break-words text-xl font-semibold leading-7 text-phantom-ink sm:text-2xl sm:leading-8">{value}</p>
+          <p className="mt-2 break-words text-xl font-semibold leading-7 text-phantom-ink transition-transform duration-phantom-base group-hover:scale-[1.03] sm:text-2xl sm:leading-8 origin-left">{value}</p>
         </div>
         <div
           className={[
-            'flex h-9 w-9 shrink-0 items-center justify-center rounded-phantom-control ring-1 ring-inset',
+            'flex h-9 w-9 shrink-0 items-center justify-center rounded-phantom-control ring-1 ring-inset transition-transform duration-phantom-base group-hover:scale-110 group-hover:-rotate-3',
             metricIconClasses[tone],
           ].join(' ')}
         >
@@ -137,9 +137,9 @@ export function EmptyPanel({
   children,
 }: EmptyPanelProps): JSX.Element {
   return (
-    <div className="flex min-h-[26rem] flex-col items-center justify-center rounded-phantom-card border border-dashed border-phantom-line bg-phantom-surface-muted p-8 text-center">
-      <div className="flex h-14 w-14 items-center justify-center rounded-phantom-card bg-phantom-surface text-phantom-accent shadow-phantom-soft ring-1 ring-phantom-line">
-        <Icon className="h-7 w-7" />
+    <div className="flex min-h-[26rem] flex-col items-center justify-center rounded-phantom-card border border-dashed border-phantom-line bg-phantom-surface-muted p-8 text-center animate-phantom-fade-in">
+      <div className="flex h-14 w-14 items-center justify-center rounded-phantom-card bg-phantom-surface text-phantom-accent shadow-phantom-soft ring-1 ring-phantom-line animate-phantom-bounce-in">
+        <Icon className="h-7 w-7 animate-phantom-pulse-soft" />
       </div>
       <h3 className="mt-5 text-lg font-semibold text-phantom-ink">{title}</h3>
       <p className="mt-2 max-w-xl text-sm leading-6 text-phantom-muted">{description}</p>
@@ -151,15 +151,16 @@ export function EmptyPanel({
 export function WorkflowTimeline({ steps }: { readonly steps: TimelineStep[] }): JSX.Element {
   return (
     <div className="grid gap-2 sm:grid-cols-3">
-      {steps.map((step) => {
+      {steps.map((step, index) => {
         const Icon = step.state === 'done' ? CheckCircle2 : step.state === 'active' ? LoaderCircle : Circle
         const iconClass = step.state === 'active' ? 'force-spin h-4 w-4 animate-spin' : 'h-4 w-4'
 
         return (
           <div
             key={step.title}
+            style={{ animationDelay: `${index * 80}ms` }}
             className={[
-              'rounded-phantom-card border p-3 transition-phantom duration-phantom-base',
+              'rounded-phantom-card border p-3 transition-phantom duration-phantom-base animate-phantom-fade-in-up hover:-translate-y-0.5 hover:shadow-phantom-soft',
               stepClasses[step.state],
             ].join(' ')}
           >

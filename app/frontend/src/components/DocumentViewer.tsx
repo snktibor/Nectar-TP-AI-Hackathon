@@ -208,8 +208,8 @@ function applyHighlight(
 
 function LegalTextPanel({ citation }: Readonly<{ citation: CitationTarget }>): JSX.Element {
   return (
-    <div className="space-y-3 p-4">
-      <div className={phantomDesign.components.subtleCard}>
+    <div className="space-y-3 p-4 animate-phantom-fade-in-up">
+      <div className={[phantomDesign.components.subtleCard, 'animate-phantom-scale-in'].join(' ')}>
         <div className="flex items-center gap-2">
           <Scale className="h-4 w-4 shrink-0 text-phantom-accent" />
           <p className="text-xs font-semibold uppercase tracking-[0.06em] text-phantom-subtle">
@@ -384,12 +384,12 @@ export default function DocumentViewer({ citation, onClose }: DocumentViewerProp
     <section
       className={[
         phantomDesign.components.panel,
-        'flex h-full flex-col gap-0 !p-0 overflow-hidden',
+        'flex h-full flex-col gap-0 !p-0 overflow-hidden animate-phantom-fade-in',
       ].join(' ')}
     >
       <ViewerHeader citation={citation} onClose={onClose} />
 
-      <div className="min-h-0 flex-1 overflow-hidden bg-phantom-canvas">
+      <div className="min-h-0 flex-1 overflow-hidden bg-phantom-canvas animate-phantom-fade-in-up">
         {showTextPanel ? (
           <div className="h-full overflow-y-auto overflow-x-hidden">
             <LegalTextPanel citation={citation} />
@@ -415,7 +415,7 @@ function ViewerHeader({
   onClose,
 }: Readonly<{ citation: CitationTarget; onClose: () => void }>): JSX.Element {
   return (
-    <div className="flex shrink-0 items-center justify-between gap-2 border-b border-phantom-line bg-phantom-surface px-4 py-3">
+    <div className="flex shrink-0 items-center justify-between gap-2 border-b border-phantom-line bg-phantom-surface px-4 py-3 animate-phantom-fade-in-down">
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-semibold text-phantom-ink" title={citation.filename}>
           {citation.filename}
@@ -429,9 +429,9 @@ function ViewerHeader({
         type="button"
         onClick={onClose}
         aria-label="Bezárás"
-        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-phantom-control text-phantom-muted transition-phantom hover:bg-phantom-surface-muted hover:text-phantom-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-accent"
+        className="group flex h-8 w-8 shrink-0 items-center justify-center rounded-phantom-control text-phantom-muted transition-phantom duration-phantom-base hover:bg-phantom-surface-muted hover:text-phantom-ink active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-accent"
       >
-        <X className="h-4 w-4" />
+        <X className="h-4 w-4 transition-transform duration-phantom-base group-hover:rotate-90" />
       </button>
     </div>
   )
@@ -439,9 +439,9 @@ function ViewerHeader({
 
 function LoadingSpinner({ label }: Readonly<{ label?: string }>): JSX.Element {
   return (
-    <div className="flex flex-col items-center justify-center gap-2 py-16">
-      <div className="h-6 w-6 animate-spin rounded-full border-2 border-phantom-accent border-t-transparent" />
-      {label && <p className="text-xs text-phantom-subtle">{label}</p>}
+    <div className="flex flex-col items-center justify-center gap-2 py-16 animate-phantom-fade-in">
+      <div className="force-spin h-6 w-6 animate-spin rounded-full border-2 border-phantom-accent border-t-transparent" />
+      {label && <p className="text-xs text-phantom-subtle animate-phantom-pulse-soft">{label}</p>}
     </div>
   )
 }
