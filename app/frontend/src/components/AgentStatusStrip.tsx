@@ -41,7 +41,7 @@ function resolveCompletedStatuses(agentRuns: BackendAgentRunResult[]): Record<Ag
 function cellClasses(status: AgentProgressStatus | BackendAgentRunStatus): string {
   switch (status) {
     case 'running':
-      return 'border-amber-300 bg-amber-50 text-amber-800'
+      return 'border-phantom-severity-medium-border bg-phantom-severity-medium-soft text-phantom-severity-medium-text'
     case 'ok':
       return 'border-phantom-severity-low-border bg-phantom-severity-low-soft text-phantom-severity-low-text'
     case 'timeout':
@@ -101,7 +101,7 @@ export default function AgentStatusStrip(props: AgentStatusStripProps): JSX.Elem
             className={[
               'min-w-0 overflow-hidden rounded-phantom-card border p-2.5 transition-phantom duration-phantom-base animate-phantom-fade-in-up hover:-translate-y-0.5 hover:shadow-phantom-soft',
               cellClasses(status),
-              isActive ? 'ring-2 ring-amber-200 animate-phantom-pulse-soft' : '',
+              isActive ? 'ring-2 ring-phantom-severity-medium-border animate-phantom-pulse-soft' : '',
             ].join(' ')}
           >
             <div className="flex min-w-0 items-center gap-1.5">

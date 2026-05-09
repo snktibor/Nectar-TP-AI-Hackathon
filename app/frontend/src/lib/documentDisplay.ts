@@ -6,35 +6,35 @@ export interface DocumentTypeDisplay {
 export const DOCUMENT_TYPE_DISPLAY: Record<string, DocumentTypeDisplay> = {
   master_file: {
     label: 'Fő Fájl',
-    badgeClassName: 'bg-blue-50 text-blue-700 ring-phantom-line',
+    badgeClassName: 'bg-phantom-accent-soft text-phantom-accent ring-phantom-accent/20',
   },
   local_file: {
     label: 'Helyi Fájl',
-    badgeClassName: 'bg-emerald-50 text-emerald-700 ring-emerald-600/20',
+    badgeClassName: 'bg-phantom-success-soft text-phantom-success-text ring-phantom-success-border',
   },
   benchmark_study: {
     label: 'Benchmark tanulmány',
-    badgeClassName: 'bg-purple-50 text-purple-700 ring-purple-600/20',
+    badgeClassName: 'bg-phantom-severity-medium-soft text-phantom-severity-medium-text ring-phantom-severity-medium-border',
   },
   contract: {
     label: 'Szerződés',
-    badgeClassName: 'bg-amber-50 text-amber-700 ring-amber-600/20',
+    badgeClassName: 'bg-phantom-severity-high-soft text-phantom-severity-high-text ring-phantom-severity-high-border',
   },
   invoice: {
     label: 'Számla',
-    badgeClassName: 'bg-orange-50 text-orange-700 ring-orange-600/20',
+    badgeClassName: 'bg-phantom-surface-muted text-phantom-muted ring-phantom-line',
   },
   financial_statement: {
     label: 'Pénzügyi dokumentum',
-    badgeClassName: 'bg-cyan-50 text-cyan-700 ring-cyan-600/20',
+    badgeClassName: 'bg-phantom-surface-muted text-phantom-muted ring-phantom-line',
   },
   regulatory_document: {
     label: 'Szabályozási dokumentum',
-    badgeClassName: 'bg-rose-50 text-rose-700 ring-rose-600/20',
+    badgeClassName: 'bg-phantom-danger-soft text-phantom-danger-text ring-phantom-danger-border',
   },
   other: {
     label: 'Egyéb dokumentum',
-    badgeClassName: 'bg-gray-50 text-gray-700 ring-gray-600/20',
+    badgeClassName: 'bg-phantom-surface-muted text-phantom-muted ring-phantom-line',
   },
 }
 
@@ -86,4 +86,8 @@ export function isClassificationConfidenceAccepted(confidence: number): boolean 
 export function formatConfidencePercent(confidence: number): number {
   const rounded = Math.round(confidence * 100)
   return Math.min(Math.max(rounded, 0), MAX_DISPLAY_CONFIDENCE_PERCENT)
+}
+
+export function formatAcceptedConfidencePercent(confidence: number): number {
+  return isClassificationConfidenceAccepted(confidence) ? 100 : formatConfidencePercent(confidence)
 }

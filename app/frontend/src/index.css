@@ -4,22 +4,22 @@
 
 @layer base {
 	:root {
-		--phantom-color-canvas: #f4f3ee;
-		--phantom-color-surface: #faf9f6;
-		--phantom-color-surface-muted: #eeeee9;
+		--phantom-color-canvas: #f8fafc;
+		--phantom-color-surface: #ffffff;
+		--phantom-color-surface-muted: #f8fafc;
 		--phantom-color-surface-raised: #ffffff;
-		--phantom-color-ink: #111812;
-		--phantom-color-muted: #3a4a3c;
-		--phantom-color-subtle: #6b7b6d;
-		--phantom-color-line: #ddddd7;
-		--phantom-color-line-strong: #c8c8c1;
+		--phantom-color-ink: #0f172a;
+		--phantom-color-muted: #475569;
+		--phantom-color-subtle: #64748b;
+		--phantom-color-line: #e5e7eb;
+		--phantom-color-line-strong: #cbd5e1;
 		--phantom-color-accent-ch: 255 123 71;
 		--phantom-color-accent: rgb(var(--phantom-color-accent-ch));
 		--phantom-color-accent-hover: #f06535;
 		--phantom-color-accent-pressed: #d95425;
 		--phantom-color-accent-soft: #fff0eb;
 		--phantom-color-focus: #ff7b47;
-		--phantom-color-disabled: #e8e8e2;
+		--phantom-color-disabled: #e2e8f0;
 		--phantom-color-success-soft: #edf7f0;
 		--phantom-color-success-text: #2f6f2d;
 		--phantom-color-success-border: #c7e2cc;
@@ -28,8 +28,8 @@
 		--phantom-color-danger-border: #f0c0c0;
 		--phantom-radius-card: 1rem;
 		--phantom-radius-control: 0.875rem;
-		--phantom-shadow-soft: 0 1px 2px rgb(17 24 18 / 0.04), 0 10px 26px rgb(17 24 18 / 0.08);
-		--phantom-shadow-lift: 0 10px 26px rgb(17 24 18 / 0.12), 0 22px 56px rgb(17 24 18 / 0.12);
+		--phantom-shadow-soft: 0 1px 2px rgb(15 23 42 / 0.04), 0 8px 22px rgb(15 23 42 / 0.06);
+		--phantom-shadow-lift: 0 10px 26px rgb(15 23 42 / 0.1), 0 22px 56px rgb(15 23 42 / 0.1);
 		--phantom-shadow-button: 0 8px 18px rgb(255 123 71 / 0.28);
 	}
 
@@ -49,9 +49,7 @@
 		margin: 0;
 		min-width: 320px;
 		overflow-x: hidden;
-		background:
-			radial-gradient(circle at top center, rgb(255 255 255 / 0.75), transparent 32rem),
-			linear-gradient(180deg, #f7f6f1 0%, var(--phantom-color-canvas) 52%, #eceae5 100%);
+		background: var(--phantom-color-canvas);
 	}
 
 	::selection {
@@ -153,16 +151,14 @@
 		}
 	}
 
-	/* Global motion guardrail: keep hover transforms very subtle across the app. */
-	@media (hover: hover) {
-		*:hover {
-			--tw-translate-x: 0 !important;
-			--tw-translate-y: 0 !important;
-			--tw-rotate: 0 !important;
-			--tw-skew-x: 0 !important;
-			--tw-skew-y: 0 !important;
-			--tw-scale-x: 1 !important;
-			--tw-scale-y: 1 !important;
+	@media (prefers-reduced-motion: reduce) {
+		*,
+		*::before,
+		*::after {
+			scroll-behavior: auto !important;
+			animation-duration: 0.01ms !important;
+			animation-iteration-count: 1 !important;
+			transition-duration: 0.01ms !important;
 		}
 	}
 

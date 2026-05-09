@@ -1,4 +1,5 @@
 import { AlertCircle, BarChart2, ClipboardList, Cpu, DatabaseZap, Sparkles } from 'lucide-react'
+import { phantomDesign } from '../design-system/phantomDesign'
 import { buildExecutiveStats, formatCompactForint } from '../lib/analysisInsights'
 import type { BackendAuditReport, WorkspacePhase } from '../lib/backendAudit'
 
@@ -64,15 +65,15 @@ export default function AnalysisReadyView({
     ]
 
     return (
-      <section className="flex h-full min-h-0 flex-col rounded-2xl border border-gray-100 bg-white p-8 animate-phantom-fade-in">
-        <div className="w-full rounded-2xl border border-phantom-line bg-white p-5 sm:p-6">
+      <section className={[phantomDesign.components.panel, 'flex flex-col'].join(' ')}>
+        <div className={phantomDesign.components.contentCardMuted}>
           <div className="flex items-start gap-3">
-            <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-phantom-accent/20 bg-phantom-accent-soft text-phantom-accent">
+            <span className={phantomDesign.components.iconBadge}>
               <Sparkles className="h-5 w-5" />
             </span>
             <div className="min-w-0">
-              <h2 className="text-xl font-semibold text-gray-900">Analízis eredmény összefoglaló</h2>
-              <p className="mt-2 text-sm leading-6 text-gray-500">
+              <h2 className="text-lg font-semibold leading-7 text-phantom-ink">Analízis eredmény összefoglaló</h2>
+              <p className="mt-2 text-sm leading-6 text-phantom-muted">
                 A kulcs mutatók valós auditadatokból számolva, vezetői áttekintéshez.
               </p>
             </div>
@@ -94,7 +95,7 @@ export default function AnalysisReadyView({
                       <p className="text-xs font-semibold uppercase tracking-[0.05em] opacity-90">{tile.label}</p>
                       <p className="mt-0.5 break-words text-[11px] opacity-80">{tile.hint}</p>
                     </div>
-                    <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-phantom-control border border-white/60 bg-white/70">
+                    <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-phantom-control border border-phantom-line bg-phantom-surface/80">
                       <Icon className="h-4 w-4 opacity-80" />
                     </span>
                   </div>
@@ -111,15 +112,15 @@ export default function AnalysisReadyView({
   }
 
   return (
-    <section className="flex h-full min-h-0 flex-col items-start justify-start rounded-2xl border border-gray-100 bg-white p-8 animate-phantom-fade-in">
-      <div className="w-full rounded-2xl border border-phantom-line bg-[#f8fafc] p-5 sm:p-6">
+    <section className={[phantomDesign.components.panel, 'flex flex-col items-start justify-start'].join(' ')}>
+      <div className={phantomDesign.components.contentCardMuted}>
         <div className="flex items-start gap-3">
-          <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-phantom-accent/20 bg-phantom-accent-soft text-phantom-accent">
+          <span className={phantomDesign.components.iconBadge}>
             <Sparkles className="h-5 w-5" />
           </span>
           <div className="min-w-0">
-            <h2 className="text-xl font-semibold text-gray-900">Analízis után elérhető</h2>
-            <p className="mt-2 text-sm leading-6 text-gray-500">
+            <h2 className="text-lg font-semibold leading-7 text-phantom-ink">Analízis után elérhető</h2>
+            <p className="mt-2 text-sm leading-6 text-phantom-muted">
               Ez a funkció az analízis elkészítése után válik elérhetővé.
             </p>
           </div>

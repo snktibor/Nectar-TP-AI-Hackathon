@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { PDFDownloadLink } from '@react-pdf/renderer'
 import { Check, Download, FileText, Loader2, X } from 'lucide-react'
+import { phantomDesign } from '../../design-system/phantomDesign'
 import type { BackendAuditReport } from '../../lib/backendAudit'
 import ReportTemplate from './ReportTemplate'
 
@@ -79,13 +80,13 @@ export default function ReportGeneratorModal({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-phantom-line"
+        className="w-full max-w-lg overflow-hidden rounded-phantom-card border border-phantom-line bg-phantom-surface shadow-phantom-lift"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="flex items-start justify-between gap-3 border-b border-phantom-line bg-phantom-surface-muted px-6 py-4">
           <div className="flex items-center gap-3">
-            <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-phantom-accent/10 text-phantom-accent">
+            <span className={phantomDesign.components.iconBadge}>
               <FileText className="h-5 w-5" />
             </span>
             <div>
@@ -105,7 +106,7 @@ export default function ReportGeneratorModal({
             onClick={onClose}
             aria-label="Riport ablak bezárása"
             title="Bezárás"
-            className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-phantom-control border border-phantom-line bg-white text-phantom-muted transition-colors hover:border-phantom-accent hover:text-phantom-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus"
+            className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-phantom-control border border-phantom-line bg-phantom-surface text-phantom-muted transition-phantom duration-phantom-base hover:border-phantom-accent hover:text-phantom-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus"
           >
             <X className="h-4 w-4" aria-hidden="true" />
           </button>
@@ -125,8 +126,8 @@ export default function ReportGeneratorModal({
                       isDone
                         ? 'bg-phantom-accent text-white ring-phantom-accent'
                         : isActive
-                        ? 'bg-white text-phantom-accent ring-phantom-accent'
-                        : 'bg-white text-phantom-muted ring-phantom-line',
+                        ? 'bg-phantom-surface text-phantom-accent ring-phantom-accent'
+                        : 'bg-phantom-surface text-phantom-muted ring-phantom-line',
                     ].join(' ')}
                   >
                     {isDone ? (
@@ -164,12 +165,12 @@ export default function ReportGeneratorModal({
         </div>
 
         {/* Footer / CTA */}
-        <div className="border-t border-phantom-line bg-white px-6 py-5">
+        <div className="border-t border-phantom-line bg-phantom-surface px-6 py-5">
           {isReady ? (
             <PDFDownloadLink
               document={documentElement}
               fileName={downloadFilename}
-              className="flex w-full items-center justify-center gap-2 rounded-lg bg-phantom-accent px-5 py-3.5 text-sm font-semibold text-white shadow-sm transition-all hover:-translate-y-px hover:bg-phantom-accent-hover hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-accent focus-visible:ring-offset-2"
+              className={[phantomDesign.components.buttonBase, phantomDesign.components.buttonPrimary, 'flex items-center justify-center gap-2'].join(' ')}
             >
               {({ loading, error }) => {
                 if (error) {
@@ -199,7 +200,7 @@ export default function ReportGeneratorModal({
             <button
               type="button"
               disabled
-              className="flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-lg bg-phantom-surface-muted px-5 py-3.5 text-sm font-semibold text-phantom-muted"
+              className={[phantomDesign.components.buttonBase, 'flex cursor-not-allowed items-center justify-center gap-2 bg-phantom-surface-muted text-phantom-muted'].join(' ')}
             >
               <Loader2 className="h-4 w-4 animate-spin" />
               Riport készítése…

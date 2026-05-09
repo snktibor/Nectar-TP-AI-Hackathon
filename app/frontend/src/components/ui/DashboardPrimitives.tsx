@@ -12,7 +12,7 @@ const toneClasses: Record<Tone, string> = {
   success: 'bg-phantom-success-soft text-phantom-success-text ring-phantom-success-border',
   warning: 'bg-phantom-severity-medium-soft text-phantom-severity-medium-text ring-phantom-severity-medium-border',
   danger: 'bg-phantom-danger-soft text-phantom-danger-text ring-phantom-danger-border',
-  info: 'bg-blue-50 text-blue-700 ring-phantom-line',
+  info: 'bg-phantom-surface-muted text-phantom-muted ring-phantom-line',
 }
 
 const metricIconClasses: Record<Tone, string> = {
@@ -21,7 +21,7 @@ const metricIconClasses: Record<Tone, string> = {
   success: 'bg-phantom-success-soft text-phantom-success-text ring-phantom-success-border',
   warning: 'bg-phantom-severity-medium-soft text-phantom-severity-medium-text ring-phantom-severity-medium-border',
   danger: 'bg-phantom-danger-soft text-phantom-danger-text ring-phantom-danger-border',
-  info: 'bg-blue-50 text-blue-700 ring-phantom-line',
+  info: 'bg-phantom-surface-muted text-phantom-muted ring-phantom-line',
 }
 
 const stepClasses: Record<StepState, string> = {
@@ -108,13 +108,13 @@ export function MetricCard({
   tone = 'neutral',
 }: MetricCardProps): JSX.Element {
   return (
-    <div className="group min-w-0 rounded-phantom-card border border-phantom-line bg-phantom-surface p-4 shadow-sm transition-phantom duration-phantom-base animate-phantom-fade-in-up hover:-translate-y-0.5 hover:border-phantom-accent/30 hover:shadow-phantom-soft">
+    <div className="group min-w-0 rounded-phantom-control border border-phantom-line bg-phantom-surface p-3 transition-phantom duration-phantom-base animate-phantom-fade-in-up hover:border-phantom-accent/30 hover:bg-phantom-accent-soft/20 sm:p-4">
       <div className="flex min-w-0 items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="break-words whitespace-pre-line text-xs font-semibold uppercase tracking-[0.08em] text-phantom-subtle">
             {label}
           </p>
-          <p className="mt-2 break-words text-xl font-semibold leading-7 text-phantom-ink transition-transform duration-phantom-base group-hover:scale-[1.03] sm:text-2xl sm:leading-8 origin-left">{value}</p>
+          <p className="mt-2 break-words text-xl font-semibold leading-7 text-phantom-ink transition-transform duration-phantom-base group-hover:scale-[1.02] sm:text-2xl sm:leading-8 origin-left">{value}</p>
         </div>
         <div
           className={[
@@ -137,8 +137,8 @@ export function EmptyPanel({
   children,
 }: EmptyPanelProps): JSX.Element {
   return (
-    <div className="flex min-h-[26rem] flex-col items-center justify-center rounded-phantom-card border border-dashed border-phantom-line bg-phantom-surface-muted p-8 text-center animate-phantom-fade-in">
-      <div className="flex h-14 w-14 items-center justify-center rounded-phantom-card bg-phantom-surface text-phantom-accent shadow-phantom-soft ring-1 ring-phantom-line animate-phantom-bounce-in">
+    <div className="flex min-h-[13rem] flex-col items-center justify-center rounded-phantom-card border border-dashed border-phantom-line bg-phantom-surface-muted p-6 text-center animate-phantom-fade-in">
+      <div className="flex h-12 w-12 items-center justify-center rounded-phantom-control bg-phantom-surface text-phantom-accent ring-1 ring-phantom-line animate-phantom-bounce-in">
         <Icon className="h-7 w-7 animate-phantom-pulse-soft" />
       </div>
       <h3 className="mt-5 text-lg font-semibold text-phantom-ink">{title}</h3>

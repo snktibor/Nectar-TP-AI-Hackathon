@@ -33,7 +33,7 @@ const headerStatusToneClasses: Record<StatusPillTone, string> = {
   success: 'bg-phantom-success-soft text-phantom-success-text',
   warning: 'bg-phantom-severity-medium-soft text-phantom-severity-medium-text',
   danger: 'bg-phantom-danger-soft text-phantom-danger-text',
-  info: 'bg-blue-50 text-blue-700',
+  info: 'bg-phantom-surface-muted text-phantom-muted',
 }
 
 function getSeverityFilterTone(severity: BackendRiskSeverity): string {
@@ -56,7 +56,6 @@ interface AnalysisWorkspaceProps {
   readonly auditStatus: BackendAuditStatusResponse | null
   readonly auditReport: BackendAuditReport | null
   readonly auditError: string | null
-  readonly onAnalyze: () => void
   readonly sessionId: string
   readonly onCitationClick: (target: CitationTarget) => void
   readonly onCloseReport: () => void
@@ -65,7 +64,7 @@ interface AnalysisWorkspaceProps {
 function resolvePhasePill(phase: WorkspacePhase): { label: string; tone: StatusPillTone } {
   if (phase === 'completed') return { label: 'Analízis kész', tone: 'success' }
   if (phase === 'polling' || phase === 'starting') return { label: 'AI analízis folyamatban', tone: 'accent' }
-  if (phase === 'ready') return { label: 'Analízis indítható', tone: 'info' }
+  if (phase === 'ready') return { label: 'Automatikusan indul', tone: 'info' }
   if (phase === 'blocked') return { label: 'Hiányos feltöltés', tone: 'warning' }
   if (phase === 'failed') return { label: 'Hiba', tone: 'danger' }
   return { label: 'Feltöltésre vár', tone: 'neutral' }
@@ -218,8 +217,8 @@ function FindingsView({
           className={[
             'inline-flex h-7 w-full items-center justify-center whitespace-nowrap rounded-full border px-3 text-xs font-medium transition-phantom duration-phantom-base hover:-translate-y-px hover:shadow-phantom-soft active:translate-y-0 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus',
             severityFilter === null
-              ? 'border-amber-300 bg-phantom-accent-soft text-phantom-accent scale-[1.02] shadow-phantom-soft'
-              : 'border-phantom-line bg-phantom-surface-muted text-phantom-muted hover:border-amber-200 hover:bg-phantom-accent-soft/60 hover:text-phantom-accent',
+              ? 'border-phantom-accent/30 bg-phantom-accent-soft text-phantom-accent scale-[1.02] shadow-phantom-soft'
+              : 'border-phantom-line bg-phantom-surface-muted text-phantom-muted hover:border-phantom-accent/30 hover:bg-phantom-accent-soft/60 hover:text-phantom-accent',
           ].join(' ')}
         >
           Mind
@@ -360,17 +359,17 @@ function AgentRunsView({ report }: Readonly<{ report: BackendAuditReport }>): JS
           {
             label: 'Konzisztencia',
             value: run.consistency_errors.length,
-            className: 'border-amber-200 bg-amber-50 text-amber-800',
+            className: 'border-phantom-accent/20 bg-phantom-accent-soft text-phantom-accent',
           },
           {
             label: 'Benchmark',
             value: run.benchmark_risks.length,
-            className: 'border-orange-200 bg-orange-50 text-orange-800',
+            className: 'border-phantom-severity-high-border bg-phantom-severity-high-soft text-phantom-severity-high-text',
           },
           {
             label: 'Hiányzó',
             value: run.missing_elements.length,
-            className: 'border-gray-200 bg-blue-50 text-blue-800',
+            className: 'border-phantom-line bg-phantom-surface-muted text-phantom-muted',
           },
           {
             label: 'Összesen',
@@ -419,7 +418,7 @@ function AgentRunsView({ report }: Readonly<{ report: BackendAuditReport }>): JS
                 </dl>
               </section>
 
-              <section className="min-w-0 overflow-hidden rounded-phantom-control border border-phantom-line bg-white p-3.5 xl:h-full">
+              <section className="min-w-0 overflow-hidden rounded-phantom-control border border-phantom-line bg-phantom-surface p-3.5 xl:h-full">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-phantom-subtle">
                   Megállapítások
                 </p>
@@ -585,7 +584,6 @@ export default function AnalysisWorkspace({
   auditStatus,
   auditReport,
   auditError,
-  onAnalyze,
   sessionId,
   onCitationClick,
   onCloseReport,
@@ -601,10 +599,10 @@ export default function AnalysisWorkspace({
   ]
 
   return (
-    <section className="h-full min-w-0 overflow-y-auto overflow-x-hidden rounded-2xl border border-gray-100 bg-white p-4 animate-phantom-fade-in [scrollbar-gutter:stable] sm:p-5 lg:p-6">
-      <div className="mb-4 min-h-14 rounded-xl border border-gray-100 bg-slate-50 px-4 py-3 animate-phantom-fade-in-down">
-        <div className="flex min-w-0 flex-wrap items-center justify-between gap-3">
-          <p className="min-w-0 truncate text-sm font-semibold text-gray-900">Analízis</p>
+    <section className={phantomDesign.components.scrollPanel}>
+      <div className={phantomDesign.components.panelHeaderBar}>
+        <div className="flex w-full min-w-0 flex-wrap items-center justify-between gap-3">
+          <p className="min-w-0 truncate text-sm font-semibold text-phantom-ink">Analízis</p>
           <div className="flex min-w-0 flex-wrap items-center gap-2">
             <span
               className={[
@@ -632,57 +630,54 @@ export default function AnalysisWorkspace({
       {phase === 'empty' && (
         <section
           aria-label="Riport előnézet betöltése"
-          className="space-y-4 rounded-xl border border-gray-100 bg-white p-5 animate-pulse"
+          className="space-y-4 rounded-phantom-card border border-phantom-line bg-phantom-surface-muted p-5 animate-pulse"
         >
           <div className="flex items-center justify-between gap-3">
-            <div className="h-5 w-2/5 rounded-md bg-gray-200" />
-            <div className="h-6 w-20 rounded-full bg-gray-200" />
+            <div className="h-5 w-2/5 rounded-md bg-phantom-line" />
+            <div className="h-6 w-20 rounded-full bg-phantom-line" />
           </div>
 
           <div className="space-y-2">
-            <div className="h-3 w-full rounded-md bg-gray-200" />
-            <div className="h-3 w-11/12 rounded-md bg-gray-200" />
-            <div className="h-3 w-3/4 rounded-md bg-gray-200" />
+            <div className="h-3 w-full rounded-md bg-phantom-line" />
+            <div className="h-3 w-11/12 rounded-md bg-phantom-line" />
+            <div className="h-3 w-3/4 rounded-md bg-phantom-line" />
           </div>
 
           <div className="grid grid-cols-3 gap-2 pt-2">
-            <div className="h-16 rounded-md bg-gray-200" />
-            <div className="h-16 rounded-md bg-gray-200" />
-            <div className="h-16 rounded-md bg-gray-200" />
+            <div className="h-16 rounded-md bg-phantom-line" />
+            <div className="h-16 rounded-md bg-phantom-line" />
+            <div className="h-16 rounded-md bg-phantom-line" />
           </div>
 
-          <div className="flex h-40 items-end gap-2 rounded-md bg-gray-100 p-3">
-            <div className="h-1/3 flex-1 rounded-md bg-gray-200" />
-            <div className="h-2/3 flex-1 rounded-md bg-gray-200" />
-            <div className="h-1/2 flex-1 rounded-md bg-gray-200" />
-            <div className="h-3/4 flex-1 rounded-md bg-gray-200" />
-            <div className="h-2/5 flex-1 rounded-md bg-gray-200" />
-            <div className="h-4/5 flex-1 rounded-md bg-gray-200" />
+          <div className="flex h-40 items-end gap-2 rounded-md bg-phantom-surface p-3">
+            <div className="h-1/3 flex-1 rounded-md bg-phantom-line" />
+            <div className="h-2/3 flex-1 rounded-md bg-phantom-line" />
+            <div className="h-1/2 flex-1 rounded-md bg-phantom-line" />
+            <div className="h-3/4 flex-1 rounded-md bg-phantom-line" />
+            <div className="h-2/5 flex-1 rounded-md bg-phantom-line" />
+            <div className="h-4/5 flex-1 rounded-md bg-phantom-line" />
           </div>
 
           <div className="space-y-2 pt-1">
-            <div className="h-3 w-1/3 rounded-md bg-gray-200" />
-            <div className="h-3 w-2/3 rounded-md bg-gray-200" />
+            <div className="h-3 w-1/3 rounded-md bg-phantom-line" />
+            <div className="h-3 w-2/3 rounded-md bg-phantom-line" />
           </div>
         </section>
       )}
 
       {phase === 'ready' && (
-        <div className="rounded-phantom-card border border-phantom-line bg-phantom-surface p-4 animate-phantom-fade-in-up">
-          <button
-            type="button"
-            onClick={onAnalyze}
-            className={[
-              phantomDesign.components.buttonBase,
-              phantomDesign.components.buttonPrimary,
-              'group/analyze h-10 min-h-8 w-full px-3 py-1.5 text-xs shadow-phantom-soft hover:scale-[1.02] hover:shadow-phantom-lift active:scale-95 sm:w-auto',
-            ].join(' ')}
-          >
-            <span className="inline-flex items-center gap-2">
-              <Sparkles className="h-4 w-4 transition-transform duration-phantom-base group-hover/analyze:rotate-12 group-hover/analyze:scale-125" />
-              Analízis indítása
+        <div className="rounded-phantom-card border border-phantom-line bg-phantom-surface-muted p-4 animate-phantom-fade-in-up">
+          <div className="flex items-start gap-3 text-phantom-ink">
+            <span className={phantomDesign.components.iconBadge}>
+              <Sparkles className="h-5 w-5 animate-phantom-pulse-soft" />
             </span>
-          </button>
+            <div className="min-w-0">
+              <p className="text-sm font-semibold">Analízis automatikusan indul</p>
+              <p className="mt-1 text-xs leading-5 text-phantom-muted">
+                Az 5 kötelező dokumentum elfogadva, az audit indítása folyamatban.
+              </p>
+            </div>
+          </div>
         </div>
       )}
 
@@ -700,7 +695,7 @@ export default function AnalysisWorkspace({
       {(phase === 'starting' || phase === 'polling') && <ProgressView status={auditStatus} />}
 
       {phase === 'failed' && (
-        <div className="rounded-phantom-card border border-rose-200 bg-rose-50 p-4 text-rose-900 animate-phantom-fade-in-down">
+        <div className="rounded-phantom-card border border-phantom-danger-border bg-phantom-danger-soft p-4 text-phantom-danger-text animate-phantom-fade-in-down">
           <p className="text-sm font-semibold">Audit hiba</p>
           <p className="mt-1 text-sm">{auditError ?? 'Ismeretlen hiba történt.'}</p>
         </div>
@@ -723,10 +718,10 @@ export default function AnalysisWorkspace({
                 aria-selected={activeTab === tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={[
-                  'relative h-7 shrink-0 whitespace-nowrap rounded-phantom-control px-3 text-xs font-medium transition-phantom duration-phantom-base hover:-translate-y-px hover:shadow-phantom-soft active:translate-y-0 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus',
+                  phantomDesign.components.analysisSubTabBase,
                   activeTab === tab.id
-                    ? 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-gray-300 shadow-phantom-soft'
-                    : 'bg-phantom-surface-muted text-phantom-muted hover:bg-blue-50/60 hover:text-blue-700',
+                    ? phantomDesign.components.analysisSubTabActive
+                    : phantomDesign.components.analysisSubTabIdle,
                 ].join(' ')}
               >
                 {tab.label}

@@ -128,7 +128,7 @@ export default function App(): JSX.Element {
   const selectedDocType = useMemo<BackendDocTypeScope | null>(() => {
     if (selectedDocId === null) return null
     const doc = ingestedDocuments.find((d) => d.filename === selectedDocId)
-    if (!doc || doc.status !== 'success') return null
+    if (doc?.status !== 'success') return null
     return doc.detected_type as BackendDocTypeScope
   }, [selectedDocId, ingestedDocuments])
 
@@ -254,11 +254,6 @@ export default function App(): JSX.Element {
     }
   }
 
-  async function handleAnalyze(): Promise<void> {
-    if (!hasReadyAuditCoverage) return
-    await startAudit()
-  }
-
   function handleIngestComplete(documents: IngestedDocument[]): void {
     clearPolling()
     setIngestedDocuments(documents)
@@ -267,7 +262,7 @@ export default function App(): JSX.Element {
     setSelectedDocId(null)
 
     if (hasCompleteRequiredCoverage(documents)) {
-      setWorkspacePhase('ready')
+      void startAudit()
       return
     }
 
@@ -297,7 +292,13 @@ export default function App(): JSX.Element {
   function handleCloseGlobalReport(): void {
     if (workspacePhase === 'failed') {
       clearAuditState()
-      setWorkspacePhase(hasReadyAuditCoverage ? 'ready' : ingestedDocuments.length > 0 ? 'blocked' : 'empty')
+      let nextPhase: WorkspacePhase = 'empty'
+      if (hasReadyAuditCoverage) {
+        nextPhase = 'ready'
+      } else if (ingestedDocuments.length > 0) {
+        nextPhase = 'blocked'
+      }
+      setWorkspacePhase(nextPhase)
     }
   }
 
@@ -378,7 +379,6 @@ export default function App(): JSX.Element {
         auditStatus={auditStatus}
         auditReport={auditReport}
         auditError={auditError}
-        onAnalyze={() => void handleAnalyze()}
         sessionId={SESSION_ID}
         onCitationClick={handleCitationClick}
         onCloseReport={handleCloseGlobalReport}
