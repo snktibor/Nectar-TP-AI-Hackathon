@@ -1,9 +1,9 @@
 ---
-description: 'Backend standards for REDLINE PHANTOM FastAPI, ingest, rulesets, and audit pipeline work.'
+description: 'Backend standards for NECTAR TP FastAPI, ingest, rulesets, and audit pipeline work.'
 applyTo: 'app/backend/**/*.py, app/backend/**/*.json, app/backend/requirements.txt'
 ---
 
-# Backend Instructions — REDLINE PHANTOM
+# Backend Instructions — NECTAR TP
 
 ## Project Context
 Transfer pricing documentation consistency auditor for PwC Hungary AI Hackathon 2026.
@@ -26,6 +26,7 @@ Multi-agent system analyzing Master File, Local File, contracts, invoices, and b
 ## Rulesets (Deterministic Baseline)
 These JSON rulesets MUST be used as the single source of truth for classification and scoring:
 - `document_classification.json` — implemented document type identification (master_file, local_file, contract, invoice, benchmark, etc.), including filename overrides for generated/system reports
+- `document_classification.json` — implemented document type identification (master_file, local_file, contract, invoice, benchmark, etc.), including strict confidence thresholding (low-confidence fallback to `other`) and filename overrides for generated/system reports
 - `tp_method_classification.json` — planned TP method detection (CUP, RPM, CPM, TNMM, PSM)
 - `severity_scoring.json` — planned finding severity levels (critical/high/medium/low)
 - `nav_risk_categories.json` — planned NAV audit triggers and penalty categories
@@ -34,6 +35,7 @@ These JSON rulesets MUST be used as the single source of truth for classificatio
 - Full type hints on all public interfaces. Pydantic models for all request/response DTOs.
 - No `dict` or `Any` in public API contracts.
 - Business logic in services, not route handlers.
+- Classification confidence gating must be deterministic and strict; low-confidence required-type guesses must not pass readiness.
 - Every finding MUST include a source reference (`doc_id:page:paragraph`).
 - Every finding MUST include a severity level and confidence score.
 - Ruff for linting and formatting. Auto-fix on save.

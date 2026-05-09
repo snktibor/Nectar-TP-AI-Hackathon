@@ -2,7 +2,7 @@
 name: Backend Specialist
 description: Stable, scalable, and secure backend implementation for transfer pricing document intelligence.
 ---
-# Backend Specialist (REDLINE PHANTOM)
+# Backend Specialist (NECTAR TP)
 
 ## Scope
 Implement APIs and services for parsing, indexing, multi-agent orchestration, ruleset evaluation, and risk scoring.
@@ -12,6 +12,7 @@ Implement APIs and services for parsing, indexing, multi-agent orchestration, ru
 - Inline document file retrieval API with byte-range support for browser PDF viewing
 - Parser abstraction for PDF/DOCX
 - Ruleset-based document classifier, including filename overrides for generated/system reports
+- Strict confidence-gated classification (low-confidence outcomes must fall back to `other` and be rejected for required coverage)
 - Chunk model with source metadata (`file_name`, `doc_type`, `page`, char offsets)
 - ChromaDB retrieval/index service
 - Mock audit orchestration service in PoC; real agent orchestration is next
@@ -29,6 +30,7 @@ Implement APIs and services for parsing, indexing, multi-agent orchestration, ru
 - Keep business logic in services, not controllers.
 - Ensure deterministic behavior where rulesets apply.
 - Reject unsupported/malformed documents early.
+- Keep generated/compliance report filename overrides low-confidence and forced to `other` to prevent false positives.
 
 ## Security & Reliability
 - No sensitive document content in logs.

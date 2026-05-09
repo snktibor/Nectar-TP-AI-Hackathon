@@ -2,16 +2,11 @@ import { useEffect, useMemo, useState } from 'react'
 import { PDFDownloadLink } from '@react-pdf/renderer'
 import { Check, Download, FileText, Loader2, X } from 'lucide-react'
 import type { BackendAuditReport } from '../../lib/backendAudit'
-import ReportTemplate, {
-  type EntityGraph,
-  type TaxVerificationResult,
-} from './ReportTemplate'
+import ReportTemplate from './ReportTemplate'
 
 interface ReportGeneratorModalProps {
   readonly open: boolean
   readonly report: BackendAuditReport
-  readonly entityGraph?: EntityGraph
-  readonly taxVerificationResults?: ReadonlyArray<TaxVerificationResult>
   readonly onClose: () => void
 }
 
@@ -31,8 +26,6 @@ const STEPS: ReadonlyArray<BuildStep> = [
 export default function ReportGeneratorModal({
   open,
   report,
-  entityGraph,
-  taxVerificationResults,
   onClose,
 }: ReportGeneratorModalProps): JSX.Element | null {
   const [completedCount, setCompletedCount] = useState(0)
@@ -49,7 +42,7 @@ export default function ReportGeneratorModal({
 
     STEPS.forEach((step, idx) => {
       elapsed += step.durationMs
-      const handle = window.setTimeout(() => {
+      const handle = globalThis.setTimeout(() => {
         if (cancelled) return
         setCompletedCount(idx + 1)
       }, elapsed)
@@ -58,7 +51,7 @@ export default function ReportGeneratorModal({
 
     return () => {
       cancelled = true
-      timeouts.forEach((h) => window.clearTimeout(h))
+      timeouts.forEach((h) => globalThis.clearTimeout(h))
     }
   }, [open])
 
@@ -67,18 +60,12 @@ export default function ReportGeneratorModal({
   const downloadFilename = useMemo(() => {
     const datePart = (report.generated_at || new Date().toISOString()).slice(0, 10)
     const sessionPart = report.session_id.slice(0, 8)
-    return `RedlinePhantom_TP_Report_${sessionPart}_${datePart}.pdf`
+    return `NectarTP_Report_${sessionPart}_${datePart}.pdf`
   }, [report.generated_at, report.session_id])
 
   const documentElement = useMemo(
-    () => (
-      <ReportTemplate
-        report={report}
-        entityGraph={entityGraph}
-        taxVerificationResults={taxVerificationResults}
-      />
-    ),
-    [report, entityGraph, taxVerificationResults],
+    () => <ReportTemplate report={report} />,
+    [report],
   )
 
   if (!open) return null
@@ -116,10 +103,11 @@ export default function ReportGeneratorModal({
           <button
             type="button"
             onClick={onClose}
-            aria-label="Bezárás"
-            className="rounded-md p-1 text-phantom-muted transition-colors hover:bg-white hover:text-phantom-ink"
+            aria-label="Riport ablak bezárása"
+            title="Bezárás"
+            className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-phantom-control border border-phantom-line bg-white text-phantom-muted transition-colors hover:border-phantom-accent hover:text-phantom-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus"
           >
-            <X className="h-5 w-5" />
+            <X className="h-4 w-4" aria-hidden="true" />
           </button>
         </div>
 

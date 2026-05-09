@@ -1,8 +1,8 @@
 ---
 name: Coding Principles
-description: SOLID, DRY, maintainability, and explainability guardrails for REDLINE PHANTOM.
+description: SOLID, DRY, maintainability, and explainability guardrails for NECTAR TP.
 ---
-# Coding Principles (REDLINE PHANTOM)
+# Coding Principles (NECTAR TP)
 
 ## Design Priorities
 1. Explainable outputs over opaque heuristics.

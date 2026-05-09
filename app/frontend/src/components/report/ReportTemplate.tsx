@@ -17,37 +17,8 @@ import type {
 // Keep these here so callers can pass them through without backend changes.
 // ---------------------------------------------------------------------------
 
-export interface EntityNode {
-  readonly id: string
-  readonly name: string
-  readonly jurisdiction?: string
-  readonly tax_id?: string
-}
-
-export interface EntityEdge {
-  readonly from: string
-  readonly to: string
-  readonly relation: string
-}
-
-export interface EntityGraph {
-  readonly nodes: ReadonlyArray<EntityNode>
-  readonly edges: ReadonlyArray<EntityEdge>
-}
-
-export interface TaxVerificationResult {
-  readonly entity_name: string
-  readonly tax_id: string
-  readonly jurisdiction: string
-  readonly source: 'VIES' | 'NAV' | 'OTHER'
-  readonly status: 'VALID' | 'INVALID' | 'UNKNOWN'
-  readonly checked_at?: string
-}
-
 export interface ReportTemplateProps {
   readonly report: BackendAuditReport
-  readonly entityGraph?: EntityGraph
-  readonly taxVerificationResults?: ReadonlyArray<TaxVerificationResult>
 }
 
 // ---------------------------------------------------------------------------
@@ -334,24 +305,6 @@ const styles = StyleSheet.create({
     fontSize: 9,
     color: INK,
   },
-  // --- Entities ---
-  entityRow: {
-    flexDirection: 'row',
-    paddingVertical: 8,
-    paddingHorizontal: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: LINE,
-  },
-  entityName: { flex: 2, fontFamily: 'Roboto', fontWeight: 'bold', fontSize: 10, color: INK },
-  entityMeta: { flex: 2, fontSize: 9, color: INK_MUTED },
-  entityStatus: {
-    flex: 1,
-    fontFamily: 'Roboto',
-    fontWeight: 'bold',
-    fontSize: 9,
-    textAlign: 'right',
-    letterSpacing: 0.5,
-  },
   // --- Footer ---
   pageFooter: {
     position: 'absolute',
@@ -419,7 +372,7 @@ function SectionHeader({ index, title }: { index: string; title: string }) {
 function PageFooter() {
   return (
     <View style={styles.pageFooter} fixed>
-      <Text>REDLINE PHANTOM · Transzferár megfelelőségi audit</Text>
+      <Text>NECTAR TP · Transzferár megfelelőségi audit</Text>
       <Text
         render={({ pageNumber, totalPages }) => `${pageNumber}. oldal / ${totalPages}`}
       />
@@ -469,15 +422,10 @@ function FindingItem({
 // Main template
 // ---------------------------------------------------------------------------
 
-export default function ReportTemplate({
-  report,
-  entityGraph,
-  taxVerificationResults,
-}: ReportTemplateProps): JSX.Element {
+export default function ReportTemplate({ report }: ReportTemplateProps): JSX.Element {
   const counts = countBySeverity(report.consistency_errors)
   const generatedAt = formatDate(report.generated_at)
 
-  // Pre-sort consistency errors by severity (Critical → Low) for the report.
   const severityRank: Record<BackendRiskSeverity, number> = {
     critical: 0,
     high: 1,
@@ -488,15 +436,10 @@ export default function ReportTemplate({
     (a, b) => severityRank[a.severity] - severityRank[b.severity],
   )
 
-  const entities = entityGraph?.nodes ?? []
-  const verificationByName = new Map(
-    (taxVerificationResults ?? []).map((v) => [v.entity_name.toLowerCase(), v]),
-  )
-
   return (
     <Document
       title="Transzferár Megfelelőségi Jelentés"
-      author="REDLINE PHANTOM"
+      author="NECTAR TP"
       subject="Transzferár megfelelőségi audit"
     >
       {/* ---------- Cover ---------- */}
@@ -538,7 +481,7 @@ export default function ReportTemplate({
         </View>
 
         <View style={styles.coverFooter}>
-          <Text>REDLINE PHANTOM · Multi-ügynökös TP Auditor</Text>
+          <Text>NECTAR TP · Multi-ügynökös TP Auditor</Text>
           <Text>Készítette: Kerek Barackok · PwC Magyarország AI Hackathon 2026</Text>
         </View>
       </Page>
@@ -606,50 +549,6 @@ export default function ReportTemplate({
           sortedFindings.map((f, idx) => (
             <FindingItem key={f.error_id} finding={f} index={idx} />
           ))
-        )}
-
-        {/* 4. Entity Network */}
-        <SectionHeader index="04" title="Entitás hálózat" />
-        {entities.length === 0 ? (
-          <Text style={styles.empty}>
-            Nincs entitás gráf csatolva ehhez a jelentéshez.
-          </Text>
-        ) : (
-          <View style={[styles.table, { borderLeftWidth: 0, borderRightWidth: 0 }]}>
-            <View style={styles.tableHeaderRow}>
-              <Text style={[styles.th, { flex: 2 }]}>Entitás</Text>
-              <Text style={[styles.th, { flex: 2 }]}>Joghatóság · Adószám</Text>
-              <Text style={[styles.th, styles.tdRight]}>Ellenőrzés</Text>
-            </View>
-            {entities.map((node) => {
-              const verification = verificationByName.get(node.name.toLowerCase())
-              const status = verification?.status ?? 'UNKNOWN'
-              const statusLabel =
-                status === 'VALID'
-                  ? 'ÉRVÉNYES'
-                  : status === 'INVALID'
-                  ? 'ÉRVÉNYTELEN'
-                  : 'ISMERETLEN'
-              const statusColor =
-                status === 'VALID'
-                  ? SEVERITY_COLOR.low
-                  : status === 'INVALID'
-                  ? SEVERITY_COLOR.critical
-                  : INK_MUTED
-              return (
-                <View key={node.id} style={styles.entityRow}>
-                  <Text style={styles.entityName}>{node.name}</Text>
-                  <Text style={styles.entityMeta}>
-                    {(node.jurisdiction ?? '—') + ' · ' + (node.tax_id ?? '—')}
-                  </Text>
-                  <Text style={[styles.entityStatus, { color: statusColor }]}>
-                    {statusLabel}
-                    {verification ? ` · ${verification.source}` : ''}
-                  </Text>
-                </View>
-              )
-            })}
-          </View>
         )}
 
         <PageFooter />

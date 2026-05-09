@@ -358,12 +358,13 @@ function PdfViewer({
   // After PDF loads, extract bookmark outline and resolve the real target page
   useEffect(() => {
     const pdf = pdfProxyRef.current
-    if (!pdf || numPages === 0 || !citation.label) return
+    const label = citation.label
+    if (!pdf || numPages === 0 || !label) return
 
     outlineCancelRef.current = false
     buildOutlinePageMap(pdf).then((map) => {
       if (outlineCancelRef.current) return
-      const matched = matchLabelToOutlinePage(citation.label!, map)
+      const matched = matchLabelToOutlinePage(label, map)
       if (matched !== null) {
         setOutlinePage0(matched)
         onPageResolved?.(matched)
@@ -397,7 +398,7 @@ function PdfViewer({
 
       attempts += 1
       timeoutIds.push(
-        window.setTimeout(() => {
+        globalThis.setTimeout(() => {
           requestAnimationFrame(tryHighlight)
         }, HIGHLIGHT_RETRY_DELAY_MS),
       )
@@ -406,7 +407,7 @@ function PdfViewer({
     requestAnimationFrame(tryHighlight)
 
     return () => {
-      timeoutIds.forEach((timeoutId) => window.clearTimeout(timeoutId))
+      timeoutIds.forEach((timeoutId) => globalThis.clearTimeout(timeoutId))
     }
   }, [targetPageRendered, clampedPage0, citation])
 
@@ -591,10 +592,11 @@ function ViewerHeader({
       <button
         type="button"
         onClick={onClose}
-        aria-label="Vissza a globális nézethez"
-        className="inline-flex h-8 shrink-0 items-center justify-center rounded-phantom-control border border-phantom-line bg-phantom-surface-muted px-2.5 text-xs font-semibold text-phantom-muted transition-phantom hover:border-phantom-accent hover:text-phantom-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-accent"
+        aria-label="PDF nézet bezárása"
+        title="Bezárás"
+        className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-phantom-control border border-phantom-line bg-phantom-surface-muted text-phantom-muted transition-phantom hover:border-phantom-accent hover:text-phantom-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-accent"
       >
-        Vissza
+        <X className="h-4 w-4" aria-hidden="true" />
       </button>
     </div>
   )

@@ -1,4 +1,4 @@
-# Backend Layer — REDLINE PHANTOM
+# Backend Layer — NECTAR TP
 
 ## What This Is
 
@@ -24,6 +24,8 @@ Python FastAPI backend for a transfer pricing documentation consistency auditor.
 - Every finding MUST have source references (`doc_id:page:paragraph`).
 - Severity and risk scores MUST be computed from `rulesets/severity_scoring.json` weights.
 - Document classification MUST use `rulesets/document_classification.json` signals, including filename override rules for generated/system reports.
+- Classification confidence is strict: low-confidence matches must fall back to `other` and must not be treated as required-category-ready.
+- Generated/compliance report filename overrides must force `other` with low confidence to avoid false-ready ingest states.
 - TP method identification MUST use `rulesets/tp_method_classification.json` once that ruleset is implemented.
 - NAV risk categories MUST use `rulesets/nav_risk_categories.json` once that ruleset is implemented.
 - Full type hints everywhere. No `Any` or bare `dict` in public APIs.

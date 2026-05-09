@@ -1,9 +1,9 @@
 ---
-description: 'Frontend standards for REDLINE PHANTOM React, Vite, TypeScript, and Tailwind UI work.'
+description: 'Frontend standards for NECTAR TP React, Vite, TypeScript, and Tailwind UI work.'
 applyTo: 'app/frontend/**/*.{ts,tsx,css,js,json}, app/frontend/tailwind.config.js, app/frontend/postcss.config.js'
 ---
 
-# Frontend Instructions — REDLINE PHANTOM
+# Frontend Instructions — NECTAR TP
 
 ## Project Context
 Transfer pricing documentation consistency auditor for PwC Hungary AI Hackathon 2026.
@@ -27,6 +27,7 @@ The frontend provides the document upload workflow and risk dashboard for review
 - Keep shared document display helpers in `src/lib/documentDisplay.ts` and backend audit DTO/helpers in `src/lib/backendAudit.ts`.
 - Active render path is `src/App.tsx` → `src/components/DashboardShell.tsx` → `src/components/DocumentIngestor.tsx` + `src/components/AnalysisWorkspace.tsx`.
 - Sidebar menu in `DashboardShell` is intentionally local-state only and must not navigate until a routing contract is approved.
+- `DashboardShell` keeps `Analízis` and `Riport` as separate menu points with dedicated left-panel views.
 - Legacy components that are not on the active render path must not be treated as UI source of truth.
 
 ## Core Screens
@@ -35,10 +36,13 @@ The frontend provides the document upload workflow and risk dashboard for review
 - Drag-and-drop or file picker for PDF/DOCX files.
 - Enforce max 5 selected files and allow ingest only when exactly 5 files are present.
 - Validate file type, duplicate filenames, and 50 MB per-file limit in the UI before sending.
+- Treat generated TP report files (for example `*TP_Report*`, `*Megfelelosegi_Jelentes*`) as invalid ingest sources and force replacement.
+- Treat required-type classifications below 80% confidence as blocked ingest outcomes and force replacement before audit readiness.
 - Support targeted and bulk replacement when the processed set has missing required categories, failed files, or duplicated required categories.
 - Call `POST /api/v1/documents/ingest` and render backend classification, confidence, page count, chunk count, and file size.
 - Require coverage of `master_file`, `local_file`, `contract`, `benchmark_study`, and `invoice` in the processed result set.
 - If coverage is incomplete, show failed files with reasons and list missing required categories.
+- Audit start readiness requires complete required coverage and accepted classification confidence for all required documents.
 - Provide done-state recovery action `Fájlok újrafeltöltése` that resets upload state and reopens the file picker.
 
 ### 2. Analysis Workspace
@@ -46,6 +50,7 @@ The frontend provides the document upload workflow and risk dashboard for review
 - Analyze CTA calls `POST /api/v1/audits/start` with the active session.
 - Poll `GET /api/v1/audits/status/{audit_task_id}` until terminal state.
 - On completed status, fetch `GET /api/v1/audits/results/{audit_task_id}` and render report data.
+- Left analysis panel shows a dynamic 2-column × 3-row executive stats grid after completion (estimated NAV exposure, findings totals, benchmark overshoot, critical count, successful agent runs, document coverage).
 - Keep state transitions explicit via `empty`, `ready`, `starting`, `polling`, `completed`, and `failed` phases.
 
 ### 3. Analysis Progress
@@ -61,7 +66,8 @@ The frontend provides the document upload workflow and risk dashboard for review
 ### 5. Dashboard Shell
 - Left sidebar rail must protect long labels with truncation and `min-w-0` overflow-safe layout.
 - Non-active menu items keep subtle colored layer styling and hover feedback.
-- Settings and profile remain in the lower sidebar block.
+- `Analízis` and `Riport` are separate tabs and both preserve existing internal card styling.
+- Lower sidebar block currently contains the profile card only; do not reintroduce settings without an approved interaction contract.
 
 ### 6. Document Evidence Viewer
 - Open uploaded document and legal citations inside `DocumentViewer` through `ResultsPanel`.
@@ -79,6 +85,7 @@ The frontend provides the document upload workflow and risk dashboard for review
 - Loading, empty, success, and error states for every async operation.
 - Keyboard navigable finding list.
 - Contrast-safe severity indicators (WCAG AA minimum).
+- Hungarian UI labels should use `Analízis` terminology consistently for analysis workflow states and actions.
 - Bilingual support ready (HU/EN labels exist in rulesets).
 - Base visual language is a clean white dashboard with soft pastel accents suitable for tax analyst workflows.
 - Use a 4px spacing rhythm: 4, 8, 12, 16, 20, 24, 32, 40, 48.

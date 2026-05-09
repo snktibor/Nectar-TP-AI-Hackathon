@@ -1,4 +1,4 @@
-# Frontend Layer — REDLINE PHANTOM
+# Frontend Layer — NECTAR TP
 
 ## What This Is
 
@@ -17,14 +17,18 @@ React + Vite + TypeScript frontend for a transfer pricing documentation consiste
 ## Key Screens
 
 1. **Split Workspace** — bal oldali ingest panel és jobb oldali audit/riport munkaterület
-2. **Dashboard Shell** — bal navigációs rail lokális kattintható menüállapotokkal, alul beállítások + profil kártya
+2. **Dashboard Shell** — bal navigációs rail lokális kattintható menüállapotokkal, alul profil kártya
+	- Az `Analízis` és `Riport` külön menüpontok: az analízis összefoglaló és a riport készítés elkülönített bal panel nézetben jelenik meg.
 3. **Document Ingestor** — drag-drop batch PDF/DOCX feltöltés, maximum 5 fájl, ingest csak pontosan 5 fájl esetén, plusz automatikus pótlás/csere hiányzó vagy duplikált kötelező kategóriákhoz
+	- Generált TP-riport fájlok (`*TP_Report*`, `*Megfelelosegi_Jelentes*`) nem tekinthetők forrásdokumentumnak, mindig cserélni kell őket.
+	- A kötelező kategóriába sorolt, de 80% alatti klasszifikációs bizalmú dokumentumok blokkoltak: kötelező a fájlcsere, és ilyen készlettel az audit nem indítható.
 4. **Classification Validation** — kötelező kategóriák ellenőrzése (`master_file`, `local_file`, `contract`, `benchmark_study`, `invoice`) részletes hibaokokkal és cserélhető fájlok állapotkezelésével
 5. **Ingest Progress + Results** — explicit loading/success/error/warning állapotok, per-dokumentum klasszifikációs kártyák
 6. **Re-upload Flow** — kész állapotban `Fájlok újrafeltöltése` visszaállítja a feltöltési állapotot és újranyitja a file pickert
 7. **Analysis Workspace** — backend audit indítás, státusz polling, majd riport betöltés (`start` → `status` → `results`)
 8. **Completed Report Tabs** — megállapítások, ügynök futások, telemetria
-9. **Document Evidence Viewer** — PDF hivatkozások céloldal-first renderrel, gyors oldalbetöltéssel és best-effort quote highlighttal
+9. **Executive Summary Grid** — a bal oldali Analízis panel a kész futás után dinamikus 2x3 statisztika-gridet jelenít meg valós report adatokból (becsült NAV-kitettség, összes finding, benchmark túllépés, kritikus findingok, sikeres ágensfutások, dokumentum lefedettség)
+10. **Document Evidence Viewer** — PDF hivatkozások céloldal-first renderrel, gyors oldalbetöltéssel és best-effort quote highlighttal
 
 ## Critical Rules
 
@@ -41,7 +45,9 @@ React + Vite + TypeScript frontend for a transfer pricing documentation consiste
 - Current active ingest contract is `POST /api/v1/documents/ingest` returning `IngestResponse`.
 - Audit contracts are actively wired in `src/App.tsx`: `POST /api/v1/audits/start`, `GET /api/v1/audits/status/{id}`, and `GET /api/v1/audits/results/{id}`.
 - Sidebar menu interactions are intentionally local-state only; they must not navigate until routing specs are approved.
+- Keep `Analízis` and `Riport` as separate menu states while preserving existing internal card design tokens in both views.
 - Keep the 5-document ingest rule and required-category set synchronized with frontend validation and backend DTO expectations.
+- Audit indítás csak teljes kötelező lefedettség + minimum 80% klasszifikációs bizalom mellett engedélyezett.
 
 ## Current Frontend File State (2026-05-09)
 
@@ -60,6 +66,7 @@ React + Vite + TypeScript frontend for a transfer pricing documentation consiste
 - Severity is always visually dominant (color + icon + label).
 - Evidence is one click from any finding.
 - Keyboard navigable. WCAG AA contrast.
+- Hungarian UI labels use `Analízis` wording consistently in workflow states and actions.
 - Bilingual ready (HU/EN labels exist in rulesets).
 - Base visual style is a clean white dashboard with soft pastel accents.
 - Responsive behavior must hold down to 320px without page-level horizontal overflow.

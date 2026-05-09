@@ -13,8 +13,12 @@ import {
   X,
 } from 'lucide-react'
 import {
+  formatConfidencePercent,
   formatBytes,
   getDocumentTypeDisplay,
+  isClassificationConfidenceAccepted,
+  isGeneratedReportFilename,
+  MIN_ACCEPTED_CLASSIFICATION_CONFIDENCE,
   isSupportedDocument,
 } from '../lib/documentDisplay'
 import type { ApiResponse, IngestedDocument, IngestResponse } from '../types/api'
@@ -28,6 +32,9 @@ const MAX_FILES = 5
 const FILE_INPUT_ID = 'document-ingest-files'
 const DUPLICATE_FILE_MESSAGE = 'Ez a fájl már ki van választva, nem töltöttük fel újra.'
 const DUPLICATE_MESSAGE_DISMISS_MS = 3000
+const MIN_CLASSIFICATION_CONFIDENCE_PERCENT = Math.round(
+  MIN_ACCEPTED_CLASSIFICATION_CONFIDENCE * 100,
+)
 
 interface DocumentIngestorProps {
   readonly sessionId: string
@@ -65,6 +72,16 @@ type ClassificationIssue =
       requiredType: RequiredDocumentType
     }
   | {
+      kind: 'file_generated_report'
+      filename: string
+    }
+  | {
+      kind: 'file_low_confidence'
+      filename: string
+      detectedType: RequiredDocumentType
+      confidence: number
+    }
+  | {
       kind: 'file_duplicate_required'
       filename: string
       detectedType: RequiredDocumentType
@@ -91,75 +108,139 @@ function isRequiredDocumentType(value: string): value is RequiredDocumentType {
   return REQUIRED_DOCUMENT_TYPES.includes(value as RequiredDocumentType)
 }
 
-function buildClassificationIssues(documents: IngestedDocument[]): ClassificationIssue[] {
-  const issues: ClassificationIssue[] = []
+interface RequiredTypeSummary {
+  readonly matchedTypeCounts: Map<RequiredDocumentType, number>
+  readonly filenamesByType: Map<RequiredDocumentType, string[]>
+}
+
+interface SelectedFileMerge {
+  readonly files: File[]
+  readonly duplicateFileDetected: boolean
+}
+
+interface AutoFillReplacementPlan {
+  readonly nextFiles: File[]
+  readonly replacedTargetFilenames: string[]
+  readonly remainingReplacementFilenames: string[]
+  readonly duplicateFileDetected: boolean
+  readonly replacementCount: number
+}
+
+function clearResolvedFileIssues(
+  issues: readonly ClassificationIssue[],
+  resolvedFilenames: ReadonlySet<string>,
+): ClassificationIssue[] {
+  return issues.filter((issue) => {
+    if (issue.kind === 'missing_required') {
+      return true
+    }
+
+    return !resolvedFilenames.has(issue.filename)
+  })
+}
+
+function summarizeRequiredTypes(documents: readonly IngestedDocument[]): RequiredTypeSummary {
   const matchedTypeCounts = new Map<RequiredDocumentType, number>()
   const filenamesByType = new Map<RequiredDocumentType, string[]>()
 
   for (const document of documents) {
-    if (document.status === 'failed') {
-      issues.push({
-        kind: 'file_failed',
-        filename: document.filename,
-        reason: document.error ?? 'Ismeretlen osztályozási hiba.',
-      })
-      continue
+    if (document.status !== 'success' || !isRequiredDocumentType(document.detected_type)) continue
+
+    matchedTypeCounts.set(
+      document.detected_type,
+      (matchedTypeCounts.get(document.detected_type) ?? 0) + 1,
+    )
+    const filenames = filenamesByType.get(document.detected_type) ?? []
+    filenames.push(document.filename)
+    filenamesByType.set(document.detected_type, filenames)
+  }
+
+  return { matchedTypeCounts, filenamesByType }
+}
+
+function buildFileIssue(document: IngestedDocument): ClassificationIssue | null {
+  if (document.status === 'failed') {
+    return {
+      kind: 'file_failed',
+      filename: document.filename,
+      reason: document.error ?? 'Ismeretlen osztályozási hiba.',
+    }
+  }
+
+  if (isGeneratedReportFilename(document.filename)) {
+    return {
+      kind: 'file_generated_report',
+      filename: document.filename,
+    }
+  }
+
+  if (isRequiredDocumentType(document.detected_type)) {
+    if (isClassificationConfidenceAccepted(document.confidence)) {
+      return null
     }
 
-    if (isRequiredDocumentType(document.detected_type)) {
-      matchedTypeCounts.set(
-        document.detected_type,
-        (matchedTypeCounts.get(document.detected_type) ?? 0) + 1,
-      )
-      const filenames = filenamesByType.get(document.detected_type) ?? []
-      filenames.push(document.filename)
-      filenamesByType.set(document.detected_type, filenames)
-      continue
-    }
-
-    issues.push({
-      kind: 'file_misclassified',
+    return {
+      kind: 'file_low_confidence',
       filename: document.filename,
       detectedType: document.detected_type,
-    })
-  }
-
-  const missingTypes: RequiredDocumentType[] = []
-  for (const requiredType of REQUIRED_DOCUMENT_TYPES) {
-    if ((matchedTypeCounts.get(requiredType) ?? 0) === 0) {
-      missingTypes.push(requiredType)
-      issues.push({
-        kind: 'missing_required',
-        requiredType,
-      })
+      confidence: document.confidence,
     }
   }
 
-  if (missingTypes.length > 0) {
-    for (const requiredType of REQUIRED_DOCUMENT_TYPES) {
-      const filenames = filenamesByType.get(requiredType) ?? []
-      if (filenames.length <= 1) {
-        continue
-      }
-
-      for (const filename of filenames.slice(1)) {
-        issues.push({
-          kind: 'file_duplicate_required',
-          filename,
-          detectedType: requiredType,
-          missingTypes,
-        })
-      }
-    }
+  return {
+    kind: 'file_misclassified',
+    filename: document.filename,
+    detectedType: document.detected_type,
   }
+}
 
-  return issues
+function findMissingRequiredTypes(summary: RequiredTypeSummary): RequiredDocumentType[] {
+  return REQUIRED_DOCUMENT_TYPES.filter(
+    (requiredType) => (summary.matchedTypeCounts.get(requiredType) ?? 0) === 0,
+  )
+}
+
+function buildDuplicateRequiredIssues(
+  summary: RequiredTypeSummary,
+  missingTypes: RequiredDocumentType[],
+): ClassificationIssue[] {
+  if (missingTypes.length === 0) return []
+
+  return REQUIRED_DOCUMENT_TYPES.flatMap((requiredType) => {
+    const filenames = summary.filenamesByType.get(requiredType) ?? []
+    return filenames.slice(1).map((filename) => ({
+      kind: 'file_duplicate_required' as const,
+      filename,
+      detectedType: requiredType,
+      missingTypes,
+    }))
+  })
+}
+
+function buildClassificationIssues(documents: IngestedDocument[]): ClassificationIssue[] {
+  const summary = summarizeRequiredTypes(documents)
+  const fileIssues = documents.flatMap((document) => {
+    const issue = buildFileIssue(document)
+    return issue === null ? [] : [issue]
+  })
+  const missingTypes = findMissingRequiredTypes(summary)
+  const missingIssues = missingTypes.map((requiredType) => ({
+    kind: 'missing_required' as const,
+    requiredType,
+  }))
+
+  return [...fileIssues, ...missingIssues, ...buildDuplicateRequiredIssues(summary, missingTypes)]
 }
 
 function collectReplaceableFilenames(documents: IngestedDocument[]): string[] {
   const replaceable = new Set<string>()
 
   for (const document of documents) {
+    if (isGeneratedReportFilename(document.filename)) {
+      replaceable.add(document.filename)
+      continue
+    }
+
     if (document.status === 'failed') {
       replaceable.add(document.filename)
       continue
@@ -167,40 +248,78 @@ function collectReplaceableFilenames(documents: IngestedDocument[]): string[] {
 
     if (!isRequiredDocumentType(document.detected_type)) {
       replaceable.add(document.filename)
-    }
-  }
-
-  const requiredTypeCounts = new Map<RequiredDocumentType, number>()
-  const requiredTypeFilenames = new Map<RequiredDocumentType, string[]>()
-
-  for (const document of documents) {
-    if (document.status !== 'success' || !isRequiredDocumentType(document.detected_type)) {
       continue
     }
 
-    requiredTypeCounts.set(
-      document.detected_type,
-      (requiredTypeCounts.get(document.detected_type) ?? 0) + 1,
-    )
-    const filenames = requiredTypeFilenames.get(document.detected_type) ?? []
-    filenames.push(document.filename)
-    requiredTypeFilenames.set(document.detected_type, filenames)
+    if (!isClassificationConfidenceAccepted(document.confidence)) {
+      replaceable.add(document.filename)
+    }
   }
 
-  const hasMissingRequiredType = REQUIRED_DOCUMENT_TYPES.some(
-    (requiredType) => (requiredTypeCounts.get(requiredType) ?? 0) === 0,
-  )
-
-  if (hasMissingRequiredType) {
-    for (const requiredType of REQUIRED_DOCUMENT_TYPES) {
-      const filenames = requiredTypeFilenames.get(requiredType) ?? []
-      for (const filename of filenames.slice(1)) {
-        replaceable.add(filename)
-      }
+  const summary = summarizeRequiredTypes(documents)
+  if (findMissingRequiredTypes(summary).length > 0) {
+    for (const filenames of summary.filenamesByType.values()) {
+      filenames.slice(1).forEach((filename) => replaceable.add(filename))
     }
   }
 
   return Array.from(replaceable)
+}
+
+function mergeSelectedFiles(previousFiles: readonly File[], validFiles: readonly File[]): SelectedFileMerge {
+  let duplicateFileDetected = false
+  const filesByName = new Map(previousFiles.map((file) => [file.name, file]))
+
+  for (const file of validFiles) {
+    if (filesByName.has(file.name)) {
+      duplicateFileDetected = true
+    } else {
+      filesByName.set(file.name, file)
+    }
+  }
+
+  return {
+    files: Array.from(filesByName.values()).slice(0, MAX_FILES),
+    duplicateFileDetected,
+  }
+}
+
+function buildAutoFillReplacementPlan(
+  validFiles: readonly File[],
+  selectedFiles: readonly File[],
+  pendingReplacementFilenames: readonly string[],
+): AutoFillReplacementPlan {
+  let duplicateFileDetected = false
+  const existingByName = new Map(selectedFiles.map((file) => [file.name, file]))
+  const remainingReplacementFilenames = [...pendingReplacementFilenames]
+  const nextFiles = [...selectedFiles]
+  const replacedTargetFilenames: string[] = []
+
+  for (const file of validFiles) {
+    if (existingByName.has(file.name)) {
+      duplicateFileDetected = true
+      continue
+    }
+
+    const targetFilename = remainingReplacementFilenames.shift()
+    if (!targetFilename) break
+
+    const targetIndex = nextFiles.findIndex((candidate) => candidate.name === targetFilename)
+    if (targetIndex === -1) continue
+
+    replacedTargetFilenames.push(targetFilename)
+    nextFiles[targetIndex] = file
+    existingByName.delete(targetFilename)
+    existingByName.set(file.name, file)
+  }
+
+  return {
+    nextFiles,
+    replacedTargetFilenames,
+    remainingReplacementFilenames,
+    duplicateFileDetected,
+    replacementCount: replacedTargetFilenames.length,
+  }
 }
 
 export default function DocumentIngestor({
@@ -252,14 +371,14 @@ export default function DocumentIngestor({
       return
     }
 
-    const timeoutId = window.setTimeout(() => {
+    const timeoutId = globalThis.setTimeout(() => {
       setErrorMessage((current) =>
         current === DUPLICATE_FILE_MESSAGE ? null : current,
       )
     }, DUPLICATE_MESSAGE_DISMISS_MS)
 
     return () => {
-      window.clearTimeout(timeoutId)
+      globalThis.clearTimeout(timeoutId)
     }
   }, [errorMessage])
 
@@ -273,106 +392,49 @@ export default function DocumentIngestor({
       return
     }
 
-    let duplicateFileDetected = false
-
     if (canAutoFillMissingSlots) {
-      const existingByName = new Map(selectedFiles.map((file) => [file.name, file]))
-      const replacementQueue = [...pendingReplacementFilenames]
-      const nextFiles = [...selectedFiles]
-      const replacements = new Map<string, File>()
+      const plan = buildAutoFillReplacementPlan(
+        validFiles,
+        selectedFiles,
+        pendingReplacementFilenames,
+      )
 
-      for (const file of validFiles) {
-        if (existingByName.has(file.name)) {
-          duplicateFileDetected = true
-          continue
-        }
-
-        const targetFilename = replacementQueue.shift()
-        if (!targetFilename) {
-          break
-        }
-
-        const targetIndex = nextFiles.findIndex((candidate) => candidate.name === targetFilename)
-        if (targetIndex === -1) {
-          continue
-        }
-
-        replacements.set(targetFilename, file)
-        nextFiles[targetIndex] = file
-        existingByName.delete(targetFilename)
-        existingByName.set(file.name, file)
-      }
-
-      if (replacements.size === 0) {
+      if (plan.replacementCount === 0) {
         setErrorMessage(
-          duplicateFileDetected
+          plan.duplicateFileDetected
             ? DUPLICATE_FILE_MESSAGE
             : 'Nincs automatikusan cserélhető új fájl. Adj meg eltérő nevű dokumentumot.',
         )
         return
       }
 
-      const nextResults = results.map((document) => {
-        const replacement = replacements.get(document.filename)
-        if (!replacement) {
-          return document
-        }
+      setSelectedFiles(plan.nextFiles)
+      setClassificationIssues((currentIssues) =>
+        clearResolvedFileIssues(currentIssues, new Set(plan.replacedTargetFilenames)),
+      )
+      setPendingReplacementFilenames(plan.remainingReplacementFilenames)
+      setErrorMessage(plan.duplicateFileDetected ? DUPLICATE_FILE_MESSAGE : null)
 
-        return {
-          ...document,
-          filename: replacement.name,
-          size_bytes: replacement.size,
-          page_count: 0,
-          chunk_count: 0,
-          confidence: 0,
-          detected_type: 'other',
-          status: 'success' as const,
-          error: null,
-        }
-      })
-
-      setSelectedFiles(nextFiles)
-      setResults(nextResults)
-      setClassificationIssues(buildClassificationIssues(nextResults))
-      setPendingReplacementFilenames(replacementQueue)
-      setErrorMessage(duplicateFileDetected ? DUPLICATE_FILE_MESSAGE : null)
-
-      if (replacementQueue.length > 0) {
+      if (plan.remainingReplacementFilenames.length > 0) {
         setHasPendingReclassification(true)
         setPhase('done')
         return
       }
 
       setHasPendingReclassification(false)
-      void handleIngest(nextFiles)
+      void handleIngest(plan.nextFiles)
       return
     }
 
-    setSelectedFiles((previousFiles) => {
-      const filesByName = new Map(previousFiles.map((file) => [file.name, file]))
-      for (const file of validFiles) {
-        if (filesByName.has(file.name)) {
-          duplicateFileDetected = true
-          continue
-        }
-
-        filesByName.set(file.name, file)
-      }
-
-      const nextFiles = Array.from(filesByName.values())
-      if (nextFiles.length > MAX_FILES) {
-        return nextFiles.slice(0, MAX_FILES)
-      }
-
-      return nextFiles
-    })
+    const selectedFileMerge = mergeSelectedFiles(selectedFiles, validFiles)
+    setSelectedFiles(selectedFileMerge.files)
 
     setPhase('ready')
     setClassificationIssues([])
     setHasPendingReclassification(false)
     setPendingReplacementFilenames([])
     setErrorMessage(
-      duplicateFileDetected ? DUPLICATE_FILE_MESSAGE : null,
+      selectedFileMerge.duplicateFileDetected ? DUPLICATE_FILE_MESSAGE : null,
     )
   }
 
@@ -451,6 +513,7 @@ export default function DocumentIngestor({
       event.currentTarget.value = ''
 
       let workingFiles = selectedFiles
+      const targetFilename = replacementTargetFilename
       if (!workingFiles.some((file) => file.name === replacementTargetFilename)) {
         const hydratedFiles = await hydrateSelectedFilesFromResults()
         if (!hydratedFiles) {
@@ -480,7 +543,7 @@ export default function DocumentIngestor({
         return
       }
 
-      const targetFile = workingFiles.find((file) => file.name === replacementTargetFilename)
+      const targetFile = workingFiles.find((file) => file.name === targetFilename)
       if (!targetFile) {
         setReplacementTargetFilename(null)
         setErrorMessage('A cserélendő fájl már nem található. Kérlek próbáld újra.')
@@ -498,30 +561,15 @@ export default function DocumentIngestor({
       }
 
       const nextFiles = workingFiles.map((file) =>
-        file.name === replacementTargetFilename ? replacementFile : file,
-      )
-
-      const nextResults = results.map((document) =>
-        document.filename === replacementTargetFilename
-          ? {
-              ...document,
-              filename: replacementFile.name,
-              size_bytes: replacementFile.size,
-              page_count: 0,
-              chunk_count: 0,
-              confidence: 0,
-              detected_type: 'other',
-              status: 'success' as const,
-              error: null,
-            }
-          : document,
+        file.name === targetFilename ? replacementFile : file,
       )
 
       setSelectedFiles(nextFiles)
-      setResults(nextResults)
-      setClassificationIssues(buildClassificationIssues(nextResults))
+      setClassificationIssues((currentIssues) =>
+        clearResolvedFileIssues(currentIssues, new Set([targetFilename])),
+      )
       const nextPendingReplacementFilenames = pendingReplacementFilenames.filter(
-        (filename) => filename !== replacementTargetFilename,
+        (filename) => filename !== targetFilename,
       )
       setPendingReplacementFilenames(nextPendingReplacementFilenames)
       setErrorMessage(null)
@@ -659,7 +707,7 @@ export default function DocumentIngestor({
   const canRestartWorkflow = showRestartAction && (selectedFiles.length > 0 || results.length > 0)
 
   return (
-    <section className="h-full rounded-2xl border border-gray-100 bg-white p-4 shadow-md animate-phantom-fade-in sm:p-5 lg:p-6">
+    <section className="h-full rounded-2xl border border-gray-100 bg-white p-4 animate-phantom-fade-in sm:p-5 lg:p-6">
       <div className="mb-4 flex min-h-14 flex-wrap items-center justify-between gap-2 rounded-xl border border-gray-100 bg-slate-50 px-4 py-3 animate-phantom-fade-in-down">
         <p className="text-sm font-semibold text-gray-900">Dokumentum feltöltés</p>
         <div className="flex min-w-0 flex-wrap items-center gap-2">
@@ -771,6 +819,8 @@ export default function DocumentIngestor({
             const iconWrapClass = isPdf
               ? 'bg-red-50 text-red-600 ring-red-100'
               : 'bg-blue-50 text-blue-600 ring-gray-200'
+            const isPendingReplacement =
+              hasPendingReclassification && pendingReplacementFilenames.includes(file.name)
             return (
             <RevealOnScroll
               key={file.name}
@@ -797,29 +847,46 @@ export default function DocumentIngestor({
                 </p>
                 <p className="text-xs text-phantom-muted">{formatBytes(file.size)}</p>
               </div>
-              <div className="flex shrink-0 items-center gap-1">
-                <button
-                  type="button"
-                  onClick={() => removeFile(file.name)}
-                  disabled={phase === 'uploading'}
-                  className={[
-                    'shrink-0 rounded-phantom-control p-2 text-phantom-subtle transition-phantom duration-phantom-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus',
-                    phase === 'uploading'
-                      ? 'cursor-not-allowed opacity-50'
-                      : 'hover:bg-phantom-danger-soft hover:text-phantom-danger-text hover:scale-110 hover:rotate-90 active:scale-90',
-                  ].join(' ')}
-                  aria-label={`Eltávolítás: ${file.name}`}
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
+              {phase !== 'uploading' && (
+                <div className="flex shrink-0 items-center gap-1">
+                  {isPendingReplacement && (
+                    <button
+                      type="button"
+                      onClick={() => replaceSingleFile(file.name)}
+                      className="inline-flex h-7 shrink-0 items-center justify-center rounded-phantom-control border border-phantom-danger-border bg-phantom-surface px-2.5 text-xs font-semibold text-phantom-danger-text transition-phantom duration-phantom-base hover:bg-phantom-danger-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus"
+                      aria-label={`Fájl csere: ${file.name}`}
+                    >
+                      Fájl csere
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => removeFile(file.name)}
+                    className="shrink-0 rounded-phantom-control p-2 text-phantom-subtle transition-phantom duration-phantom-base hover:bg-phantom-danger-soft hover:text-phantom-danger-text hover:scale-110 hover:rotate-90 active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus"
+                    aria-label={`Eltávolítás: ${file.name}`}
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              )}
             </RevealOnScroll>
             )
           })}
         </div>
       )}
 
-      {phase === 'done' && results.length > 0 && (
+      {phase === 'done' && hasPendingReclassification && (
+        <div className="mt-4 rounded-phantom-card border border-amber-200 bg-amber-50 p-4 animate-phantom-fade-in-down">
+          <p className="text-sm font-semibold text-amber-800">Fájlcsere folyamatban</p>
+          <p className="mt-1 text-xs text-amber-700">
+            {pendingReplacementFilenames.length > 0
+              ? `Még ${pendingReplacementFilenames.length} hibás fájl cseréje szükséges. Az utolsó csere után automatikusan újraindul az osztályozás.`
+              : 'Folyamatban: automatikus újraosztályozás indul.'}
+          </p>
+        </div>
+      )}
+
+      {phase === 'done' && results.length > 0 && !hasPendingReclassification && (
         <div className="space-y-4 animate-phantom-fade-in-up">
           <div className="rounded-phantom-card border border-phantom-line bg-phantom-surface px-4 py-2.5 animate-phantom-fade-in-down">
             <div className="flex flex-wrap items-center justify-between gap-3">
@@ -843,10 +910,7 @@ export default function DocumentIngestor({
                     {issue.kind === 'missing_required' && (
                       <>
                         Hiányzó kötelező kategória:{' '}
-                        <span className="font-bold">
-                          {REQUIRED_DOCUMENT_TYPE_LABELS_EN[issue.requiredType]}
-                        </span>
-                        .
+                        <span className="font-bold">{REQUIRED_DOCUMENT_TYPE_LABELS_EN[issue.requiredType]}</span>.
                       </>
                     )}
 
@@ -863,15 +927,32 @@ export default function DocumentIngestor({
                       </>
                     )}
 
+                    {issue.kind === 'file_generated_report' && (
+                      <>
+                        <span className="font-bold">{issue.filename}</span>: riportfájl, nem használható audit forrásdokumentumként. Cseréld kötelező dokumentumtípusra.
+                      </>
+                    )}
+
+                    {issue.kind === 'file_low_confidence' && (
+                      <>
+                        <span className="font-bold">{issue.filename}</span>: alacsony osztályozási bizalom{' '}
+                        <span className="font-bold">({formatConfidencePercent(issue.confidence)}%)</span>{' '}
+                        a{' '}
+                        <span className="font-bold">{REQUIRED_DOCUMENT_TYPE_LABELS_EN[issue.detectedType]}</span>{' '}
+                        típushoz. Minimum{' '}
+                        <span className="font-bold">{MIN_CLASSIFICATION_CONFIDENCE_PERCENT}%</span>{' '}
+                        szükséges, kérlek cseréld a fájlt.
+                      </>
+                    )}
+
                     {issue.kind === 'file_duplicate_required' && (
                       <>
                         <span className="font-bold">{issue.filename}</span>: többszörös kategória{' '}
-                        <span className="font-bold">{REQUIRED_DOCUMENT_TYPE_LABELS_EN[issue.detectedType]}</span>. Cseréld
-                        egy hiányzó típusra:{' '}
+                        <span className="font-bold">{REQUIRED_DOCUMENT_TYPE_LABELS_EN[issue.detectedType]}</span>. Cseréld egy
+                        hiányzó típusra:{' '}
                         <span className="font-bold">
                           {issue.missingTypes.map((type) => REQUIRED_DOCUMENT_TYPE_LABELS_EN[type]).join(', ')}
-                        </span>
-                        .
+                        </span>.
                       </>
                     )}
                   </li>
@@ -880,24 +961,13 @@ export default function DocumentIngestor({
             </div>
           )}
 
-          {hasPendingReclassification && (
-            <div className="rounded-phantom-card border border-amber-200 bg-amber-50 p-4 animate-phantom-fade-in-down">
-              <p className="text-sm font-semibold text-amber-800">
-                Fájlcsere megtörtént
-              </p>
-              <p className="mt-1 text-xs text-amber-700">
-                {pendingReplacementFilenames.length > 0
-                  ? `Még ${pendingReplacementFilenames.length} hibás fájl cseréje szükséges. Az utolsó csere után automatikusan újraindul az osztályozás.`
-                  : 'Folyamatban: automatikus újraosztályozás indul.'}
-              </p>
-            </div>
-          )}
-
           <div className="space-y-2">
             {results.map((document, index) => {
               const typeConfig = getDocumentTypeDisplay(document.detected_type)
               const isMisclassified =
                 document.status === 'success' && !isRequiredDocumentType(document.detected_type)
+              const isReplaceableTarget = pendingReplacementFilenames.includes(document.filename)
+              const isProblematic = document.status === 'failed' || isReplaceableTarget
 
               if (document.status === 'failed') {
                 return (
@@ -913,13 +983,15 @@ export default function DocumentIngestor({
                           <p className="truncate text-sm font-semibold text-phantom-danger-text" title={document.filename}>
                             {document.filename}
                           </p>
-                          <button
-                            type="button"
-                            onClick={() => replaceSingleFile(document.filename)}
-                            className="inline-flex h-7 shrink-0 items-center justify-center rounded-phantom-control border border-phantom-danger-border bg-phantom-surface px-3 text-xs font-semibold text-phantom-danger-text transition-phantom duration-phantom-base hover:bg-phantom-danger-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus"
-                          >
-                            Fájl csere
-                          </button>
+                          {isReplaceableTarget && (
+                            <button
+                              type="button"
+                              onClick={() => replaceSingleFile(document.filename)}
+                              className="inline-flex h-7 shrink-0 items-center justify-center rounded-phantom-control border border-phantom-danger-border bg-phantom-surface px-3 text-xs font-semibold text-phantom-danger-text transition-phantom duration-phantom-base hover:bg-phantom-danger-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus"
+                            >
+                              Fájl csere
+                            </button>
+                          )}
                         </div>
                         <p className="mt-1 text-xs text-phantom-danger-text">Feldolgozás meghiúsult.</p>
                       </div>
@@ -930,7 +1002,7 @@ export default function DocumentIngestor({
 
               const findingCount = findingsByFilename?.[document.filename] ?? 0
               const isSelected = selectedDocId === document.filename
-              const isSelectable = !isMisclassified && Boolean(onSelectDocument)
+              const isSelectable = !isProblematic && Boolean(onSelectDocument)
 
               return (
                 <RevealOnScroll key={document.document_id} delayMs={index * 60}>
@@ -954,7 +1026,7 @@ export default function DocumentIngestor({
                   }
                   className={[
                     'group rounded-xl border p-3 shadow-sm transition-phantom duration-phantom-base',
-                    isMisclassified
+                    isProblematic
                       ? 'border-phantom-danger-border bg-phantom-danger-soft hover:-translate-y-px hover:shadow-phantom-soft'
                       : isSelected
                         ? 'border-orange-300 bg-orange-50 shadow-md ring-1 ring-orange-200 scale-[1.01]'
@@ -965,7 +1037,7 @@ export default function DocumentIngestor({
                   ].join(' ')}
                 >
                   <div className="flex items-start gap-2">
-                    {isMisclassified ? (
+                    {isProblematic ? (
                       <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-phantom-danger-text animate-phantom-pulse-soft" />
                     ) : (
                       <CheckCircle className="mt-0.5 h-5 w-5 shrink-0 text-phantom-success-text transition-transform duration-phantom-base group-hover:scale-110" />
@@ -976,7 +1048,7 @@ export default function DocumentIngestor({
                           <p
                             className={[
                               'truncate text-sm font-semibold',
-                              isMisclassified ? 'text-phantom-danger-text' : 'text-gray-900',
+                              isProblematic ? 'text-phantom-danger-text' : 'text-gray-900',
                             ].join(' ')}
                             title={document.filename}
                           >
@@ -1011,7 +1083,7 @@ export default function DocumentIngestor({
                         </div>
 
                         <div className="flex shrink-0 items-center gap-1">
-                          {isMisclassified && (
+                          {isReplaceableTarget && (
                             <button
                               type="button"
                               onClick={(event) => {
@@ -1030,7 +1102,7 @@ export default function DocumentIngestor({
                         <span>{document.page_count} oldal</span>
                         <span>{document.chunk_count} részlet</span>
                         <span>{formatBytes(document.size_bytes)}</span>
-                        <span>{Math.round(document.confidence * 100)}% bizalom</span>
+                        <span>{formatConfidencePercent(document.confidence)}% bizalom</span>
                       </div>
 
                     </div>
@@ -1075,7 +1147,7 @@ export default function DocumentIngestor({
           {phase === 'uploading' ? (
             <>
               <Loader2 className="force-spin h-4 w-4 animate-spin" />
-              AI Elemzés folyamatban...
+              AI analízis folyamatban...
             </>
           ) : (
             <>

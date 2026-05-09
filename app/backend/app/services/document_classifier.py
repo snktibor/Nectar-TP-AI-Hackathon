@@ -15,6 +15,7 @@ from pathlib import Path
 logger = logging.getLogger(__name__)
 
 _RULESET_PATH = Path(__file__).resolve().parents[2] / "rulesets" / "document_classification.json"
+_MAX_CLASSIFICATION_CONFIDENCE = 0.99
 
 
 @dataclass(frozen=True)
@@ -30,6 +31,10 @@ class ClassificationResult:
 def _load_ruleset() -> dict:
     with open(_RULESET_PATH, encoding="utf-8") as f:
         return json.load(f)
+
+
+def _clamp_confidence(value: float) -> float:
+    return min(max(value, 0.0), _MAX_CLASSIFICATION_CONFIDENCE)
 
 
 def classify_document(sample_text: str, filename: str | None = None) -> ClassificationResult:
@@ -63,7 +68,7 @@ def classify_document(sample_text: str, filename: str | None = None) -> Classifi
             return ClassificationResult(
                 doc_type=forced_type,
                 label=forced_label,
-                confidence=float(override.get("confidence", 0.95)),
+                confidence=round(_clamp_confidence(float(override.get("confidence", 0.95))), 3),
                 matched_keywords=[f"filename:{matched_token}"],
             )
 
@@ -101,7 +106,7 @@ def classify_document(sample_text: str, filename: str | None = None) -> Classifi
     scored.sort(key=lambda r: (r[0], r[1]), reverse=True)
     best_score, _, best_type, best_label, best_matched, best_saturation = scored[0]
 
-    confidence = min(best_score / max(best_saturation, 1), 1.0)
+    confidence = _clamp_confidence(best_score / max(best_saturation, 1))
 
     if len(scored) > 1 and second_lead_margin > 0:
         runner_up = scored[1][0]
@@ -119,6 +124,6 @@ def classify_document(sample_text: str, filename: str | None = None) -> Classifi
     return ClassificationResult(
         doc_type=best_type,
         label=best_label,
-        confidence=round(confidence, 3),
+        confidence=round(_clamp_confidence(confidence), 3),
         matched_keywords=best_matched,
     )

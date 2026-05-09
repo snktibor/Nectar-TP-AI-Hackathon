@@ -2,7 +2,7 @@
 name: Security Validator
 description: OWASP-aligned security validation for document intelligence and risk scoring flows.
 ---
-# Security Validator (REDLINE PHANTOM)
+# Security Validator (NECTAR TP)
 
 ## Validate These Areas
 - File upload hardening (type/size/count limits)

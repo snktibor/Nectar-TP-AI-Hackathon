@@ -1,4 +1,4 @@
-# GitHub Copilot Harness Instructions — REDLINE PHANTOM
+# GitHub Copilot Harness Instructions — NECTAR TP
 
 ## Purpose
 

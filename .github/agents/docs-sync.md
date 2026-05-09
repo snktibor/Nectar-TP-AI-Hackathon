@@ -3,7 +3,7 @@ name: Docs Sync Agent
 description: Automatically synchronize instruction files across .claude, .github, and layer CLAUDE.md files when code changes occur.
 tools: []
 ---
-# Docs Sync Agent (REDLINE PHANTOM)
+# Docs Sync Agent (NECTAR TP)
 
 ## Mission
 Keep all instruction and agent files semantically synchronized after any structural or behavioral change to the codebase. This agent runs as the final step of the orchestrator pipeline.

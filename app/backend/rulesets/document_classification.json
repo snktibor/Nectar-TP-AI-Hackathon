@@ -308,7 +308,7 @@
   "classification_rules": {
     "strategy": "highest_match_count_with_priority_tiebreak",
     "fallback_type": "other",
-    "min_confidence_threshold": 0.1,
+    "min_confidence_threshold": 0.8,
     "sample_pages": 5,
     "case_insensitive": true,
     "confidence_saturation": 6,
@@ -316,11 +316,59 @@
     "filename_overrides": [
       {
         "contains_any": [
-          "redlinephantom_tp_report",
-          "tp_report_"
+          "nectartp_report",
+          "nectar_tp_report",
+          "tp_report_",
+          "megfelelosegi_jelentes",
+          "megfelelőségi_jelentés",
+          "compliance_report"
         ],
         "force_type": "other",
-        "confidence": 0.95
+        "confidence": 0.2
+      },
+      {
+        "contains_any": [
+          "masterfile",
+          "master_file"
+        ],
+        "force_type": "master_file",
+        "confidence": 0.97
+      },
+      {
+        "contains_any": [
+          "localfile",
+          "local_file"
+        ],
+        "force_type": "local_file",
+        "confidence": 0.97
+      },
+      {
+        "contains_any": [
+          "benchmark_study",
+          "benchmark"
+        ],
+        "force_type": "benchmark_study",
+        "confidence": 0.97
+      },
+      {
+        "contains_any": [
+          "contracts",
+          "contract",
+          "szerzodes",
+          "szerzodesek"
+        ],
+        "force_type": "contract",
+        "confidence": 0.97
+      },
+      {
+        "contains_any": [
+          "invoices",
+          "invoice",
+          "szamla",
+          "szamlak"
+        ],
+        "force_type": "invoice",
+        "confidence": 0.97
       }
     ]
   }

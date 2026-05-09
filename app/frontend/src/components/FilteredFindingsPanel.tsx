@@ -78,7 +78,7 @@ export default function FilteredFindingsPanel({
   )
 
   return (
-    <section className="flex h-full min-h-0 flex-col rounded-2xl border border-gray-100 bg-white p-4 shadow-md animate-phantom-fade-in sm:p-5 lg:p-6">
+    <section className="flex h-full min-h-0 flex-col rounded-2xl border border-gray-100 bg-white p-4 animate-phantom-fade-in sm:p-5 lg:p-6">
       <div className="mb-4 flex min-h-14 flex-wrap items-center justify-between gap-2 rounded-xl border border-gray-100 bg-slate-50 px-4 py-3 animate-phantom-fade-in-down transition-phantom duration-phantom-base hover:border-orange-200">
         <div className="min-w-0" key={selectedDocId}>
           <p className="truncate text-sm font-semibold text-gray-900 animate-phantom-fade-in-up" title={selectedDocId}>
@@ -100,7 +100,7 @@ export default function FilteredFindingsPanel({
             <FileSearch className="h-6 w-6 text-gray-400 animate-phantom-pulse-soft" />
             <p className="text-sm font-medium text-gray-700">Még nincs audit lefuttatva</p>
             <p className="text-xs text-gray-500">
-              Indítsd el az auditot az Elemzés fülön a megállapítások megjelenítéséhez.
+              Indítsd el az auditot az Analízis fülön a megállapítások megjelenítéséhez.
             </p>
           </div>
         ) : filtered.length === 0 ? (

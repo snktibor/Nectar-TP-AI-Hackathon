@@ -3,11 +3,9 @@ import {
   type LucideIcon,
   FileText,
   LayoutDashboard,
-  Settings,
-  ShieldAlert,
 } from 'lucide-react'
 
-export type DashboardTab = 'analysis' | 'documents' | 'reports'
+export type DashboardTab = 'analysis' | 'reports' | 'documents'
 
 interface DashboardShellProps {
   readonly activeTab: DashboardTab
@@ -90,17 +88,17 @@ interface MinimalSidebarProps {
 
 function MinimalSidebar({ activeTab, onTabChange }: MinimalSidebarProps): JSX.Element {
   const navItems: ReadonlyArray<{ icon: LucideIcon; label: string; tab: DashboardTab }> = [
-    { icon: LayoutDashboard, label: 'Elemzés', tab: 'analysis' },
     { icon: FileText, label: 'Dokumentumok', tab: 'documents' },
-    { icon: ShieldAlert, label: 'Riportok', tab: 'reports' },
+    { icon: LayoutDashboard, label: 'Analízis', tab: 'analysis' },
+    { icon: LayoutDashboard, label: 'Riport', tab: 'reports' },
   ]
   return (
     <aside className="flex flex-col justify-between border-b border-gray-100 bg-slate-50 p-3 animate-phantom-fade-in sm:p-4 lg:min-h-screen lg:border-b-0 lg:border-r lg:p-5">
       <div className="space-y-4 px-1 py-1">
         <div className="pl-1 animate-phantom-fade-in-down" style={{ animationDelay: '20ms' }}>
           <p className="cursor-default text-sm font-semibold uppercase tracking-[0.08em] text-gray-900">
-            <span className="text-orange-600">REDLINE</span>{' '}
-            <span>PHANTOM</span>
+            <span className="text-orange-600">Nectar</span>{' '}
+            <span>TP</span>
           </p>
         </div>
 
@@ -128,16 +126,6 @@ function MinimalSidebar({ activeTab, onTabChange }: MinimalSidebarProps): JSX.El
 
       <div className="space-y-2">
         <div className="animate-phantom-fade-in-up" style={{ animationDelay: '320ms' }}>
-          <SidebarButton
-            icon={Settings}
-            label="Beállítások"
-            isActive={false}
-            onClick={() => {
-              /* settings is local-state only, intentionally inert */
-            }}
-          />
-        </div>
-        <div className="animate-phantom-fade-in-up" style={{ animationDelay: '380ms' }}>
           <SidebarProfileCard />
         </div>
       </div>

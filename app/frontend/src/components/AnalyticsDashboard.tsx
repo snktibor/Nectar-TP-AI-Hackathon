@@ -6,9 +6,9 @@ interface RiskBadge {
 }
 
 const RISK_BADGES: readonly RiskBadge[] = [
-  { label: 'Funkcionális Elemzés Ellentmondás', tone: 'bg-red-100 text-red-800' },
+  { label: 'Funkcionális Analízis Ellentmondás', tone: 'bg-red-100 text-red-800' },
   { label: 'Berry-ráta (1.19 > IQR 1.10)', tone: 'bg-red-100 text-red-800' },
-  { label: 'Hiányzó DEMPE Elemzés', tone: 'bg-orange-100 text-orange-800' },
+  { label: 'Hiányzó DEMPE Analízis', tone: 'bg-orange-100 text-orange-800' },
   { label: 'Számlázási Dátum Eltérés', tone: 'bg-gray-100 text-gray-800' },
 ]
 
@@ -53,7 +53,7 @@ function FinancialRiskCard(): JSX.Element {
       title="Kritikus Adókockázat & Bírságpotenciál"
     >
       <p className="text-4xl font-bold text-red-600 animate-pulse tabular-nums">
-        ~18 500 000 Ft
+        131.000.000 Ft
       </p>
       <p className="mt-3 text-xs leading-5 text-gray-600">
         A 5M Ft-os licencdíj-eltérés és az érvénytelen Berry-ráta (1.19) miatti adóalap-korrekció
@@ -131,7 +131,7 @@ function CognitiveSavingsCard(): JSX.Element {
           variant="baseline"
         />
         <ComparisonBar
-          label="Redline Phantom AI"
+          label="Nectar TP AI"
           value="10 perc"
           width="10%"
           variant="phantom"

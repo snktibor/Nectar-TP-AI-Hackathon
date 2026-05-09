@@ -1,4 +1,4 @@
-# Claude Harness Instructions — REDLINE PHANTOM
+# Claude Harness Instructions — NECTAR TP
 
 ## Purpose
 

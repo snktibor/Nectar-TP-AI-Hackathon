@@ -30,7 +30,7 @@ export default function ResultsPanel({
 
   return (
     <section className="flex h-full min-h-0 flex-col">
-      <div className="min-h-0 flex-1 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-md">
+      <div className="min-h-0 flex-1 overflow-hidden rounded-2xl border border-gray-100 bg-white">
         <DocumentViewer citation={previewCitation} onClose={onClose} />
       </div>
     </section>

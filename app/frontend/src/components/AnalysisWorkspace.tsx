@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { AlertCircle, BarChart2, ChevronDown, ClipboardList, Cpu, DatabaseZap, SearchCheck, Sparkles, Wrench, X } from 'lucide-react'
+import { ChevronDown, Cpu, DatabaseZap, SearchCheck, Sparkles, Wrench, X } from 'lucide-react'
 import { phantomDesign } from '../design-system/phantomDesign'
 import {
   ALL_AGENT_IDS,
@@ -20,7 +20,6 @@ import {
   type WorkspacePhase,
 } from '../lib/backendAudit'
 import type { CitationTarget } from '../types/viewer'
-import type { IngestedDocument } from '../types/api'
 import AgentStatusStrip from './AgentStatusStrip'
 import FindingCard from './FindingCard'
 import { EmptyPanel, MetricCard, StatusPill } from './ui/DashboardPrimitives'
@@ -53,7 +52,6 @@ function getSeverityFilterTone(severity: BackendRiskSeverity): string {
 }
 
 interface AnalysisWorkspaceProps {
-  readonly documents: IngestedDocument[]
   readonly phase: WorkspacePhase
   readonly auditStatus: BackendAuditStatusResponse | null
   readonly auditReport: BackendAuditReport | null
@@ -65,9 +63,9 @@ interface AnalysisWorkspaceProps {
 }
 
 function resolvePhasePill(phase: WorkspacePhase): { label: string; tone: StatusPillTone } {
-  if (phase === 'completed') return { label: 'Riport kész', tone: 'success' }
-  if (phase === 'polling' || phase === 'starting') return { label: 'Audit fut', tone: 'accent' }
-  if (phase === 'ready') return { label: 'Indítható', tone: 'info' }
+  if (phase === 'completed') return { label: 'Analízis kész', tone: 'success' }
+  if (phase === 'polling' || phase === 'starting') return { label: 'AI analízis folyamatban', tone: 'accent' }
+  if (phase === 'ready') return { label: 'Analízis indítható', tone: 'info' }
   if (phase === 'blocked') return { label: 'Hiányos feltöltés', tone: 'warning' }
   if (phase === 'failed') return { label: 'Hiba', tone: 'danger' }
   return { label: 'Feltöltésre vár', tone: 'neutral' }
@@ -185,10 +183,8 @@ function FindingsView({
   onCitationClick: (target: CitationTarget) => void
 }>): JSX.Element {
   const [severityFilter, setSeverityFilter] = useState<BackendRiskSeverity | null>(null)
-
   const allFindings = flattenFindings(report)
   const hasFilteredFindings = allFindings.some((f) => matchesSeverityFilter(f, severityFilter))
-
   const grouped = groupFindingsByAgent(allFindings)
 
   const severityOptions: BackendRiskSeverity[] = ['critical', 'high', 'medium', 'low']
@@ -198,7 +194,11 @@ function FindingsView({
       {/* Summary banner */}
       <section className="min-w-0 overflow-hidden rounded-phantom-card border border-phantom-line bg-phantom-surface p-4 animate-phantom-fade-in-up transition-phantom duration-phantom-base hover:shadow-phantom-soft">
         <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
-          <p className="min-w-0 flex-1 break-words text-sm leading-6 text-phantom-ink">{report.summary}</p>
+          <div className="min-w-0 flex-1">
+            <p className="text-xs font-semibold uppercase tracking-[0.06em] text-phantom-subtle">Vezetői összefoglaló</p>
+            <p className="mt-1 break-words text-sm leading-6 text-phantom-ink">{report.summary}</p>
+          </div>
+
           <span
             className={[
               'inline-flex h-7 shrink-0 items-center rounded-full px-3 text-xs font-semibold uppercase whitespace-nowrap animate-phantom-bounce-in transition-transform duration-phantom-base hover:scale-105',
@@ -209,23 +209,6 @@ function FindingsView({
           </span>
         </div>
       </section>
-
-      {/* Metric cards */}
-      <div className="grid grid-cols-1 gap-2 xs:grid-cols-2 sm:grid-cols-3">
-        {[
-          { icon: AlertCircle, label: 'Konzisztencia\nhibák', value: String(report.consistency_errors.length) },
-          { icon: BarChart2, label: 'Benchmark\nkockázatok', value: String(report.benchmark_risks.length) },
-          { icon: ClipboardList, label: 'Hiányzó\nelemek', value: String(report.missing_elements.length) },
-        ].map((card, index) => (
-          <div
-            key={card.label}
-            style={{ animationDelay: `${index * 70}ms` }}
-            className="animate-phantom-fade-in-up"
-          >
-            <MetricCard icon={card.icon} label={card.label} value={card.value} />
-          </div>
-        ))}
-      </div>
 
       {/* Severity filter */}
       <div className="grid min-w-0 grid-cols-2 gap-1.5 animate-phantom-fade-in-up sm:grid-cols-3 xl:grid-cols-5" style={{ animationDelay: '240ms' }}>
@@ -598,7 +581,6 @@ function TelemetryView({ report }: Readonly<{ report: BackendAuditReport }>): JS
 // ---------------------------------------------------------------------------
 
 export default function AnalysisWorkspace({
-  documents,
   phase,
   auditStatus,
   auditReport,
@@ -609,7 +591,6 @@ export default function AnalysisWorkspace({
   onCloseReport,
 }: AnalysisWorkspaceProps): JSX.Element {
   const [activeTab, setActiveTab] = useState<TabId>('findings')
-  const successfulDocuments = documents.filter((document) => document.status === 'success')
   const status = resolvePhasePill(phase)
   const canCloseReport = phase === 'failed'
 
@@ -620,10 +601,10 @@ export default function AnalysisWorkspace({
   ]
 
   return (
-    <section className="h-full min-w-0 overflow-y-auto overflow-x-hidden rounded-2xl border border-gray-100 bg-white p-4 shadow-md animate-phantom-fade-in [scrollbar-gutter:stable] sm:p-5 lg:p-6">
+    <section className="h-full min-w-0 overflow-y-auto overflow-x-hidden rounded-2xl border border-gray-100 bg-white p-4 animate-phantom-fade-in [scrollbar-gutter:stable] sm:p-5 lg:p-6">
       <div className="mb-4 min-h-14 rounded-xl border border-gray-100 bg-slate-50 px-4 py-3 animate-phantom-fade-in-down">
         <div className="flex min-w-0 flex-wrap items-center justify-between gap-3">
-          <p className="min-w-0 truncate text-sm font-semibold text-gray-900">Riport</p>
+          <p className="min-w-0 truncate text-sm font-semibold text-gray-900">Analízis</p>
           <div className="flex min-w-0 flex-wrap items-center gap-2">
             <span
               className={[
@@ -688,21 +669,18 @@ export default function AnalysisWorkspace({
 
       {phase === 'ready' && (
         <div className="rounded-phantom-card border border-phantom-line bg-phantom-surface p-4 animate-phantom-fade-in-up">
-          <p className="text-sm text-phantom-ink">
-            Sikeres dokumentumok: {successfulDocuments.length}
-          </p>
           <button
             type="button"
             onClick={onAnalyze}
             className={[
               phantomDesign.components.buttonBase,
               phantomDesign.components.buttonPrimary,
-              'group/analyze mt-3 h-10 min-h-8 w-full px-3 py-1.5 text-xs shadow-phantom-soft hover:scale-[1.02] hover:shadow-phantom-lift active:scale-95 sm:w-auto',
+              'group/analyze h-10 min-h-8 w-full px-3 py-1.5 text-xs shadow-phantom-soft hover:scale-[1.02] hover:shadow-phantom-lift active:scale-95 sm:w-auto',
             ].join(' ')}
           >
             <span className="inline-flex items-center gap-2">
               <Sparkles className="h-4 w-4 transition-transform duration-phantom-base group-hover/analyze:rotate-12 group-hover/analyze:scale-125" />
-              Elemzés indítása
+              Analízis indítása
             </span>
           </button>
         </div>
@@ -711,7 +689,7 @@ export default function AnalysisWorkspace({
       {phase === 'blocked' && (
         <div className="rounded-phantom-card border border-phantom-danger-border bg-phantom-danger-soft p-4 animate-phantom-fade-in-down">
           <p className="text-sm font-semibold text-phantom-danger-text">
-            Nem indítható az elemzés
+            Nem indítható az analízis
           </p>
           <p className="mt-1 break-words text-xs text-phantom-danger-text">
             Töltsd fel és osztályozd helyesen mind az 5 kötelező kategóriát: Master File, Local File, Contract, Benchmark Study, Invoice.

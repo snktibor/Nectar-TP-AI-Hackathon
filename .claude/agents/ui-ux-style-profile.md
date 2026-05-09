@@ -2,7 +2,7 @@
 name: UI UX Style Profile
 description: UX standards for the transfer pricing analysis dashboard and evidence workflow.
 ---
-# UI/UX Style Profile (REDLINE PHANTOM)
+# UI/UX Style Profile (NECTAR TP)
 
 ## Experience Goals
 - Make risk immediately understandable.

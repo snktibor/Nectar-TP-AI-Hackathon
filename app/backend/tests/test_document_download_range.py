@@ -5,19 +5,19 @@ from __future__ import annotations
 import pytest
 from fastapi import HTTPException, status
 
-from app.api.v1.endpoints.documents import _build_file_response, _parse_byte_range
+from app.services.file_response import build_file_response, parse_byte_range
 
 
 def test_parse_byte_range_supports_open_ended_ranges() -> None:
-    assert _parse_byte_range("bytes=4-", 10) == (4, 9)
+    assert parse_byte_range("bytes=4-", 10) == (4, 9)
 
 
 def test_parse_byte_range_supports_suffix_ranges() -> None:
-    assert _parse_byte_range("bytes=-4", 10) == (6, 9)
+    assert parse_byte_range("bytes=-4", 10) == (6, 9)
 
 
 def test_build_file_response_returns_partial_content() -> None:
-    response = _build_file_response(
+    response = build_file_response(
         payload=b"0123456789",
         filename="sample.pdf",
         media_type="application/pdf",
@@ -33,12 +33,12 @@ def test_build_file_response_returns_partial_content() -> None:
 
 def test_build_file_response_rejects_invalid_range() -> None:
     with pytest.raises(HTTPException) as exc_info:
-        _build_file_response(
+        build_file_response(
             payload=b"0123456789",
             filename="sample.pdf",
             media_type="application/pdf",
             range_header="bytes=30-40",
         )
 
-    assert exc_info.value.status_code == status.HTTP_416_REQUESTED_RANGE_NOT_SATISFIABLE
+    assert exc_info.value.status_code == status.HTTP_416_RANGE_NOT_SATISFIABLE
     assert exc_info.value.headers == {"Content-Range": "bytes */10"}

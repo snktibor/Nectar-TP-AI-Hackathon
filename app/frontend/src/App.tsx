@@ -7,6 +7,10 @@ import FilteredFindingsPanel from './components/FilteredFindingsPanel'
 import ResultsPanel from './components/ResultsPanel'
 import ReportsTab from './components/report/ReportsTab'
 import { phantomDesign } from './design-system/phantomDesign'
+import {
+  isClassificationConfidenceAccepted,
+  isGeneratedReportFilename,
+} from './lib/documentDisplay'
 import type {
   BackendAuditReport,
   BackendAuditStartResponse,
@@ -47,7 +51,15 @@ function hasCompleteRequiredCoverage(documents: IngestedDocument[]): boolean {
 
   const coveredTypes = new Set<RequiredDocumentType>()
   for (const document of successful) {
+    if (isGeneratedReportFilename(document.filename)) {
+      return false
+    }
+
     if (!isRequiredAuditType(document.detected_type)) {
+      return false
+    }
+
+    if (!isClassificationConfidenceAccepted(document.confidence)) {
       return false
     }
 
@@ -212,9 +224,7 @@ export default function App(): JSX.Element {
     }
   }, [])
 
-  async function handleAnalyze(): Promise<void> {
-    if (!hasReadyAuditCoverage) return
-
+  async function startAudit(): Promise<void> {
     clearPolling()
     setWorkspacePhase('starting')
     clearAuditState()
@@ -242,6 +252,11 @@ export default function App(): JSX.Element {
       setAuditError(message)
       setWorkspacePhase('failed')
     }
+  }
+
+  async function handleAnalyze(): Promise<void> {
+    if (!hasReadyAuditCoverage) return
+    await startAudit()
   }
 
   function handleIngestComplete(documents: IngestedDocument[]): void {
@@ -303,9 +318,8 @@ export default function App(): JSX.Element {
       return (
         <AnalysisReadyView
           phase={workspacePhase}
-          auditStatus={auditStatus}
-          auditError={auditError}
-          onAnalyze={() => void handleAnalyze()}
+          report={auditReport}
+          successfulDocumentCount={ingestedDocuments.filter((document) => document.status === 'success').length}
         />
       )
     }
@@ -347,8 +361,10 @@ export default function App(): JSX.Element {
     </div>
   )
 
+  const showDocumentScopedFindings = activeTab === 'documents' && selectedDocId !== null
+
   const rightPanelContent =
-    selectedDocId !== null ? (
+    showDocumentScopedFindings ? (
       <FilteredFindingsPanel
         selectedDocId={selectedDocId}
         selectedDocType={selectedDocType}
@@ -358,7 +374,6 @@ export default function App(): JSX.Element {
       />
     ) : (
       <AnalysisWorkspace
-        documents={ingestedDocuments}
         phase={workspacePhase}
         auditStatus={auditStatus}
         auditReport={auditReport}
@@ -370,7 +385,9 @@ export default function App(): JSX.Element {
       />
     )
 
-  const rightPanelKey = selectedDocId !== null ? `filtered:${selectedDocId}` : 'workspace'
+  const rightPanelKey = showDocumentScopedFindings
+    ? `filtered:${selectedDocId}`
+    : `workspace:${activeTab}`
   const rightPanel = (
     <div key={rightPanelKey} className="h-full animate-phantom-fade-in-up">
       {rightPanelContent}
