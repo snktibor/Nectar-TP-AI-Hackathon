@@ -898,30 +898,13 @@ class MockAgentService:
             missing_elements=missing_elements,
             overall_risk=RiskSeverity.CRITICAL,
             summary=(
-                f"{len(_AGENTS)}/{len(_AGENTS)} ágens sikeresen lefutott; 5 dokumentum "
-                f"átvizsgálva (Master File, Local File, Benchmark, szerződések, "
-                f"számlák), 9 megállapítás (4 CRITICAL, 3 HIGH, 2 MEDIUM): "
-                f"{len(consistency_errors)} konzisztencia-, {len(benchmark_risks)} "
-                f"benchmark- és {len(missing_elements)} teljességi finding. "
-                "Kritikus súlyú megállapítások (4): "
-                "a Berry-ráta (1,19) az IQR felső határa (Q3=1,10) "
-                "felett van, a Benchmark mégis téves következtetéssel szokásos "
-                "piaci árnak minősíti az árazást; "
-                "a licencdíj-összegeltérés "
-                "(szerződés/számla: 50.000.000 Ft vs. Local File: 45.000.000 Ft, "
-                "11,1% eltérés); "
-                "a Local File 5. fejezetének funkcionális elemzése "
-                "stratégiai döntési jogköröket rendel a HIG Manufacturing "
-                "Kft.-hez, ami ellentétes a Master File 1.3. és Local File 2.1. "
-                "fejezetében rögzített korlátozott kockázatú gyártói profillal. "
-                "Magas súlyú megállapítások (3): hiányzó benefit test "
-                "a menedzsmentdíjnál, hiányzó DEMPE-elemzés a "
-                "licencdíjnál, mérhető teljesítési kritériumok "
-                "nélküli management fee szerződés. "
-                "Közepes súlyú megállapítások (2): cost-plus 8% ↔ "
-                "Berry 1,19 módszertani inkonzisztencia, Q4 " 
-                "management fee számla 91 nappal a szerződéses határidő előtt "
-                "kiállítva. Az átfogó NAV-kockázat: CRITICAL."
+"Átfogó NAV-kockázat: KRITIKUS. Az AI összesen 9 megállapítást tett (4 kritikus, 3 magas, 2 közepes). "
+"Kritikus hibák: A Berry-ráta (1,19) meghaladja a megengedett Q3=1,10 határt, amit a Benchmark tévesen jóváhagyott. "
+"A licencdíjnál 11,1%-os eltérés van a szerződés/számla (50.000.000 Ft) és a Local File (45.000.000 Ft) között. "
+"A HIG Manufacturing Kft. profilja súlyosan ellentmondásos a dokumentumokban (stratégiai döntéshozó vs. korlátozott kockázatú gyártó). "
+"Magas kockázatok: Hiányzik a menedzsmentdíj hasznossági tesztje (benefit test), a licencdíj DEMPE-elemzése, "
+"illetve a szerződésből hiányoznak a mérhető teljesítési kritériumok. "
+"Közepes kockázatok: Módszertani inkonzisztencia (cost-plus 8% ↔ Berry 1,19) és egy 91 nappal korábban kiállított Q4-es számla."
             ),
             agent_runs=agent_runs,
         )

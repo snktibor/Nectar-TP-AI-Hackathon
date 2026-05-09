@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ChevronDown, Cpu, DatabaseZap, SearchCheck, Sparkles, Wrench, X } from 'lucide-react'
+import { AlertCircle, BarChart2, ChevronDown, ClipboardList, Cpu, DatabaseZap, SearchCheck, Sparkles, Wrench, X } from 'lucide-react'
 import { phantomDesign } from '../design-system/phantomDesign'
 import {
   ALL_AGENT_IDS,
@@ -208,6 +208,23 @@ function FindingsView({
           </span>
         </div>
       </section>
+
+        {/* Metric cards */}
+      <div className="grid grid-cols-1 gap-2 xs:grid-cols-2 sm:grid-cols-3">
+        {[
+          { icon: AlertCircle, label: 'Konzisztencia\nhibák', value: String(report.consistency_errors.length) },
+          { icon: BarChart2, label: 'Benchmark\nkockázatok', value: String(report.benchmark_risks.length) },
+          { icon: ClipboardList, label: 'Hiányzó\nelemek', value: String(report.missing_elements.length) },
+        ].map((card, index) => (
+          <div
+            key={card.label}
+            style={{ animationDelay: `${index * 70}ms` }}
+            className="animate-phantom-fade-in-up"
+          >
+            <MetricCard icon={card.icon} label={card.label} value={card.value} />
+          </div>
+        ))}
+      </div>
 
       {/* Severity filter */}
       <div className="grid min-w-0 grid-cols-2 gap-1.5 animate-phantom-fade-in-up sm:grid-cols-3 xl:grid-cols-5" style={{ animationDelay: '240ms' }}>
