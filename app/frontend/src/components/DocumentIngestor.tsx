@@ -1,14 +1,18 @@
 import { useCallback, useRef, useState } from 'react'
 import {
   AlertCircle,
+  AlertTriangle,
   CheckCircle,
+  CheckCircle2,
   FileText,
+  FileType2,
   FileUp,
+  Loader2,
+  Plus,
   RotateCcw,
   Upload,
   X,
 } from 'lucide-react'
-import { phantomDesign } from '../design-system/phantomDesign'
 import {
   formatBytes,
   getDocumentTypeDisplay,
@@ -28,6 +32,10 @@ interface DocumentIngestorProps {
   readonly onIngestComplete?: (documents: IngestedDocument[]) => void
   readonly onResetWorkspace?: () => void
   readonly showRestartAction?: boolean
+  readonly selectedDocId?: string | null
+  readonly onSelectDocument?: (filename: string) => void
+  readonly findingsByFilename?: Readonly<Record<string, number>>
+  readonly initialResults?: IngestedDocument[]
 }
 
 type IngestPhase = 'empty' | 'ready' | 'uploading' | 'done' | 'error'
@@ -118,12 +126,19 @@ export default function DocumentIngestor({
   onIngestComplete,
   onResetWorkspace,
   showRestartAction = false,
+  selectedDocId = null,
+  onSelectDocument,
+  findingsByFilename,
+  initialResults,
 }: DocumentIngestorProps): JSX.Element {
+  const hasHydratedResults = (initialResults?.length ?? 0) > 0
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
-  const [phase, setPhase] = useState<IngestPhase>('empty')
-  const [results, setResults] = useState<IngestedDocument[]>([])
+  const [phase, setPhase] = useState<IngestPhase>(hasHydratedResults ? 'done' : 'empty')
+  const [results, setResults] = useState<IngestedDocument[]>(initialResults ?? [])
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
-  const [classificationIssues, setClassificationIssues] = useState<ClassificationIssue[]>([])
+  const [classificationIssues, setClassificationIssues] = useState<ClassificationIssue[]>(
+    hasHydratedResults ? buildClassificationIssues(initialResults ?? []) : [],
+  )
   const [replacementTargetFilename, setReplacementTargetFilename] = useState<string | null>(null)
   const [isDragOver, setIsDragOver] = useState(false)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
@@ -366,9 +381,9 @@ export default function DocumentIngestor({
   const canRestartWorkflow = showRestartAction && (selectedFiles.length > 0 || results.length > 0)
 
   return (
-    <section className={[phantomDesign.components.panel, 'h-full shadow-none'].join(' ')}>
-      <div className="mb-4 flex min-h-14 flex-wrap items-center justify-between gap-2 rounded-phantom-card border border-phantom-line bg-phantom-surface-muted/60 px-4 py-3">
-        <p className="text-sm font-semibold text-phantom-ink">Dokumentum feltöltés</p>
+    <section className="h-full rounded-2xl border border-gray-100 bg-white p-4 shadow-md sm:p-5 lg:p-6">
+      <div className="mb-4 flex min-h-14 flex-wrap items-center justify-between gap-2 rounded-xl border border-gray-100 bg-slate-50 px-4 py-3">
+        <p className="text-sm font-semibold text-gray-900">Dokumentum feltöltés</p>
         <div className="flex min-w-0 flex-wrap items-center gap-2">
           {canRestartWorkflow && (
             <button
@@ -392,56 +407,44 @@ export default function DocumentIngestor({
       </div>
 
       {phase !== 'done' && phase !== 'uploading' && (
-        <>
+        isSelectionLocked ? (
+          <div
+            title={lockedUploadMessage}
+            className="flex items-center gap-3 rounded-xl border border-dashed border-gray-200 bg-slate-50/70 px-4 py-3 text-sm text-gray-500"
+          >
+            <Plus className="h-4 w-4 shrink-0 text-gray-400" />
+            <span className="flex-1 truncate">További fájlok hozzáadása</span>
+            <span className="text-xs font-medium text-gray-400">5/5 kiválasztva</span>
+          </div>
+        ) : (
           <label
-            htmlFor={isSelectionLocked ? undefined : FILE_INPUT_ID}
-            title={
-              isSelectionLocked
-                ? lockedUploadMessage
-                : undefined
-            }
+            htmlFor={FILE_INPUT_ID}
             onClick={handleUploadAreaClick}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
             className={[
-              'group flex flex-col items-center justify-center gap-4 rounded-phantom-card border border-dashed p-6 text-center transition-phantom duration-phantom-base sm:p-8',
-              isSelectionLocked
-                ? 'cursor-not-allowed border-phantom-line bg-phantom-surface-muted/95 saturate-0'
-                : 'cursor-pointer',
-              !isSelectionLocked && isDragOver
+              'group flex cursor-pointer flex-col items-center justify-center gap-4 rounded-2xl border border-dashed p-6 text-center transition-phantom duration-phantom-base sm:p-8',
+              isDragOver
                 ? 'border-phantom-accent bg-phantom-accent-soft shadow-phantom-soft'
-                : !isSelectionLocked
-                  ? 'border-phantom-line bg-phantom-surface-muted hover:border-phantom-accent hover:bg-phantom-accent-soft hover:shadow-phantom-soft'
-                  : '',
+                : 'border-gray-200 bg-slate-50 hover:border-phantom-accent hover:bg-phantom-accent-soft hover:shadow-phantom-soft',
             ].join(' ')}
           >
-            <div
-              className={[
-                'flex h-14 w-14 items-center justify-center rounded-phantom-card ring-1 ring-phantom-line transition-phantom duration-phantom-base',
-                isSelectionLocked
-                  ? 'bg-phantom-surface-muted text-phantom-subtle'
-                  : 'bg-phantom-surface text-phantom-accent shadow-phantom-soft group-hover:-translate-y-0.5',
-              ].join(' ')}
-            >
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-phantom-accent shadow-phantom-soft ring-1 ring-gray-100 transition-phantom duration-phantom-base group-hover:-translate-y-0.5">
               <Upload className="h-7 w-7" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-phantom-ink">
-                {isSelectionLocked
-                  ? '5/5 fájl kiválasztva'
-                  : isDragOver
+              <p className="text-sm font-semibold text-gray-900">
+                {isDragOver
                   ? 'Engedd el itt a dokumentumokat'
                   : 'Húzd ide a dokumentumokat, vagy kattints'}
               </p>
-              <p className="mt-1 text-xs leading-5 text-phantom-muted">
-                {isSelectionLocked
-                  ? 'A feltöltés zárolva, amíg nem törölsz egy fájlt.'
-                  : `PDF vagy DOCX, max 50 MB / fájl. Pontosan ${MAX_FILES} dokumentum szükséges.`}
+              <p className="mt-1 text-xs leading-5 text-gray-500">
+                {`PDF vagy DOCX, max 50 MB / fájl. Pontosan ${MAX_FILES} dokumentum szükséges.`}
               </p>
             </div>
           </label>
-        </>
+        )
       )}
 
       <input
@@ -456,26 +459,37 @@ export default function DocumentIngestor({
 
       {(phase === 'ready' || phase === 'error' || phase === 'uploading') && selectedFiles.length > 0 && (
         <div className="mt-4 space-y-2">
-          <div className="mb-1 rounded-phantom-card border border-phantom-line bg-phantom-surface px-4 py-2.5">
+          <div className="mb-1 rounded-xl border border-gray-100 bg-white px-4 py-2.5">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <p className="text-xs font-semibold text-phantom-muted">
+              <p className="text-xs font-semibold text-gray-500">
                 Kiválasztva: {selectedFiles.length}/{MAX_FILES}
               </p>
-              <StatusPill tone={selectedFiles.length === MAX_FILES ? 'success' : 'warning'}>
-                {selectedFiles.length === MAX_FILES
-                  ? 'Készen áll'
-                  : `Még ${MAX_FILES - selectedFiles.length} hiányzik`}
-              </StatusPill>
+              {selectedFiles.length === MAX_FILES ? (
+                <span className="inline-flex h-7 items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 text-xs font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-200">
+                  <CheckCircle2 className="h-3.5 w-3.5" />
+                  Készen áll
+                </span>
+              ) : (
+                <StatusPill tone="warning">
+                  {`Még ${MAX_FILES - selectedFiles.length} hiányzik`}
+                </StatusPill>
+              )}
             </div>
           </div>
 
-          {selectedFiles.map((file) => (
+          {selectedFiles.map((file) => {
+            const isPdf = file.name.toLowerCase().endsWith('.pdf')
+            const FileIcon = isPdf ? FileText : FileType2
+            const iconWrapClass = isPdf
+              ? 'bg-red-50 text-red-600 ring-red-100'
+              : 'bg-blue-50 text-blue-600 ring-blue-100'
+            return (
             <div
               key={file.name}
-              className="flex items-center gap-3 rounded-phantom-card border border-phantom-line bg-phantom-surface p-3 shadow-sm"
+              className="flex items-center gap-3 rounded-xl border border-gray-100 bg-white p-3 shadow-sm"
             >
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-phantom-control bg-phantom-surface-muted text-phantom-muted ring-1 ring-phantom-line">
-                <FileText className="h-4 w-4" />
+              <div className={['flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ring-1', iconWrapClass].join(' ')}>
+                <FileIcon className="h-4 w-4" />
               </div>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium text-phantom-ink" title={file.name}>
@@ -498,7 +512,8 @@ export default function DocumentIngestor({
                 <X className="h-4 w-4" />
               </button>
             </div>
-          ))}
+            )
+          })}
         </div>
       )}
 
@@ -594,14 +609,40 @@ export default function DocumentIngestor({
                 )
               }
 
+              const findingCount = findingsByFilename?.[document.filename] ?? 0
+              const isSelected = selectedDocId === document.filename
+              const isSelectable = !isMisclassified && Boolean(onSelectDocument)
+
               return (
                 <div
                   key={document.document_id}
+                  role={isSelectable ? 'button' : undefined}
+                  tabIndex={isSelectable ? 0 : undefined}
+                  onClick={
+                    isSelectable
+                      ? () => onSelectDocument?.(document.filename)
+                      : undefined
+                  }
+                  onKeyDown={
+                    isSelectable
+                      ? (event) => {
+                          if (event.key === 'Enter' || event.key === ' ') {
+                            event.preventDefault()
+                            onSelectDocument?.(document.filename)
+                          }
+                        }
+                      : undefined
+                  }
                   className={[
-                    'rounded-phantom-card border p-3 shadow-sm',
+                    'rounded-xl border p-3 transition-all duration-150 shadow-sm',
                     isMisclassified
                       ? 'border-phantom-danger-border bg-phantom-danger-soft'
-                      : 'border-phantom-line bg-phantom-surface',
+                      : isSelected
+                        ? 'border-orange-300 bg-orange-50 shadow-md ring-1 ring-orange-200'
+                        : 'border-gray-100 bg-white hover:border-orange-200 hover:bg-orange-50/40',
+                    isSelectable
+                      ? 'cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400'
+                      : '',
                   ].join(' ')}
                 >
                   <div className="flex items-start gap-2">
@@ -616,7 +657,7 @@ export default function DocumentIngestor({
                           <p
                             className={[
                               'truncate text-sm font-semibold',
-                              isMisclassified ? 'text-phantom-danger-text' : 'text-phantom-ink',
+                              isMisclassified ? 'text-phantom-danger-text' : 'text-gray-900',
                             ].join(' ')}
                             title={document.filename}
                           >
@@ -630,20 +671,54 @@ export default function DocumentIngestor({
                           >
                             {typeConfig.label}
                           </span>
+                          {!isMisclassified && findingCount > 0 && (
+                            <span
+                              className="inline-flex items-center gap-1 rounded-full bg-red-50 px-2 py-0.5 text-xs font-semibold text-red-700 ring-1 ring-inset ring-red-200"
+                              title={`${findingCount} megállapítás ehhez a dokumentumhoz`}
+                            >
+                              <AlertTriangle className="h-3 w-3" />
+                              {findingCount}
+                            </span>
+                          )}
+                          {!isMisclassified && findingCount === 0 && findingsByFilename && (
+                            <span
+                              className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-200"
+                              title="Nincs megállapítás"
+                            >
+                              <CheckCircle2 className="h-3 w-3" />
+                              0
+                            </span>
+                          )}
                         </div>
 
-                        {isMisclassified && (
+                        <div className="flex shrink-0 items-center gap-1">
+                          {isMisclassified && (
+                            <button
+                              type="button"
+                              onClick={(event) => {
+                                event.stopPropagation()
+                                replaceSingleFile(document.filename)
+                              }}
+                              className="inline-flex h-7 shrink-0 items-center justify-center rounded-phantom-control border border-phantom-danger-border bg-phantom-surface px-3 text-xs font-semibold text-phantom-danger-text transition-phantom duration-phantom-base hover:bg-phantom-danger-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus"
+                            >
+                              Fájl csere
+                            </button>
+                          )}
                           <button
                             type="button"
-                            onClick={() => replaceSingleFile(document.filename)}
-                            className="inline-flex h-7 shrink-0 items-center justify-center rounded-phantom-control border border-phantom-danger-border bg-phantom-surface px-3 text-xs font-semibold text-phantom-danger-text transition-phantom duration-phantom-base hover:bg-phantom-danger-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus"
+                            onClick={(event) => {
+                              event.stopPropagation()
+                              replaceSingleFile(document.filename)
+                            }}
+                            className="shrink-0 rounded-md p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400"
+                            aria-label={`Eltávolítás: ${document.filename}`}
                           >
-                            Fájl csere
+                            <X className="h-4 w-4" />
                           </button>
-                        )}
+                        </div>
                       </div>
 
-                      <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-1 text-xs text-phantom-muted">
+                      <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500">
                         <span>{document.page_count} oldal</span>
                         <span>{document.chunk_count} részlet</span>
                         <span>{formatBytes(document.size_bytes)}</span>
@@ -672,19 +747,32 @@ export default function DocumentIngestor({
         </div>
       )}
 
-      {(phase === 'ready' || phase === 'error') && (
+      {(phase === 'ready' || phase === 'error' || phase === 'uploading') && (
         <button
           type="button"
           onClick={() => void handleIngest()}
-          disabled={selectedFiles.length !== MAX_FILES}
+          disabled={selectedFiles.length !== MAX_FILES || phase === 'uploading'}
           className={[
-            phantomDesign.components.buttonBase,
-            phantomDesign.components.buttonPrimary,
-            'mt-4 flex items-center justify-center gap-2',
+            'mt-4 flex min-h-11 w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold text-white',
+            'bg-gradient-to-r from-orange-500 to-orange-400 shadow-lg shadow-orange-500/30',
+            'transition-all duration-200 ease-out',
+            'hover:from-orange-600 hover:to-orange-500 hover:shadow-orange-500/40 hover:-translate-y-0.5',
+            'active:translate-y-0 active:shadow-orange-500/20',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 focus-visible:ring-offset-2',
+            'disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0',
           ].join(' ')}
         >
-          <FileUp className="h-4 w-4" />
-          Beolvasás indítása ({selectedFiles.length}/{MAX_FILES})
+          {phase === 'uploading' ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              AI Elemzés folyamatban...
+            </>
+          ) : (
+            <>
+              <FileUp className="h-4 w-4" />
+              Beolvasás indítása ({selectedFiles.length}/{MAX_FILES})
+            </>
+          )}
         </button>
       )}
     </section>
