@@ -12,7 +12,7 @@ const toneClasses: Record<Tone, string> = {
   success: 'bg-phantom-success-soft text-phantom-success-text ring-phantom-success-border',
   warning: 'bg-phantom-severity-medium-soft text-phantom-severity-medium-text ring-phantom-severity-medium-border',
   danger: 'bg-phantom-danger-soft text-phantom-danger-text ring-phantom-danger-border',
-  info: 'bg-blue-50 text-blue-700 ring-blue-600/20',
+  info: 'bg-blue-50 text-blue-700 ring-phantom-line',
 }
 
 const metricIconClasses: Record<Tone, string> = {
@@ -21,7 +21,7 @@ const metricIconClasses: Record<Tone, string> = {
   success: 'bg-phantom-success-soft text-phantom-success-text ring-phantom-success-border',
   warning: 'bg-phantom-severity-medium-soft text-phantom-severity-medium-text ring-phantom-severity-medium-border',
   danger: 'bg-phantom-danger-soft text-phantom-danger-text ring-phantom-danger-border',
-  info: 'bg-blue-50 text-blue-700 ring-blue-600/20',
+  info: 'bg-blue-50 text-blue-700 ring-phantom-line',
 }
 
 const stepClasses: Record<StepState, string> = {

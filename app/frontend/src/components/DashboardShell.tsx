@@ -98,9 +98,9 @@ function MinimalSidebar({ activeTab, onTabChange }: MinimalSidebarProps): JSX.El
     <aside className="flex flex-col justify-between border-b border-gray-100 bg-slate-50 p-3 animate-phantom-fade-in sm:p-4 lg:min-h-screen lg:border-b-0 lg:border-r lg:p-5">
       <div className="space-y-4 px-1 py-1">
         <div className="pl-1 animate-phantom-fade-in-down" style={{ animationDelay: '20ms' }}>
-          <p className="group cursor-default text-sm font-semibold uppercase tracking-[0.08em] text-gray-900 transition-all duration-phantom-base hover:tracking-[0.12em]">
-            <span className="text-orange-600 transition-colors duration-phantom-base group-hover:text-orange-500">REDLINE</span>{' '}
-            <span className="transition-colors duration-phantom-base group-hover:text-orange-700">PHANTOM</span>
+          <p className="cursor-default text-sm font-semibold uppercase tracking-[0.08em] text-gray-900">
+            <span className="text-orange-600">REDLINE</span>{' '}
+            <span>PHANTOM</span>
           </p>
         </div>
 

@@ -153,6 +153,19 @@
 		}
 	}
 
+	/* Global motion guardrail: keep hover transforms very subtle across the app. */
+	@media (hover: hover) {
+		*:hover {
+			--tw-translate-x: 0 !important;
+			--tw-translate-y: 0 !important;
+			--tw-rotate: 0 !important;
+			--tw-skew-x: 0 !important;
+			--tw-skew-y: 0 !important;
+			--tw-scale-x: 1 !important;
+			--tw-scale-y: 1 !important;
+		}
+	}
+
 	details.phantom-accordion {
 		overflow: hidden;
 	}
