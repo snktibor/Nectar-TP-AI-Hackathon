@@ -67,11 +67,6 @@ export default {
         'phantom-card': 'var(--phantom-radius-card)',
         'phantom-control': 'var(--phantom-radius-control)',
       },
-      boxShadow: {
-        'phantom-soft': 'var(--phantom-shadow-soft)',
-        'phantom-lift': 'var(--phantom-shadow-lift)',
-        'phantom-button': 'var(--phantom-shadow-button)',
-      },
       fontFamily: {
         sans: ['Inter', 'Segoe UI', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
@@ -84,7 +79,7 @@ export default {
         'phantom-standard': 'cubic-bezier(0.22, 1, 0.36, 1)',
       },
       transitionProperty: {
-        phantom: 'color, background-color, border-color, box-shadow, transform, opacity',
+        phantom: 'color, background-color, border-color, transform, opacity',
       },
       keyframes: {
         'phantom-fade-in': {
@@ -112,9 +107,9 @@ export default {
           '50%': { opacity: '0.82' },
         },
         'phantom-pulse-ring': {
-          '0%': { boxShadow: '0 0 0 0 rgb(255 123 71 / 0.28)' },
-          '70%': { boxShadow: '0 0 0 6px rgb(255 123 71 / 0)' },
-          '100%': { boxShadow: '0 0 0 0 rgb(255 123 71 / 0)' },
+          '0%': { transform: 'scale(1)', opacity: '1' },
+          '70%': { transform: 'scale(1.08)', opacity: '0.65' },
+          '100%': { transform: 'scale(1)', opacity: '1' },
         },
         'phantom-pulse-dot': {
           '0%, 100%': { transform: 'scale(1)', opacity: '1' },
@@ -126,8 +121,8 @@ export default {
           '100%': { opacity: '1', transform: 'scale(1)' },
         },
         'phantom-progress-glow': {
-          '0%, 100%': { boxShadow: '0 0 0 0 rgb(255 123 71 / 0)' },
-          '50%': { boxShadow: '0 0 3px 0 rgb(255 123 71 / 0.2)' },
+          '0%, 100%': { opacity: '1' },
+          '50%': { opacity: '0.82' },
         },
       },
       animation: {

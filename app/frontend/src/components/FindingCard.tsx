@@ -11,6 +11,7 @@ import {
   type BackendMissingElement,
 } from '../lib/backendAudit'
 import type { CitationTarget } from '../types/viewer'
+import { evidenceChunkToCitationTarget, formatEvidencePage } from '../lib/citations'
 import { resolveLegalReference } from '../lib/legalDocs'
 import { phantomDesign } from '../design-system/phantomDesign'
 import EvidenceChip from './EvidenceChip'
@@ -20,22 +21,6 @@ function collectLegalReferences(attribution: BackendFindingAttribution): string[
   const raw = [attribution.rule_id, ...(attribution.legal_references ?? [])]
   const filtered = raw.filter((item): item is string => Boolean(item?.trim()))
   return [...new Set(filtered)]
-}
-
-function chunkToCitation(
-  chunk: BackendEvidenceChunk,
-  sessionId: string,
-  fallbackQuote: string | null = null,
-): CitationTarget {
-  return {
-    sessionId,
-    filename: chunk.filename,
-    page: chunk.page,
-    charStart: chunk.char_start ?? null,
-    charEnd: chunk.char_end ?? null,
-    sourceKind: chunk.source_kind ?? 'document',
-    quote: chunk.quote ?? fallbackQuote,
-  }
 }
 
 function LegalReferenceBadge({
@@ -125,15 +110,7 @@ function AttributionRow({
         <span className="text-[11px] text-phantom-subtle">Hivatkozások:</span>
         {hasChunks ? (
           attribution.evidence_chunks.map((chunk, i) => {
-            const target: CitationTarget = {
-              sessionId,
-              filename: chunk.filename,
-              page: chunk.page,
-              charStart: chunk.char_start ?? null,
-              charEnd: chunk.char_end ?? null,
-              sourceKind: chunk.source_kind ?? 'document',
-              quote: chunk.quote ?? null,
-            }
+            const target = evidenceChunkToCitationTarget(chunk, sessionId)
             return (
               <span
                 key={`${chunk.filename}-${chunk.page}-${chunk.chunk_index}-${i}`}
@@ -153,7 +130,7 @@ function AttributionRow({
         )}
       </div>
 
-      {/* Confidence bar + human review badge */}
+      {/* Confidence bar */}
       <div className="flex flex-wrap items-center gap-2">
         <div className="h-1 w-full overflow-hidden rounded-full bg-phantom-surface ring-1 ring-phantom-line sm:flex-1 sm:w-auto">
           <div
@@ -164,11 +141,6 @@ function AttributionRow({
         <span className="shrink-0 whitespace-nowrap text-[11px] text-phantom-subtle">
           Megbízhatóság: {confidencePct}%
         </span>
-        {attribution.requires_human_review === true && (
-          <div className="min-w-0">
-            <StatusPill tone="warning">Emberi felülvizsgálat szükséges</StatusPill>
-          </div>
-        )}
       </div>
 
       {/* Reasoning (collapsible) */}
@@ -180,13 +152,6 @@ function AttributionRow({
           </summary>
           <p className="mt-1 break-words italic leading-relaxed text-phantom-muted">{attribution.reasoning}</p>
         </details>
-      )}
-
-      {/* Uncertainty notes */}
-      {attribution.uncertainty_notes && (
-        <p className="break-words border-l-2 border-amber-300 pl-2 text-[11px] text-phantom-subtle">
-          {attribution.uncertainty_notes}
-        </p>
       )}
 
       {/* Legal references */}
@@ -222,6 +187,12 @@ function findingSeverity(variant: FindingVariant) {
   return variant.finding.severity
 }
 
+function findingGroupLabel(kind: FindingVariant['kind']): string {
+  if (kind === 'consistency') return 'Konzisztencia hibák'
+  if (kind === 'benchmark') return 'Benchmark kockázatok'
+  return 'Hiányzó elemek'
+}
+
 function findingLocationsCount(variant: FindingVariant): number {
   if (variant.kind === 'missing') return 0
   return variant.finding.locations.length
@@ -255,20 +226,22 @@ export default function FindingCard({
       className={[
         'group min-w-0 overflow-hidden rounded-phantom-card border border-phantom-line bg-phantom-surface-muted p-3',
         'border-l-4 transition-phantom duration-phantom-base animate-phantom-fade-in-up',
-        'hover:-translate-y-0.5 hover:bg-phantom-surface hover:shadow-phantom-soft hover:border-phantom-line-strong',
+        'hover:bg-phantom-surface hover:border-phantom-line-strong',
         borderClass,
       ].join(' ')}
     >
       <div className="flex min-w-0 flex-wrap items-center gap-1.5">
         <span
           className={[
-            'inline-flex h-6 shrink-0 items-center whitespace-nowrap rounded-full px-2 text-[11px] font-semibold uppercase transition-transform duration-phantom-base group-hover:scale-105',
+            'inline-flex h-6 shrink-0 items-center whitespace-nowrap rounded-full px-2 text-[11px] font-semibold uppercase',
             getSeverityTone(severity),
             severity === 'critical' ? 'animate-phantom-pulse-soft' : '',
           ].join(' ')}
         >
           {severityLabel(severity)}
         </span>
+
+        <StatusPill tone="neutral">{findingGroupLabel(variant.kind)}</StatusPill>
 
         {showAgentBadge && attribution?.agent_id && (
           <StatusPill tone="neutral">{AGENT_LABELS[attribution.agent_id]}</StatusPill>
@@ -323,11 +296,11 @@ export default function FindingCard({
         <div className="mt-3 flex min-w-0 flex-wrap items-center gap-2">
           <button
             type="button"
-            onClick={() => onCitationClick(chunkToCitation(primaryChunk, sessionId, fallbackQuote))}
-            className="group/btn inline-flex items-center gap-1.5 rounded-phantom-control bg-phantom-accent px-3 py-1.5 text-xs font-semibold text-white shadow-phantom-button transition-phantom duration-phantom-base hover:-translate-y-px hover:scale-[1.03] hover:bg-phantom-accent-hover hover:shadow-phantom-lift active:translate-y-0 active:scale-95 active:bg-phantom-accent-pressed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus focus-visible:ring-offset-2 focus-visible:ring-offset-phantom-surface"
-            title={`${primaryChunk.filename} · oldal ${primaryChunk.page + 1}`}
+            onClick={() => onCitationClick(evidenceChunkToCitationTarget(primaryChunk, sessionId, fallbackQuote))}
+            className="group/btn inline-flex items-center gap-1.5 rounded-phantom-control border border-transparent bg-phantom-accent px-3 py-1.5 text-xs font-semibold text-white transition-phantom duration-phantom-base hover:bg-phantom-accent-hover active:bg-phantom-accent-pressed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus focus-visible:ring-offset-2 focus-visible:ring-offset-phantom-surface"
+            title={`${primaryChunk.filename} · ${formatEvidencePage(primaryChunk.page)}`}
           >
-            <MapPin className="h-3.5 w-3.5 transition-transform duration-phantom-base group-hover/btn:-translate-y-0.5 group-hover/btn:scale-110" />
+            <MapPin className="h-3.5 w-3.5" />
             <span>Mutasd meg hol van</span>
           </button>
         </div>
