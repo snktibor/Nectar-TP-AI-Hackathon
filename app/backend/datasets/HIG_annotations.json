@@ -6,7 +6,7 @@
     {
       "doc_id": "HIG-MF-2024",
       "doc_type": "Master File",
-      "filename": "HIG_Masterfile_2024.docx",
+      "filename": "hig_master_file_2024.pdf",
       "reference": "HIG-MF-2024",
       "errors": [],
       "note": "Hibátlan verzió – nincs annotált hiba"
@@ -14,7 +14,7 @@
     {
       "doc_id": "HIG-LF-2024",
       "doc_type": "Local File",
-      "filename": "HIG_LocalFile_2024_FAULTY.docx",
+      "filename": "hig_local_file_2024_faulty.pdf",
       "reference": "HIG-LF-2024-001",
       "errors": [
         {
@@ -60,12 +60,12 @@
           "correct_approach": "A funkcionális elemzésben a Társaságot konzisztensen korlátozott kockázatú, operatív gyártói profillal kell leírni: az operatív termelési döntések (műszak, karbantartási ütemezés) a Társaságnál maradnak, de a stratégiai döntések (kapacitásbővítés, árstratégia, szállítói keretszerződések) az Anyavállalat hatásköre."
         }
       ],
-      "note": "Hibás verzió – 3 szándékos hiba a hackathon detekciós feladathoz. A hibátlan verzió: HIG_LocalFile_2024.docx"
+      "note": "Hibás verzió – 3 szándékos hiba a hackathon detekciós feladathoz. A hibátlan verzió: hig_local_file_2024.pdf"
     },
     {
       "doc_id": "HIG-BENCH-2024",
       "doc_type": "Benchmark Study",
-      "filename": "HIG_Benchmark_2024.docx",
+      "filename": "hig_benchmark_study_2024.pdf",
       "reference": "HIG-BENCH-2024-001",
       "errors": [
         {
@@ -112,7 +112,7 @@
     {
       "doc_id": "HIG-CONTRACTS-2024",
       "doc_type": "Intragroup Contracts",
-      "filename": "HIG_Contracts_2024.docx",
+      "filename": "hig_contracts_2024.pdf",
       "reference": "HIG-MFG-2024-001 / HIG-MGMT-2024-002 / HIG-LIC-2024-003",
       "errors": [
         {
@@ -157,7 +157,7 @@
     {
       "doc_id": "HIG-INVOICES-2024",
       "doc_type": "Invoices",
-      "filename": "HIG_Invoices_2024.docx",
+      "filename": "hig_invoices_2024.pdf",
       "reference": "HIG-MFG-2024-1201 / HIG-MGMT-2024-Q4 / HIG-LIC-2024-001 / HIG-MFG-2024-ANNUAL",
       "errors": [
         {

@@ -5,13 +5,11 @@ GET  /status/{id} -> low-cost polling endpoint for the frontend.
 GET  /results/{id} -> final structured report (only available once COMPLETED).
 """
 
-from __future__ import annotations
-
 import logging
 from datetime import datetime, timezone
 from uuid import UUID
 
-from fastapi import APIRouter, BackgroundTasks, HTTPException, status
+from fastapi import APIRouter, BackgroundTasks, HTTPException, Request, status
 
 from app.models.schemas import (
     ApiResponse,
@@ -21,7 +19,8 @@ from app.models.schemas import (
     AuditStatus,
     AuditStatusResponse,
 )
-from app.services.agent_orchestrator import get_audit_service
+from app.core.rate_limiter import limiter
+from app.services.agent_orchestrator import AuditConfigurationError, get_audit_service
 
 logger = logging.getLogger(__name__)
 
@@ -30,16 +29,24 @@ router = APIRouter(prefix="/audits", tags=["audits"])
 
 @router.post(
     "/start",
-    response_model=ApiResponse[AuditStartResponse],
     status_code=status.HTTP_202_ACCEPTED,
     summary="Enqueue an audit pipeline run for a session.",
 )
+@limiter.limit("2/minute")
 async def start_audit(
+    request: Request,
     payload: AuditStartRequest,
     background_tasks: BackgroundTasks,
 ) -> ApiResponse[AuditStartResponse]:
     """Register a new task and schedule the background pipeline."""
-    audit_service = get_audit_service()
+    try:
+        audit_service = get_audit_service()
+    except AuditConfigurationError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={"code": exc.code, "message": str(exc)},
+        ) from exc
+
     task_id = await audit_service.register_task(payload.session_id)
 
     # BackgroundTasks runs after the response is sent — perfect for
@@ -63,7 +70,6 @@ async def start_audit(
 
 @router.get(
     "/status/{audit_task_id}",
-    response_model=ApiResponse[AuditStatusResponse],
     summary="Poll the current status and progress of an audit task.",
 )
 async def get_audit_status(audit_task_id: UUID) -> ApiResponse[AuditStatusResponse]:
@@ -103,7 +109,6 @@ async def get_audit_status(audit_task_id: UUID) -> ApiResponse[AuditStatusRespon
 
 @router.get(
     "/results/{audit_task_id}",
-    response_model=ApiResponse[AuditReport],
     summary="Fetch the final structured audit report.",
 )
 async def get_audit_results(audit_task_id: UUID) -> ApiResponse[AuditReport]:

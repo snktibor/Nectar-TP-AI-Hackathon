@@ -15,7 +15,7 @@ stable RAG surface it consumes.
 from __future__ import annotations
 
 import logging
-from typing import Any
+from typing import Annotated, Any
 from uuid import UUID
 
 from fastapi import APIRouter, HTTPException, Query, status
@@ -27,6 +27,7 @@ from app.services.rag_service import RagChunk, rag_service
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/rag", tags=["rag"])
+_QUERY_DESCRIPTION = "Natural-language query."
 
 
 # ---------------------------------------------------------------------------
@@ -44,6 +45,15 @@ class RagChunkOut(BaseModel):
     page: int = Field(..., ge=0)
     chunk_index: int = Field(..., ge=0)
     score: float
+    char_start: int | None = Field(default=None, ge=0)
+    char_end: int | None = Field(default=None, ge=0)
+    source_kind: str = "document"
+    source_id: str | None = None
+    source_title: str | None = None
+    source_url: str | None = None
+    source_version: str | None = None
+    section_id: str | None = None
+    citation_label: str | None = None
 
 
 class RagQueryResponse(BaseModel):
@@ -91,6 +101,15 @@ def _to_out(chunks: list[RagChunk]) -> list[RagChunkOut]:
             page=c.page,
             chunk_index=c.chunk_index,
             score=c.score,
+            char_start=c.char_start,
+            char_end=c.char_end,
+            source_kind=c.source_kind,
+            source_id=c.source_id,
+            source_title=c.source_title,
+            source_url=c.source_url,
+            source_version=c.source_version,
+            section_id=c.section_id,
+            citation_label=c.citation_label,
         )
         for c in chunks
     ]
@@ -113,28 +132,40 @@ def _validate_query(q: str) -> str:
 
 @router.get(
     "/legal/query",
-    response_model=ApiResponse[RagQueryResponse],
     summary="Query the static legal knowledge RAG (OECD, NAV).",
 )
 async def query_legal(
-    q: str = Query(..., description="Natural-language query."),
-    n_results: int = Query(5, ge=1, le=25),
+    q: Annotated[str, Query(description=_QUERY_DESCRIPTION)],
+    n_results: Annotated[int, Query(ge=1, le=25)] = 5,
+    agent_scope: Annotated[
+        str | None,
+        Query(description="Optional agent/document scope used for source reranking."),
+    ] = None,
+    source_id: Annotated[
+        list[str] | None,
+        Query(description="Optional canonical legal source id filter. Repeat to pass multiple ids."),
+    ] = None,
 ) -> ApiResponse[RagQueryResponse]:
     cleaned = _validate_query(q)
-    chunks = rag_service.query_legal_knowledge(cleaned, n_results=n_results)
+    source_ids = {item.strip() for item in source_id or [] if item.strip()}
+    chunks = rag_service.query_legal_knowledge(
+        cleaned,
+        n_results=n_results,
+        agent_scope=agent_scope,
+        source_ids=source_ids,
+    )
     payload = RagQueryResponse(query=cleaned, n_results=len(chunks), chunks=_to_out(chunks))
     return ApiResponse[RagQueryResponse](success=True, data=payload)
 
 
 @router.get(
     "/documents/{document_id}/query",
-    response_model=ApiResponse[RagQueryResponse],
     summary="Query a single document's RAG.",
 )
 async def query_document(
     document_id: UUID,
-    q: str = Query(..., description="Natural-language query."),
-    n_results: int = Query(5, ge=1, le=25),
+    q: Annotated[str, Query(description=_QUERY_DESCRIPTION)],
+    n_results: Annotated[int, Query(ge=1, le=25)] = 5,
 ) -> ApiResponse[RagQueryResponse]:
     cleaned = _validate_query(q)
     chunks = rag_service.query_document(document_id, cleaned, n_results=n_results)
@@ -144,13 +175,12 @@ async def query_document(
 
 @router.get(
     "/sessions/{session_id}/query",
-    response_model=ApiResponse[RagQueryResponse],
     summary="Fan-out query across every document RAG in a session.",
 )
 async def query_session(
     session_id: UUID,
-    q: str = Query(..., description="Natural-language query."),
-    n_results_per_doc: int = Query(3, ge=1, le=10),
+    q: Annotated[str, Query(description=_QUERY_DESCRIPTION)],
+    n_results_per_doc: Annotated[int, Query(ge=1, le=10)] = 3,
 ) -> ApiResponse[RagQueryResponse]:
     cleaned = _validate_query(q)
     chunks = rag_service.query_session_documents(
@@ -162,7 +192,6 @@ async def query_session(
 
 @router.get(
     "/sessions/{session_id}/documents",
-    response_model=ApiResponse[SessionDocumentsResponse],
     summary="List every per-document RAG registered for a session.",
 )
 async def list_session_documents(

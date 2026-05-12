@@ -1,0 +1,237 @@
+{
+  "catalog_version": "2026-05-12.4",
+  "description": "Pinned official legal sources used to build the NECTAR TP legal_knowledge RAG collection. Each indexed source is a cached PDF with a verified hash plus agent-scope and topic metadata for deterministic legal-RAG reranking.",
+  "sources": [
+    {
+      "source_id": "HU_TAO_ACT_1996_LXXXI",
+      "title": "1996. evi LXXXI. torveny a tarsasagi adorol es az osztalekadorol",
+      "source_type": "law",
+      "jurisdiction": "HU",
+      "language": "hu",
+      "official_url": "https://njt.jog.gov.hu/jogszabaly/1996-81-00-00",
+      "download_url": null,
+      "local_path": "hu_act_lxxxi_1996_tao.pdf",
+      "index_enabled": true,
+      "update_mode": "manual_cache",
+      "access_status": "cached",
+      "source_version": "cached-2026-05-12",
+      "publication_date": null,
+      "effective_from": null,
+      "effective_to": null,
+      "citation_label": "1996. evi LXXXI. torveny",
+      "agent_scopes": ["local_file", "benchmark_study", "invoice", "cross_document", "all"],
+      "priority_topics": ["szokasos piaci ar", "kapcsolt vallalkozas", "tao 18", "tao 31/b", "adoalap korrekcio", "tarsasagi ado"],
+      "sha256": "cf28041ad92711eb84b86cc7770892afa778d75ac007c829a23fc5b4947e2fc2",
+      "size_bytes": 2820228,
+      "aliases": [
+        {"value": "HU_Act_LXXXI_1996", "kind": "canonical_reference"},
+        {"value": "Tao_tv", "kind": "legacy_reference"},
+        {"value": "hu_act_lxxxi_1996_tao.pdf", "kind": "filename"}
+      ],
+      "sections": [
+        {"section_id": "HU_Act_LXXXI_1996.18", "label": "18. §", "title": "Szokasos piaci ar", "page_hint": 17, "citation_label": "Tao. tv. 18. §"},
+        {"section_id": "HU_Act_LXXXI_1996.19", "label": "19. §", "title": "Tarsasagi ado merteke", "page_hint": 18, "citation_label": "Tao. tv. 19. §"},
+        {"section_id": "HU_Act_LXXXI_1996.31_B", "label": "31/B. §", "title": "Kapcsolt vallalkozasi adatszolgaltatasi kotelesseg", "page_hint": 30, "citation_label": "Tao. tv. 31/B. §"}
+      ]
+    },
+    {
+      "source_id": "HU_NGM_DECREE_45_2025",
+      "title": "45/2025. (XII. 23.) NGM rendelet a transzferar-nyilvantartasi kotelezettsegrol",
+      "source_type": "decree",
+      "jurisdiction": "HU",
+      "language": "hu",
+      "official_url": "https://magyarkozlony.hu/",
+      "download_url": null,
+      "local_path": "hu_ngm_decree_45_2025.pdf",
+      "index_enabled": true,
+      "update_mode": "manual_cache",
+      "access_status": "cached",
+      "source_version": "cached-2026-05-12",
+      "publication_date": "2025-12-23",
+      "effective_from": null,
+      "effective_to": null,
+      "citation_label": "45/2025. (XII. 23.) NGM rendelet",
+      "agent_scopes": ["master_file", "local_file", "benchmark_study", "contract", "cross_document", "all"],
+      "priority_topics": ["transzferar nyilvantartas", "master file", "local file", "benchmark", "osszehasonlito elemzes", "tartalmi elemek"],
+      "sha256": "a100a47fb1b7e71bd54c5bc96bacfdcd7c2329b38eea87a8ad0d43d4f342d623",
+      "size_bytes": 1839746,
+      "aliases": [
+        {"value": "45_2025_NGM", "kind": "canonical_reference"},
+        {"value": "NGM_45_2025", "kind": "legacy_reference"},
+        {"value": "hu_ngm_decree_45_2025.pdf", "kind": "filename"}
+      ],
+      "sections": [
+        {"section_id": "45_2025_NGM.section_1", "label": "1. §", "title": "Altalanos rendelkezesek", "page_hint": 0, "citation_label": "45/2025. NGM 1. §"},
+        {"section_id": "45_2025_NGM.section_4", "label": "4. §", "title": "Transzferar-nyilvantartas tartalmi elemei", "page_hint": 3, "citation_label": "45/2025. NGM 4. §"},
+        {"section_id": "45_2025_NGM.section_6", "label": "6. §", "title": "Benchmark es osszehasonlito elemzes", "page_hint": 5, "citation_label": "45/2025. NGM 6. §"},
+        {"section_id": "45_2025_NGM.section_8", "label": "8. §", "title": "Zaro rendelkezesek", "page_hint": 8, "citation_label": "45/2025. NGM 8. §"}
+      ]
+    },
+    {
+      "source_id": "HU_NAV_TP_DATA_SERVICE_GUIDE_2024",
+      "title": "NAV/PM tajekoztato a transzferar-adatszolgaltatashoz",
+      "source_type": "tax_authority_guidance",
+      "jurisdiction": "HU",
+      "language": "hu",
+      "official_url": "https://nav.gov.hu/ugyfeliranytu/nezzen-utana/tudjon_rola/Tajekoztato_a_transzferar-adatszolgaltatashoz",
+      "download_url": "https://cdn.kormany.hu/uploads/sheets/e/ef/ef8/ef8e068c1d559b301ce53d14001efd4.pdf",
+      "local_path": "hu_nav_transfer_pricing_data_service_guide.pdf",
+      "index_enabled": true,
+      "update_mode": "manual_cache",
+      "access_status": "cached",
+      "source_version": "frissitve-2024-04-26",
+      "publication_date": "2024-05-09",
+      "effective_from": null,
+      "effective_to": null,
+      "citation_label": "NAV/PM TP adatszolgaltatasi tajekoztato",
+      "agent_scopes": ["local_file", "benchmark_study", "invoice", "cross_document", "all"],
+      "priority_topics": ["transzferar adatszolgaltatas", "ugyletmegnevezes", "teaor", "szokasos piaci ar modszer", "tesztelt fel", "jovedelmezosegi mutato", "mentesulo ugyletek"],
+      "sha256": "849940af502dcd84d7b236222b581ba44acb9c24b8cdb75d6a95524e95338625",
+      "size_bytes": 132617,
+      "aliases": [
+        {"value": "NAV_TP_DATA_SERVICE_GUIDE_2024", "kind": "canonical_reference"},
+        {"value": "PM_tajekoztato_TPadatszolg", "kind": "legacy_reference"},
+        {"value": "Tajekoztato a transzferar-adatszolgaltatashoz", "kind": "natural_language"},
+        {"value": "hu_nav_transfer_pricing_data_service_guide.pdf", "kind": "filename"}
+      ],
+      "sections": [
+        {"section_id": "NAV_TP_DATA_SERVICE_GUIDE_2024.obligation", "label": "1.", "title": "Adatszolgaltatasi kotelezettseg", "page_hint": 2, "citation_label": "NAV/PM TP adatszolg. taj. 1."},
+        {"section_id": "NAV_TP_DATA_SERVICE_GUIDE_2024.exemptions", "label": "6.", "title": "Teljeskoruen mentesulo ugyletek", "page_hint": 5, "citation_label": "NAV/PM TP adatszolg. taj. 6."},
+        {"section_id": "NAV_TP_DATA_SERVICE_GUIDE_2024.transaction_labels", "label": "8.", "title": "Ugyletmegnevezesek es TEAOR kapcsolat", "page_hint": 8, "citation_label": "NAV/PM TP adatszolg. taj. 8."},
+        {"section_id": "NAV_TP_DATA_SERVICE_GUIDE_2024.tp_method", "label": "8.6.", "title": "Szokasos piaci ar-megallapitasi modszer", "page_hint": 23, "citation_label": "NAV/PM TP adatszolg. taj. 8.6."},
+        {"section_id": "NAV_TP_DATA_SERVICE_GUIDE_2024.tested_party", "label": "8.7.", "title": "Tesztelt fel es jovedelmezosegi mutatok", "page_hint": 25, "citation_label": "NAV/PM TP adatszolg. taj. 8.7."}
+      ]
+    },
+    {
+      "source_id": "HU_NAV_INFO_BOOKLET_41_TAO_2026",
+      "title": "NAV 41. informacios fuzet - A tarsasagi ado legfontosabb szabalyai",
+      "source_type": "tax_authority_guidance",
+      "jurisdiction": "HU",
+      "language": "hu",
+      "official_url": "https://nav.gov.hu/ugyfeliranytu/nezzen-utana/inf_fuz",
+      "download_url": "https://nav.gov.hu/pfile/file?path=/ugyfeliranytu/nezzen-utana/inf_fuz/rejtett/Informacios-fuzetek---Aktualis/41.-A-tarsasagi-ado-legfontosabb-szabalyai",
+      "local_path": "hu_nav_corporate_tax_info_booklet_41_2026.pdf",
+      "index_enabled": true,
+      "update_mode": "manual_cache",
+      "access_status": "cached",
+      "source_version": "kozzeteve-2026-02-02",
+      "publication_date": "2026-02-02",
+      "effective_from": null,
+      "effective_to": null,
+      "citation_label": "NAV 41. informacios fuzet",
+      "agent_scopes": ["local_file", "invoice", "benchmark_study", "cross_document", "all"],
+      "priority_topics": ["tarsasagi ado", "adoalap", "adoalap korrekcio", "szokasos piaci ar", "kapcsolt vallalkozas", "9 szazalek"],
+      "sha256": "c83e4e6cd474bd6c356e6074eeb26ec4983667d91990943a6afcd5d6abca1029",
+      "size_bytes": 556477,
+      "aliases": [
+        {"value": "NAV_INFO_BOOKLET_41_TAO_2026", "kind": "canonical_reference"},
+        {"value": "41. Informacios fuzet", "kind": "natural_language"},
+        {"value": "A tarsasagi ado legfontosabb szabalyai", "kind": "natural_language"},
+        {"value": "hu_nav_corporate_tax_info_booklet_41_2026.pdf", "kind": "filename"}
+      ],
+      "sections": [
+        {"section_id": "NAV_INFO_BOOKLET_41_TAO_2026.arm_length", "label": "7.", "title": "Szokasos piaci ar es kapcsolt vallalkozas", "page_hint": 16, "citation_label": "NAV 41. fuzet 7."},
+        {"section_id": "NAV_INFO_BOOKLET_41_TAO_2026.adjustment", "label": "7.", "title": "Adoalap-korrekcio szokasos piaci artol elteres miatt", "page_hint": 17, "citation_label": "NAV 41. fuzet 7."},
+        {"section_id": "NAV_INFO_BOOKLET_41_TAO_2026.tax_rate", "label": "10.", "title": "A tarsasagi ado merteke", "page_hint": 26, "citation_label": "NAV 41. fuzet 10."}
+      ]
+    },
+    {
+      "source_id": "HU_MAGYAR_KOZLONY_2025_157",
+      "title": "Magyar Kozlony 2025/157. szam (45/2025. NGM rendelet hivatalos kozzetetel)",
+      "source_type": "other",
+      "jurisdiction": "HU",
+      "language": "hu",
+      "official_url": "https://magyarkozlony.hu/",
+      "download_url": null,
+      "local_path": "hu_magyar_kozlony_2025_157.pdf",
+      "index_enabled": true,
+      "update_mode": "manual_cache",
+      "access_status": "cached",
+      "source_version": "2025_157",
+      "publication_date": "2025-12-23",
+      "effective_from": null,
+      "effective_to": null,
+      "citation_label": "Magyar Kozlony 2025/157.",
+      "agent_scopes": ["master_file", "local_file", "benchmark_study", "contract", "cross_document", "all"],
+      "priority_topics": ["transzferar nyilvantartasi kotelezettseg", "45/2025 ngm rendelet", "kozlony kozzetetel", "master file", "local file"],
+      "sha256": "d9c28d5722672a6b0bc0f91666156c1d5fab22541973823774dac7f42378cf90",
+      "size_bytes": 3376168,
+      "aliases": [
+        {"value": "HU_GAZETTE_2025_157", "kind": "canonical_reference"},
+        {"value": "MK_25_157", "kind": "legacy_reference"},
+        {"value": "hu_magyar_kozlony_2025_157.pdf", "kind": "filename"}
+      ],
+      "sections": [
+        {"section_id": "HU_MAGYAR_KOZLONY_2025_157.ngm_45_header", "label": "45/2025. (XII. 23.) NGM", "title": "Rendelet kozzetetele", "page_hint": 3, "citation_label": "MK 2025/157. 45/2025. NGM"},
+        {"section_id": "HU_MAGYAR_KOZLONY_2025_157.tp_scope", "label": "45/2025. NGM", "title": "Transzferar nyilvantartasi kotelezettseg", "page_hint": 4, "citation_label": "MK 2025/157. TP rendelet"}
+      ]
+    },
+    {
+      "source_id": "OECD_TPG_2010_HU",
+      "title": "OECD Transzferar Iranyelvek (magyar valtozat)",
+      "source_type": "guideline",
+      "jurisdiction": "OECD",
+      "language": "hu",
+      "official_url": "https://www.oecd.org/tax/transfer-pricing/",
+      "download_url": null,
+      "local_path": "oecd_transfer_pricing_guidelines_2010_hu.pdf",
+      "index_enabled": true,
+      "update_mode": "manual_cache",
+      "access_status": "cached",
+      "source_version": "2010-hu",
+      "publication_date": "2010-01-01",
+      "effective_from": null,
+      "effective_to": null,
+      "citation_label": "OECD Transzferar Iranyelvek (HU)",
+      "agent_scopes": ["master_file", "local_file", "contract", "benchmark_study", "cross_document", "all"],
+      "priority_topics": ["szokasos piaci ar elve", "transzferar modszer", "osszehasonlithatosagi elemzes", "dokumentacio", "tesztelt fel"],
+      "sha256": "a663805d5188d39a617462cb99dc9a39cc83ab9dd026f50713ba6cecfa7683a6",
+      "size_bytes": 1689785,
+      "aliases": [
+        {"value": "OECD_TP_GUIDELINES_HU", "kind": "canonical_reference"},
+        {"value": "9789264216631-hu", "kind": "legacy_reference"},
+        {"value": "oecd_transfer_pricing_guidelines_2010_hu.pdf", "kind": "filename"}
+      ],
+      "sections": [
+        {"section_id": "OECD_TPG_2010_HU.CH_I", "label": "I. fejezet", "title": "A szokasos piaci ar elve", "page_hint": 5, "citation_label": "OECD TPG HU I. fejezet"},
+        {"section_id": "OECD_TPG_2010_HU.CH_II", "label": "II. fejezet", "title": "Transzferar modszer", "page_hint": 6, "citation_label": "OECD TPG HU II. fejezet"},
+        {"section_id": "OECD_TPG_2010_HU.CH_V", "label": "V. fejezet", "title": "Dokumentacio", "page_hint": 9, "citation_label": "OECD TPG HU V. fejezet"}
+      ]
+    },
+    {
+      "source_id": "OECD_TPG_2022",
+      "title": "OECD Transfer Pricing Guidelines for Multinational Enterprises and Tax Administrations 2022",
+      "source_type": "guideline",
+      "jurisdiction": "OECD",
+      "language": "en",
+      "official_url": "https://doi.org/10.1787/0e655865-en",
+      "download_url": "https://www.oecd-ilibrary.org/taxation/oecd-transfer-pricing-guidelines-for-multinational-enterprises-and-tax-administrations-2022_0e655865-en",
+      "local_path": "oecd_tpg_2022_en.pdf",
+      "index_enabled": true,
+      "update_mode": "manual_cache",
+      "access_status": "cached",
+      "source_version": "2022",
+      "publication_date": "2022-01-20",
+      "effective_from": null,
+      "effective_to": null,
+      "citation_label": "OECD TPG 2022",
+      "agent_scopes": ["master_file", "local_file", "contract", "benchmark_study", "cross_document", "all"],
+      "priority_topics": ["arm's length principle", "transfer pricing methods", "comparability analysis", "documentation", "intangibles", "intra-group services", "tested party"],
+      "sha256": "573d14f958bb9f5a097fade0ba663edb53b291987d69d03cb469f6c7dcf2ea06",
+      "size_bytes": 4596294,
+      "aliases": [
+        {"value": "OECD_TPG_2022", "kind": "canonical_reference"},
+        {"value": "OECD Transfer Pricing Guidelines 2022", "kind": "natural_language"},
+        {"value": "oecd_tpg_2022_en.pdf", "kind": "filename"}
+      ],
+      "sections": [
+        {"section_id": "OECD_TPG_2022.Ch_I", "label": "Chapter I", "title": "The arm's length principle", "page_hint": 16, "citation_label": "OECD TPG 2022 Ch. I"},
+        {"section_id": "OECD_TPG_2022.Ch_II", "label": "Chapter II", "title": "Transfer pricing methods", "page_hint": 68, "citation_label": "OECD TPG 2022 Ch. II"},
+        {"section_id": "OECD_TPG_2022.Ch_III", "label": "Chapter III", "title": "Comparability analysis", "page_hint": 94, "citation_label": "OECD TPG 2022 Ch. III"},
+        {"section_id": "OECD_TPG_2022.Ch_V", "label": "Chapter V", "title": "Documentation", "page_hint": 160, "citation_label": "OECD TPG 2022 Ch. V"},
+        {"section_id": "OECD_TPG_2022.Ch_VI", "label": "Chapter VI", "title": "Intangibles", "page_hint": 182, "citation_label": "OECD TPG 2022 Ch. VI"},
+        {"section_id": "OECD_TPG_2022.Ch_VII", "label": "Chapter VII", "title": "Intra-group services", "page_hint": 248, "citation_label": "OECD TPG 2022 Ch. VII"}
+      ]
+    }
+  ]
+}

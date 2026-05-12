@@ -1,0 +1,26 @@
+# Backend local environment and secrets
+.env
+.env.local
+.env.*
+!.env.example
+secrets/
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+env/
+alembic.ini
+
+# Local data stores
+*.sqlite
+*.sqlite3
+*.db
+chroma_db/
+chroma/
+data/chromadb/
+data/chroma/

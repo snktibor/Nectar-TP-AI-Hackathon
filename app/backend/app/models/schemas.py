@@ -190,6 +190,76 @@ class IngestResponse(BaseModel):
 
 
 # ---------------------------------------------------------------------------
+# Official legal sources
+# ---------------------------------------------------------------------------
+
+
+class LegalSourceAlias(BaseModel):
+    """Alternative identifier for a legal source."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    value: str = Field(..., min_length=1)
+    kind: Literal["canonical_reference", "legacy_reference", "natural_language", "filename"]
+
+
+class LegalSourceSection(BaseModel):
+    """Section-level anchor inside an official legal source."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    section_id: str = Field(..., min_length=1)
+    label: str = Field(..., min_length=1)
+    title: str = Field(..., min_length=1)
+    page_hint: int | None = Field(default=None, ge=0)
+    citation_label: str = Field(..., min_length=1)
+
+
+class LegalSource(BaseModel):
+    """Public metadata for one official legal source in the pinned catalog."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    source_id: str = Field(..., min_length=1)
+    title: str = Field(..., min_length=1)
+    source_type: Literal["law", "decree", "guideline", "tax_authority_guidance", "other"]
+    jurisdiction: str = Field(..., min_length=1)
+    language: str = Field(..., min_length=2, max_length=8)
+    official_url: str | None = None
+    download_url: str | None = None
+    local_filename: str | None = None
+    index_enabled: bool
+    update_mode: Literal["manual_cache", "official_download", "disabled"]
+    access_status: Literal["cached", "needs_manual_fetch_validation", "unavailable"]
+    source_version: str | None = None
+    publication_date: str | None = None
+    effective_from: str | None = None
+    effective_to: str | None = None
+    citation_label: str = Field(..., min_length=1)
+    agent_scopes: list[str] = Field(
+        default_factory=list,
+        description="Agent/document scopes where this source should receive retrieval priority.",
+    )
+    priority_topics: list[str] = Field(
+        default_factory=list,
+        description="Topic keywords used for deterministic legal-RAG reranking.",
+    )
+    sha256: str | None = Field(default=None, pattern=r"^[a-f0-9]{64}$")
+    size_bytes: int | None = Field(default=None, ge=0)
+    aliases: list[LegalSourceAlias] = Field(default_factory=list)
+    sections: list[LegalSourceSection] = Field(default_factory=list)
+
+
+class LegalSourceCatalogResponse(BaseModel):
+    """Read-only catalog response returned by /legal-sources."""
+
+    model_config = ConfigDict(extra="forbid")
+    catalog_version: str = Field(..., min_length=1)
+    sources: list[LegalSource]
+    total: int = Field(..., ge=0)
+
+
+# ---------------------------------------------------------------------------
 # Audits
 # ---------------------------------------------------------------------------
 
@@ -281,9 +351,33 @@ class EvidenceChunk(BaseModel):
         description=(
             "Where this chunk lives. 'document' → uploaded TP package file "
             "(opens in the document viewer). 'legal' → legal_knowledge "
-            "collection (NGM 32/2017, OECD TPG, HU Act LXXXI; opens in the "
+            "collection (official source catalog PDFs; opens in the "
             "legal viewer). Drives the click-through routing."
         ),
+    )
+    source_id: str | None = Field(
+        default=None,
+        description="Canonical official source id for legal chunks, e.g. OECD_TPG_2022.",
+    )
+    source_title: str | None = Field(
+        default=None,
+        description="Human-readable title of the official legal source.",
+    )
+    source_url: str | None = Field(
+        default=None,
+        description="Official publication or DOI URL for legal chunks.",
+    )
+    source_version: str | None = Field(
+        default=None,
+        description="Pinned publication/version label from the official source catalog.",
+    )
+    section_id: str | None = Field(
+        default=None,
+        description="Optional section anchor when the source chunk can be mapped precisely.",
+    )
+    citation_label: str | None = Field(
+        default=None,
+        description="Short legal citation label suitable for evidence badges.",
     )
 
 
@@ -482,3 +576,125 @@ class AuditReport(BaseModel):
     overall_risk: RiskSeverity
     summary: str
     agent_runs: list[AgentRunResult] = Field(default_factory=list)
+
+
+# ---------------------------------------------------------------------------
+# Enterprise report payload
+# ---------------------------------------------------------------------------
+
+
+class SeverityBreakdown(BaseModel):
+    """Count of findings by severity across all finding types."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    critical: int = Field(default=0, ge=0)
+    high: int = Field(default=0, ge=0)
+    medium: int = Field(default=0, ge=0)
+    low: int = Field(default=0, ge=0)
+
+
+class SeverityTypeMatrixRow(BaseModel):
+    """One row of the Severity × FindingType matrix."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    severity: RiskSeverity
+    consistency: int = Field(default=0, ge=0)
+    benchmark: int = Field(default=0, ge=0)
+    completeness: int = Field(default=0, ge=0)
+    total: int = Field(default=0, ge=0)
+
+
+class SeverityTransactionMatrixRow(BaseModel):
+    """One row of the Severity × TransactionType matrix."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    transaction_type: str = Field(..., min_length=1)
+    critical: int = Field(default=0, ge=0)
+    high: int = Field(default=0, ge=0)
+    medium: int = Field(default=0, ge=0)
+    low: int = Field(default=0, ge=0)
+    total: int = Field(default=0, ge=0)
+    dominant_issue: str = Field(..., min_length=1)
+
+
+class FinancialEstimateLineItem(BaseModel):
+    """A single financial exposure line item used in chapter 04."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    item: str = Field(..., min_length=1)
+    legal_basis: str | None = None
+    amount_huf: int = Field(..., ge=0)
+    notes: str | None = None
+
+
+class FinancialEstimate(BaseModel):
+    """Aggregated financial exposure estimate for the enterprise report."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    line_items: list[FinancialEstimateLineItem] = Field(default_factory=list)
+    estimated_tax_shortfall_huf: int = Field(..., ge=0)
+    default_penalty_huf: int = Field(..., ge=0)
+    bad_faith_penalty_huf: int = Field(..., ge=0)
+    delay_interest_huf: int = Field(..., ge=0)
+    documentation_fine_huf: int = Field(..., ge=0)
+    functional_adjustment_huf: int = Field(..., ge=0)
+    base_total_huf: int = Field(..., ge=0)
+    max_total_huf: int = Field(..., ge=0)
+
+
+class RemediationPhase(str, Enum):
+    """Timeline phase used by remediation planning."""
+
+    IMMEDIATE_30 = "immediate_30"
+    SHORT_90 = "short_90"
+    MID_180 = "mid_180"
+
+
+class RemediationAction(BaseModel):
+    """One remediation action mapped from one finding."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    finding_id: str = Field(..., min_length=1)
+    finding_ref: str = Field(..., min_length=1)
+    severity: RiskSeverity
+    phase: RemediationPhase
+    title: str = Field(..., min_length=1)
+    owner: str = Field(..., min_length=1)
+    due_in_days: int = Field(..., ge=1)
+    recommendation: str = Field(..., min_length=1)
+    source_type: Literal["consistency", "benchmark", "completeness"]
+
+
+class RemediationPlan(BaseModel):
+    """Grouped remediation actions by timeline phase."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    immediate_30: list[RemediationAction] = Field(default_factory=list)
+    short_90: list[RemediationAction] = Field(default_factory=list)
+    mid_180: list[RemediationAction] = Field(default_factory=list)
+    all_actions: list[RemediationAction] = Field(default_factory=list)
+
+
+class EnterpriseReportPayload(BaseModel):
+    """Expanded payload used by the 20+ page frontend report template."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    audit_task_id: UUID
+    session_id: UUID
+    generated_at: datetime
+    overall_risk: RiskSeverity
+    findings_total: int = Field(..., ge=0)
+    severity_breakdown: SeverityBreakdown
+    severity_type_matrix: list[SeverityTypeMatrixRow] = Field(default_factory=list)
+    severity_transaction_matrix: list[SeverityTransactionMatrixRow] = Field(default_factory=list)
+    financial_estimate: FinancialEstimate
+    remediation_plan: RemediationPlan
+    source_report: AuditReport

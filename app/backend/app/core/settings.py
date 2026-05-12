@@ -7,14 +7,16 @@ secret, a model id, or a budget reads it from `get_settings()` — never from
 
 from __future__ import annotations
 
+import os
 from functools import lru_cache
 from pathlib import Path
 
-from pydantic import AliasChoices, Field, SecretStr
+from pydantic import AliasChoices, Field, SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 _BACKEND_ROOT = Path(__file__).resolve().parents[2]
+_OUTPUT_ROOT = _BACKEND_ROOT.parent.parent / "logs"
 
 
 class Settings(BaseSettings):
@@ -22,21 +24,44 @@ class Settings(BaseSettings):
 
     model_config = SettingsConfigDict(
         env_file=".env",
-        env_prefix="REDLINE_",
+        env_prefix="NECTAR_",
         extra="ignore",
         case_sensitive=False,
+        protected_namespaces=("settings_",),
     )
 
     # ---- Secrets ----------------------------------------------------------
     anthropic_api_key: SecretStr | None = Field(
         default=None,
-        validation_alias=AliasChoices("REDLINE_ANTHROPIC_API_KEY", "ANTHROPIC_API_KEY"),
+        validation_alias=AliasChoices("NECTAR_ANTHROPIC_API_KEY", "ANTHROPIC_API_KEY"),
         description=(
             "Anthropic API key. Read once at startup; never logged. Optional at "
             "load time so imports succeed in dev/CI environments without the key; "
             "LlmClient.create() raises a clear error if it is missing at call time."
         ),
     )
+
+    @field_validator("anthropic_api_key", mode="before")
+    @classmethod
+    def _normalize_optional_secret(
+        cls, value: SecretStr | str | None
+    ) -> SecretStr | str | None:
+        if value is None:
+            return None
+        if isinstance(value, SecretStr):
+            return value if value.get_secret_value().strip() else None
+        if isinstance(value, str):
+            normalized = value.strip()
+            return normalized or None
+        return value
+
+    @property
+    def has_anthropic_credentials(self) -> bool:
+        """Return True only when a non-empty Anthropic credential is configured."""
+        return bool(
+            self.anthropic_api_key
+            and self.anthropic_api_key.get_secret_value().strip()
+        )
 
     # ---- LLM tier ---------------------------------------------------------
     model_doc_agent: str = Field(
@@ -45,7 +70,7 @@ class Settings(BaseSettings):
             "Claude model used by per-document-type specialist agents. "
             "Haiku is the default: ~10× cheaper than Sonnet and has a much higher "
             "TPM rate limit, which matters when 6 agents run sequentially. "
-            "Override with REDLINE_MODEL_DOC_AGENT=claude-sonnet-4-6 for higher quality."
+            "Override with NECTAR_MODEL_DOC_AGENT=claude-sonnet-4-6 for higher quality."
         ),
     )
     model_aggregator: str = Field(
@@ -119,13 +144,17 @@ class Settings(BaseSettings):
 
     # ---- Feature flags ----------------------------------------------------
     use_real_agents: bool = Field(
-        default=True,
-        description="When False, /audits/* falls back to the legacy mock pipeline.",
+        default=False,
+        description=(
+            "When True, /audits/* uses real LLM agents and requires a non-empty "
+            "Anthropic API key. Default False keeps local PoC runs deterministic "
+            "and token-free via the mock pipeline."
+        ),
     )
     mock_report_enabled: bool = Field(
         default=False,
         validation_alias=AliasChoices(
-            "REDLINE_MOCK_REPORT_ENABLED", "MOCK_REPORT_ENABLED"
+            "NECTAR_MOCK_REPORT_ENABLED", "MOCK_REPORT_ENABLED"
         ),
         description=(
             "When True, the report download endpoint serves the prebuilt "
@@ -133,8 +162,62 @@ class Settings(BaseSettings):
         ),
     )
 
+    # ---- API hardening ----------------------------------------------------
+    cors_allowed_origins: tuple[str, ...] = Field(
+        default=(
+            "http://localhost:5173",
+            "http://127.0.0.1:5173",
+        ),
+        description=(
+            "Explicit CORS allowlist. Keep this tight in production and avoid '*'"
+            " to prevent cross-origin abuse."
+        ),
+    )
+    cors_allow_origin_regex: str | None = Field(
+        default=r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$",
+        description=(
+            "Regex-based CORS allowlist for local development ports. "
+            "Set to empty to disable regex matching and rely only on explicit origins."
+        ),
+    )
+
+    @field_validator("cors_allowed_origins", mode="before")
+    @classmethod
+    def _normalize_cors_allowed_origins(
+        cls, value: tuple[str, ...] | list[str] | str
+    ) -> tuple[str, ...]:
+        if isinstance(value, tuple):
+            return value
+        if isinstance(value, list):
+            return tuple(value)
+        if isinstance(value, str):
+            parts = [part.strip() for part in value.split(",") if part.strip()]
+            return tuple(parts)
+        raise TypeError("cors_allowed_origins must be a tuple, list, or comma-separated string")
+
+    @field_validator("cors_allow_origin_regex", mode="before")
+    @classmethod
+    def _normalize_cors_allow_origin_regex(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+        if isinstance(value, str):
+            normalized = value.strip()
+            return normalized or None
+        raise TypeError("cors_allow_origin_regex must be a string or None")
+
     # ---- Paths (read-only references; RAG layer is owned elsewhere) -------
     chroma_path: Path = Field(default=_BACKEND_ROOT / "data" / "chromadb")
+    chroma_anonymized_telemetry: bool = Field(
+        default=False,
+        validation_alias=AliasChoices(
+            "NECTAR_CHROMA_ANONYMIZED_TELEMETRY",
+            "ANONYMIZED_TELEMETRY",
+        ),
+        description=(
+            "Controls ChromaDB anonymized telemetry. Default False avoids noisy "
+            "PostHog telemetry failures and is safer for confidential tax material."
+        ),
+    )
 
     # ---- Logging redaction ------------------------------------------------
     log_redact_keys: tuple[str, ...] = Field(
@@ -144,7 +227,7 @@ class Settings(BaseSettings):
 
     # ---- File logging ----------------------------------------------------
     log_file_path: Path | None = Field(
-        default=_BACKEND_ROOT.parent.parent / "logs.txt",
+        default=_OUTPUT_ROOT / "logs.txt",
         description=(
             "Absolute path of the structured log file. The file is truncated "
             "on every process start and each record is flushed immediately, "
@@ -169,7 +252,7 @@ class Settings(BaseSettings):
 
     # ---- Audit report persistence ----------------------------------------
     audit_report_dir: Path | None = Field(
-        default=_BACKEND_ROOT.parent.parent / "audit_reports",
+        default=_OUTPUT_ROOT / "audit_reports",
         description=(
             "Directory where every completed (or failed) audit report is "
             "auto-dumped as a timestamped JSON file. Filename pattern: "
@@ -182,4 +265,14 @@ class Settings(BaseSettings):
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:
     """Return a process-wide singleton. Cached so env is read exactly once."""
-    return Settings()  # type: ignore[call-arg]
+    settings = Settings()  # type: ignore[call-arg]
+    if settings.anthropic_api_key is not None:
+        return settings
+
+    fallback_key = os.environ.get("ANTHROPIC_API_KEY", "").strip()
+    if not fallback_key:
+        return settings
+
+    return settings.model_copy(
+        update={"anthropic_api_key": SecretStr(fallback_key)},
+    )

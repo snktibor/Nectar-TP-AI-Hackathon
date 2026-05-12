@@ -7,22 +7,37 @@ HU counterparties → NAV mock (no technical user key available for the hackatho
 from __future__ import annotations
 
 import logging
+import re
 
 import httpx
 
-logger = logging.getLogger("redline.services.tax_api")
+logger = logging.getLogger("nectar.services.tax_api")
 
 _VIES_BASE = "https://ec.europa.eu/taxation_customs/vies/rest-api/ms/{cc}/vat/{vat}"
 _TIMEOUT = 10.0
+_COUNTRY_CODE_PATTERN = re.compile(r"^[A-Z]{2}$")
 
 
 async def verify_tax_number(country_code: str, vat_number: str) -> dict[str, object]:
     """Return a validation result dict for the given tax / VAT number.
 
     Keys: is_valid (bool), company_name (str), company_address (str), source (str).
+
+    Validates country_code against ISO 3166-1 alpha-2 format (2 uppercase letters).
     """
     cc = country_code.upper().strip()
     vat = vat_number.strip()
+
+    # SSRF hardening: validate country_code format strictly.
+    if not _COUNTRY_CODE_PATTERN.match(cc):
+        logger.warning("invalid country code format: %s", cc)
+        return {
+            "is_valid": False,
+            "company_name": "",
+            "company_address": "",
+            "source": "TAX_API",
+            "error": f"Invalid country code format: {cc}",
+        }
 
     if cc == "HU":
         return _mock_nav(vat)

@@ -37,7 +37,15 @@ from app.models.schemas import (
 )
 from app.services.llm_client import LlmClient
 
-logger = logging.getLogger("redline.orchestrator")
+logger = logging.getLogger("nectar.orchestrator")
+
+
+class AuditConfigurationError(RuntimeError):
+    """Raised when the selected audit mode cannot run with current settings."""
+
+    def __init__(self, message: str, *, code: str = "AUDIT_CONFIGURATION_ERROR") -> None:
+        super().__init__(message)
+        self.code = code
 
 
 # ---------------------------------------------------------------------------
@@ -164,7 +172,8 @@ class AgentOrchestrator:
                     message=f"Agent exceeded {self._settings.agent_timeout_s}s timeout.",
                     status="timeout",
                 )
-            except Exception as exc:  # noqa: BLE001 — surface as telemetry, do not crash audit
+            # Surface as telemetry, do not crash the whole audit.
+            except Exception as exc:  # noqa: BLE001
                 logger.exception("agent crashed agent_id=%s", agent.agent_id)
                 result = _synthetic_failure(
                     agent_cls=cls,
@@ -430,6 +439,12 @@ def get_audit_service() -> AuditService:
     """
     settings = get_settings()
     if settings.use_real_agents:
+        if not settings.has_anthropic_credentials:
+            raise AuditConfigurationError(
+                "Real audit agents require NECTAR_ANTHROPIC_API_KEY or "
+                "ANTHROPIC_API_KEY. Set NECTAR_USE_REAL_AGENTS=false to run "
+                "the deterministic mock pipeline without external LLM calls."
+            )
         global _orchestrator
         if _orchestrator is None:
             _orchestrator = AgentOrchestrator(settings=settings)

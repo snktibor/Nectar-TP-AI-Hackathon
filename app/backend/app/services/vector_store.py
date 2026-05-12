@@ -14,25 +14,27 @@ similarity scores remain comparable.
 from __future__ import annotations
 
 import logging
-from pathlib import Path
+from typing import TYPE_CHECKING
 from uuid import UUID
 
-import chromadb
-from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunction
-
 from app.services.chunker import TextChunk
+from app.services.chroma_client import (
+    create_persistent_chroma_client,
+    create_sentence_transformer_embedding_function,
+)
+
+if TYPE_CHECKING:
+    import chromadb
 
 logger = logging.getLogger(__name__)
 
-_CHROMA_DIR = Path(__file__).resolve().parents[2] / "data" / "chromadb"
 _EMBED_MODEL = "paraphrase-multilingual-MiniLM-L12-v2"
 
-_embed = SentenceTransformerEmbeddingFunction(model_name=_EMBED_MODEL)
+_embed = create_sentence_transformer_embedding_function(model_name=_EMBED_MODEL)
 
 
 def _get_client() -> chromadb.ClientAPI:
-    _CHROMA_DIR.mkdir(parents=True, exist_ok=True)
-    return chromadb.PersistentClient(path=str(_CHROMA_DIR))
+    return create_persistent_chroma_client()
 
 
 def _collection_name(document_id: UUID) -> str:

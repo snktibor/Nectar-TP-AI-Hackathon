@@ -63,7 +63,7 @@ class _AutoFlushFileHandler(logging.FileHandler):
                 pass
 
 _REDACTED_PLACEHOLDER: Final[str] = "<redacted>"
-_FACTORY_INSTALLED_FLAG: Final[str] = "_redline_redact_installed"
+_FACTORY_INSTALLED_FLAG: Final[str] = "_nectar_redact_installed"
 
 
 def _mask(value: object) -> str:
@@ -131,7 +131,7 @@ class RedactingFilter(logging.Filter):
         return True
 
 
-_MAKERECORD_PATCH_FLAG: Final[str] = "_redline_makeRecord_patched"
+_MAKERECORD_PATCH_FLAG: Final[str] = "_nectar_makeRecord_patched"
 
 
 def configure_logging(settings: Settings, level: int | None = None) -> None:
@@ -162,7 +162,7 @@ def configure_logging(settings: Settings, level: int | None = None) -> None:
 
     # Idempotency: re-installing on uvicorn --reload should not stack handlers.
     # Tag our handlers so we can recognise & remove them across reloads.
-    _OWNER_TAG = "_redline_owned"
+    _OWNER_TAG = "_nectar_owned"
     for h in list(root.handlers):
         if getattr(h, _OWNER_TAG, False):
             try:
@@ -193,7 +193,7 @@ def configure_logging(settings: Settings, level: int | None = None) -> None:
         root.addHandler(file_handler)
         # Bootstrap message — confirms the file is being written and gives
         # an unambiguous "new run starts here" anchor for grep.
-        logging.getLogger("redline").info(
+        logging.getLogger("nectar").info(
             "logging initialised: level=%s file=%s mode=%s",
             logging.getLevelName(level),
             path,

@@ -175,7 +175,7 @@ class LlmClient:
     ) -> None:
         self._settings = settings or get_settings()
         self._client: AsyncAnthropic | None = client
-        self._logger = logging.getLogger("redline.llm")
+        self._logger = logging.getLogger("nectar.llm")
         # Throttle state — `time.monotonic()` units so wall-clock changes
         # cannot break the spacing.  `_last_call_started_at = 0` means "no
         # call yet" and the first invocation skips the wait.
@@ -185,11 +185,11 @@ class LlmClient:
     def _ensure_client(self) -> AsyncAnthropic:
         """Build the SDK client on first use; raise a clear error if the key is missing."""
         if self._client is None:
-            if self._settings.anthropic_api_key is None:
+            if not self._settings.has_anthropic_credentials:
                 raise RuntimeError(
-                    "Anthropic API key is not configured. Set REDLINE_ANTHROPIC_API_KEY "
+                    "Anthropic API key is not configured. Set NECTAR_ANTHROPIC_API_KEY "
                     "(or ANTHROPIC_API_KEY) before invoking LLM agents, or run with "
-                    "REDLINE_USE_REAL_AGENTS=false to fall back to the mock pipeline."
+                    "NECTAR_USE_REAL_AGENTS=false to fall back to the mock pipeline."
                 )
             self._client = AsyncAnthropic(
                 api_key=self._settings.anthropic_api_key.get_secret_value(),

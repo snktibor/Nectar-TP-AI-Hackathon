@@ -37,6 +37,36 @@ def _clamp_confidence(value: float) -> float:
     return min(max(value, 0.0), _MAX_CLASSIFICATION_CONFIDENCE)
 
 
+def _normalize_filename_token(value: str) -> str:
+    return "".join(char for char in value.lower() if char.isalnum())
+
+
+def _filename_matches_override_token(
+    filename_lower: str,
+    filename_normalized: str,
+    token: str,
+) -> bool:
+    return token.lower() in filename_lower or _normalize_filename_token(token) in filename_normalized
+
+
+def _find_filename_override(filename: str, overrides: list[dict]) -> tuple[dict, str] | None:
+    filename_lower = filename.lower()
+    filename_normalized = _normalize_filename_token(filename)
+    for override in overrides:
+        contains_any: list[str] = override.get("contains_any", [])
+        matched_token = next(
+            (
+                token
+                for token in contains_any
+                if _filename_matches_override_token(filename_lower, filename_normalized, token)
+            ),
+            None,
+        )
+        if matched_token is not None:
+            return override, matched_token
+    return None
+
+
 def classify_document(sample_text: str, filename: str | None = None) -> ClassificationResult:
     """Classify document type by matching keyword signals against sample text.
 
@@ -56,13 +86,9 @@ def classify_document(sample_text: str, filename: str | None = None) -> Classifi
     fallback_label = categories.get(fallback_type, {}).get("label", "Other")
 
     if filename:
-        filename_lower = filename.lower()
-        for override in rules.get("filename_overrides", []):
-            contains_any: list[str] = override.get("contains_any", [])
-            matched_token = next((token for token in contains_any if token.lower() in filename_lower), None)
-            if matched_token is None:
-                continue
-
+        filename_override = _find_filename_override(filename, rules.get("filename_overrides", []))
+        if filename_override is not None:
+            override, matched_token = filename_override
             forced_type = override.get("force_type", fallback_type)
             forced_label = categories.get(forced_type, {}).get("label", forced_type)
             return ClassificationResult(

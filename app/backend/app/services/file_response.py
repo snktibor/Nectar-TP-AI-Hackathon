@@ -24,7 +24,7 @@ def build_file_response(
     byte_range = parse_byte_range(range_header, len(payload))
     if byte_range is None:
         raise HTTPException(
-            status_code=status.HTTP_416_RANGE_NOT_SATISFIABLE,
+            status_code=status.HTTP_416_REQUESTED_RANGE_NOT_SATISFIABLE,
             detail={"code": "INVALID_RANGE", "message": "Requested byte range is not satisfiable."},
             headers={"Content-Range": f"bytes */{len(payload)}"},
         )

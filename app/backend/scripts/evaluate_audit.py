@@ -1,6 +1,6 @@
 """Compare an audit report against a ground-truth annotations file.
 
-Designed for the HIG hackathon dataset (`datasets/HIG_annotations.json`),
+Designed for the HIG hackathon dataset (`datasets/hig_annotations.json`),
 which lists 9 known errors across 5 documents with stable IDs (LF-01,
 LF-02, ..., INV-02). For each error this script decides whether the audit
 detected it, then reports recall, precision, F1, severity-match rate, and
@@ -15,7 +15,7 @@ Usage
 Output
 ------
 * Console: aligned tables (overall, per error_id, per agent, false positives).
-* Sidecar JSON: ``audit_reports/eval_<audit_basename>.json`` — machine-readable
+* Sidecar JSON: ``logs/audit_reports/eval_<audit_basename>.json`` — machine-readable
   summary suitable for CI tracking or later trend analysis.
 
 Match algorithm
@@ -46,12 +46,12 @@ from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 BACKEND_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_ANNOTATIONS = BACKEND_ROOT / "datasets" / "HIG_annotations.json"
-DEFAULT_AUDIT_DIR = REPO_ROOT / "audit_reports"
+DEFAULT_ANNOTATIONS = BACKEND_ROOT / "datasets" / "hig_annotations.json"
+DEFAULT_AUDIT_DIR = REPO_ROOT / "logs" / "audit_reports"
 
 
 # ---------------------------------------------------------------------------
-# Ground-truth matchers — keyed by error_id from HIG_annotations.json.
+# Ground-truth matchers — keyed by error_id from hig_annotations.json.
 # Keywords are normalised (lowercase + accent-stripped) at match time.
 # ---------------------------------------------------------------------------
 
@@ -513,7 +513,7 @@ def main(argv: list[str] | None = None) -> int:
         "audit",
         nargs="?",
         default=None,
-        help="Path to audit_<timestamp>.json (default: latest real audit in audit_reports/)",
+        help="Path to audit_<timestamp>.json (default: latest real audit in logs/audit_reports/)",
     )
     parser.add_argument(
         "--annotations",

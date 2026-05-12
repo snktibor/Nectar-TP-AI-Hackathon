@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 from fastapi import HTTPException, status
 
+from app.services.dataset_files import load_from_datasets
 from app.services.file_response import build_file_response, parse_byte_range
 
 
@@ -40,5 +43,17 @@ def test_build_file_response_rejects_invalid_range() -> None:
             range_header="bytes=30-40",
         )
 
-    assert exc_info.value.status_code == status.HTTP_416_RANGE_NOT_SATISFIABLE
+    assert exc_info.value.status_code == status.HTTP_416_REQUESTED_RANGE_NOT_SATISFIABLE
     assert exc_info.value.headers == {"Content-Range": "bytes */10"}
+
+
+def test_dataset_fallback_matches_filename_case_insensitively(
+    tmp_path: Path,
+) -> None:
+    dataset_folder = tmp_path / "local"
+    dataset_folder.mkdir()
+    dataset_file = dataset_folder / "hig_local_file_2024_faulty.pdf"
+    dataset_file.write_bytes(b"pdf-bytes")
+    payload = load_from_datasets(tmp_path, "HIG_LocalFile_2024_FAULTY.pdf")
+
+    assert payload == b"pdf-bytes"

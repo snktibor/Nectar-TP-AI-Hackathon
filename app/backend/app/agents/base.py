@@ -47,7 +47,7 @@ from app.services.llm_client import (
 )
 
 
-logger = logging.getLogger("redline.agents")
+logger = logging.getLogger("nectar.agents")
 
 
 # ---------------------------------------------------------------------------

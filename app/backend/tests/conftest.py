@@ -25,8 +25,8 @@ if str(_BACKEND_ROOT) not in sys.path:
 
 # Default a non-empty key so Settings() succeeds even though llm_client never
 # instantiates the real SDK in tests.
-os.environ.setdefault("REDLINE_ANTHROPIC_API_KEY", "test-key-not-used")
-os.environ.setdefault("REDLINE_USE_REAL_AGENTS", "true")
+os.environ.setdefault("NECTAR_ANTHROPIC_API_KEY", "test-key-not-used")
+os.environ.setdefault("NECTAR_USE_REAL_AGENTS", "true")
 
 from app.core.settings import Settings, get_settings  # noqa: E402
 from app.models.schemas import DocumentType, EvidenceChunk  # noqa: E402

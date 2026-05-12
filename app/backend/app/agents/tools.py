@@ -28,6 +28,8 @@ SEARCH_CONTEXT: ToolSchema = {
                 "type": "string",
                 "description": "Natural-language query, in English or Hungarian.",
                 "minLength": 1,
+                "maxLength": 500,
+                "pattern": "^[\\p{L}\\p{N}\\p{P}\\p{Z}\\-_.,:;!?()\\[\\]{}\"'&@#+=/<>%$\\*]+$"
             },
             "n_results": {
                 "type": "integer",

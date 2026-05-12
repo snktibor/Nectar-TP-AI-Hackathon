@@ -58,7 +58,7 @@ def test_low_confidence_required_type_falls_back_to_other() -> None:
 def test_local_file_filename_override_classifies_as_local_file() -> None:
     sample_text = "Random content with weak signals"
 
-    result = classify_document(sample_text, filename="HIG_LocalFile_2024_FAULTY.pdf")
+    result = classify_document(sample_text, filename="hig_local_file_2024_faulty.pdf")
 
     assert result.doc_type == "local_file"
     assert result.confidence == pytest.approx(0.97, abs=1e-9)

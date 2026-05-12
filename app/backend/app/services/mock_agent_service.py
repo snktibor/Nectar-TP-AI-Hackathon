@@ -5,7 +5,7 @@ the frontend (and CI) can exercise the full audit UI — including per-agent
 progress, attribution, evidence citations, and the cross-document
 consistency findings — without burning tokens.
 
-Activate with `REDLINE_USE_REAL_AGENTS=false`. The shape of the returned
+Activate with `NECTAR_USE_REAL_AGENTS=false`. The shape of the returned
 `AuditReport` and the polling state is identical to the real orchestrator;
 only the contents are fabricated.
 """
@@ -75,7 +75,7 @@ class _TaskState:
     error: ErrorDetail | None = None
     report: AuditReport | None = None
     agent_progress: dict[str, str] = field(
-        default_factory=lambda: {agent_id: "pending" for agent_id, _, _ in _AGENTS}
+        default_factory=lambda: dict.fromkeys((agent_id for agent_id, _, _ in _AGENTS), "pending")
     )
 
 
@@ -210,7 +210,7 @@ class MockAgentService:
 
         # ---- Findings (each tagged to one agent via attribution) ---------------
 
-        # -- HIG Manufacturing Kft. dataset findings (ground truth: HIG_annotations.json) --
+        # -- HIG Manufacturing Kft. dataset findings (ground truth: hig_annotations.json) --
 
         lf_benefit_test_missing = MissingElement(
             description=(
@@ -222,7 +222,7 @@ class MockAgentService:
                 "amelyet független féltől is megvásárolt volna. Enélkül a díj "
                 "levonhatósága kétségbe vonható."
             ),
-            expected_in="HIG_LocalFile_2024_FAULTY.pdf",
+            expected_in="hig_local_file_2024_faulty.pdf",
             required_by="OECD TPG 7.6–7.8, 2017; 45/2025. (XII. 23.) NGM rendelet 6. § (3) bek.",
             severity=RiskSeverity.HIGH,
             attribution=_attribution(
@@ -254,8 +254,8 @@ class MockAgentService:
                 ),
                 evidence=[
                     EvidenceChunk(
-                        filename="HIG_LocalFile_2024_FAULTY.pdf",
-                        page=18,
+                        filename="hig_local_file_2024_faulty.pdf",
+                        page=7,
                         chunk_index=0,
                         char_start=12640,
                         char_end=12716,
@@ -276,7 +276,7 @@ class MockAgentService:
                 "DEMPE-funkciókat, viseli a kapcsolódó kockázatokat, és ennek "
                 "alapján ki jogosult az immateriális javakhoz kapcsolódó hozamra."
             ),
-            expected_in="HIG_LocalFile_2024_FAULTY.pdf",
+            expected_in="hig_local_file_2024_faulty.pdf",
             required_by="OECD TPG Ch. 6, paras. 6.32–6.56; BEPS Actions 8–10; 45/2025. (XII. 23.) NGM rendelet 6. § (4) bek.",
             severity=RiskSeverity.HIGH,
             attribution=_attribution(
@@ -314,8 +314,8 @@ class MockAgentService:
                 ),
                 evidence=[
                     EvidenceChunk(
-                        filename="HIG_LocalFile_2024_FAULTY.pdf",
-                        page=22,
+                        filename="hig_local_file_2024_faulty.pdf",
+                        page=7,
                         chunk_index=0,
                         char_start=15840,
                         char_end=15890,
@@ -340,7 +340,7 @@ class MockAgentService:
                 "elvének igazolásához; adóhatósági vizsgálat esetén a díj "
                 "levonhatósága kétségbe vonható."
             ),
-            expected_in="HIG_Contracts_2024.pdf",
+            expected_in="hig_contracts_2024.pdf",
             required_by="OECD TPG 7.6–7.8, 7.14–7.15; 45/2025. (XII. 23.) NGM rendelet 6. § (3) bek.",
             severity=RiskSeverity.HIGH,
             attribution=_attribution(
@@ -375,8 +375,8 @@ class MockAgentService:
                 ),
                 evidence=[
                     EvidenceChunk(
-                        filename="HIG_Contracts_2024.pdf",
-                        page=2,
+                        filename="hig_contracts_2024.pdf",
+                        page=4,
                         chunk_index=0,
                         char_start=840,
                         char_end=924,
@@ -405,8 +405,8 @@ class MockAgentService:
             ),
             severity=RiskSeverity.CRITICAL,
             locations=[
-                ErrorLocation(filename="HIG_LocalFile_2024_FAULTY.pdf"),
-                ErrorLocation(filename="HIG_Masterfile_2024.pdf"),
+                ErrorLocation(filename="hig_local_file_2024_faulty.pdf"),
+                ErrorLocation(filename="hig_master_file_2024.pdf"),
             ],
             evidence="Local File 5. fejezet vs. Master File 1.3. fejezet és Local File 2.1. fejezet",
             attribution=_attribution(
@@ -447,22 +447,22 @@ class MockAgentService:
                 ),
                 evidence=[
                     EvidenceChunk(
-                        filename="HIG_LocalFile_2024_FAULTY.pdf",
-                        page=25,
+                        filename="hig_local_file_2024_faulty.pdf",
+                        page=9,
                         chunk_index=2,
                         char_start=18420,
                         char_end=18578,
                         source_kind="document",
-                        quote="részt vesz a beszállítói kiválasztásban, önállóan dönt a termelési kapacitás bővítéséről, és aktívan közreműködik az árstratégia kialakításában",
+                        quote="A Társaság aktívan részt vesz a termeléshez szükséges nyersanyagok és segédanyagok beszállítóinak kiválasztásában",
                     ),
                     EvidenceChunk(
-                        filename="HIG_Masterfile_2024.pdf",
-                        page=7,
+                        filename="hig_master_file_2024.pdf",
+                        page=5,
                         chunk_index=1,
                         char_start=5210,
                         char_end=5312,
                         source_kind="document",
-                        quote="A HIG Manufacturing Kft. üzleti és pénzügyi kockázatprofilja korlátozott... az Anyavállalat irányítja",
+                        quote="az értékesítési kockázatot, a piacra lépési döntéseket és az árazási stratégiát kizárólag az Anyavállalat irányítja. Mindebből következően a HIG Manufacturing Kft. üzleti és pénzügyi kockázatprofilja korlátozott",
                     ),
                 ],
             ),
@@ -484,8 +484,8 @@ class MockAgentService:
             ),
             severity=RiskSeverity.CRITICAL,
             locations=[
-                ErrorLocation(filename="HIG_Contracts_2024.pdf"),
-                ErrorLocation(filename="HIG_LocalFile_2024_FAULTY.pdf"),
+                ErrorLocation(filename="hig_contracts_2024.pdf"),
+                ErrorLocation(filename="hig_local_file_2024_faulty.pdf"),
             ],
             evidence=(
                 "Licencszerződés 3. § (50.000.000 Ft) vs. Local File 7.1. fejezet "
@@ -524,8 +524,8 @@ class MockAgentService:
                 ),
                 evidence=[
                     EvidenceChunk(
-                        filename="HIG_Contracts_2024.pdf",
-                        page=6,
+                        filename="hig_contracts_2024.pdf",
+                        page=7,
                         chunk_index=1,
                         char_start=4210,
                         char_end=4298,
@@ -533,13 +533,13 @@ class MockAgentService:
                         quote="A 2024. adóévre vonatkozó éves licencdíj összege: 50.000.000 Ft (ötvenmillió forint)",
                     ),
                     EvidenceChunk(
-                        filename="HIG_LocalFile_2024_FAULTY.pdf",
-                        page=32,
+                        filename="hig_local_file_2024_faulty.pdf",
+                        page=12,
                         chunk_index=0,
                         char_start=22640,
                         char_end=22710,
                         source_kind="document",
-                        quote="licencdíj (HIG Holding GmbH): 45.000.000 Ft",
+                        quote="ebből: licencdíj (HIG Holding GmbH) 45.000.000",
                     ),
                 ],
             ),
@@ -558,9 +558,9 @@ class MockAgentService:
             ),
             severity=RiskSeverity.CRITICAL,
             locations=[
-                ErrorLocation(filename="HIG_Invoices_2024.pdf"),
-                ErrorLocation(filename="HIG_LocalFile_2024_FAULTY.pdf"),
-                ErrorLocation(filename="HIG_Contracts_2024.pdf"),
+                ErrorLocation(filename="hig_invoices_2024.pdf"),
+                ErrorLocation(filename="hig_local_file_2024_faulty.pdf"),
+                ErrorLocation(filename="hig_contracts_2024.pdf"),
             ],
             evidence=(
                 "Licencdíj számla (50.000.000 Ft) vs. szerződés HIG-LIC-2024-003 "
@@ -599,8 +599,8 @@ class MockAgentService:
                 ),
                 evidence=[
                     EvidenceChunk(
-                        filename="HIG_Invoices_2024.pdf",
-                        page=7,
+                        filename="hig_invoices_2024.pdf",
+                        page=3,
                         chunk_index=0,
                         char_start=5840,
                         char_end=5878,
@@ -608,13 +608,13 @@ class MockAgentService:
                         quote="Nettó összeg: 50 000 000 Ft",
                     ),
                     EvidenceChunk(
-                        filename="HIG_LocalFile_2024_FAULTY.pdf",
-                        page=22,
+                        filename="hig_local_file_2024_faulty.pdf",
+                        page=8,
                         chunk_index=1,
                         char_start=16210,
                         char_end=16250,
                         source_kind="document",
-                        quote="2% × 2.250.000.000 = 45.000.000 Ft",
+                        quote="Vetítési alap 2.250.000.000 Ft × 2,0% = 45.000.000 Ft",
                     ),
                 ],
             ),
@@ -635,8 +635,8 @@ class MockAgentService:
             ),
             severity=RiskSeverity.MEDIUM,
             locations=[
-                ErrorLocation(filename="HIG_Invoices_2024.pdf"),
-                ErrorLocation(filename="HIG_Contracts_2024.pdf"),
+                ErrorLocation(filename="hig_invoices_2024.pdf"),
+                ErrorLocation(filename="hig_contracts_2024.pdf"),
             ],
             evidence=(
                 "invoice_issue_date=2024-10-01; contract_required_date=2024-12-31; "
@@ -669,17 +669,17 @@ class MockAgentService:
                 ),
                 evidence=[
                     EvidenceChunk(
-                        filename="HIG_Invoices_2024.pdf",
-                        page=4,
+                        filename="hig_invoices_2024.pdf",
+                        page=2,
                         chunk_index=0,
                         char_start=3210,
                         char_end=3248,
                         source_kind="document",
-                        quote="Kiállítás dátuma: 2024. október 1.",
+                        quote="2024. október 1. 2024. okt. 1. – 2024. dec. 31. HIG-MGMT-2024-Q4",
                     ),
                     EvidenceChunk(
-                        filename="HIG_Contracts_2024.pdf",
-                        page=3,
+                        filename="hig_contracts_2024.pdf",
+                        page=5,
                         chunk_index=1,
                         char_start=2140,
                         char_end=2236,
@@ -709,7 +709,7 @@ class MockAgentService:
                 "kívüli pozíció indoklása szükséges."
             ),
             locations=[
-                ErrorLocation(filename="HIG_Benchmark_2024.pdf"),
+                ErrorLocation(filename="hig_benchmark_study_2024.pdf"),
             ],
             attribution=_attribution(
                 "benchmark_agent",
@@ -745,22 +745,22 @@ class MockAgentService:
                 ),
                 evidence=[
                     EvidenceChunk(
-                        filename="HIG_Benchmark_2024.pdf",
-                        page=22,
+                        filename="hig_benchmark_study_2024.pdf",
+                        page=8,
                         chunk_index=0,
                         char_start=15640,
                         char_end=15784,
                         source_kind="document",
-                        quote="A HIG Manufacturing Kft. Berry-rátája az interkvartilis tartományba esik, ezért az alkalmazott árazás szokásos piaci árnak minősül.",
+                        quote="A HIG Manufacturing Kft. Berry -rátája az interkvartilis tartományba esik, ezért az alkalmazott árazás szokásos piaci árnak minősül.",
                     ),
                     EvidenceChunk(
-                        filename="HIG_Benchmark_2024.pdf",
-                        page=18,
+                        filename="hig_benchmark_study_2024.pdf",
+                        page=7,
                         chunk_index=2,
                         char_start=12840,
                         char_end=12884,
                         source_kind="document",
-                        quote="IQR: Q1 = 1,05; Q3 = 1,10",
+                        quote="Interkvartilis tartomány (IQR) 1,05 – 1,10",
                     ),
                 ],
             ),
@@ -781,8 +781,8 @@ class MockAgentService:
             ),
             severity=RiskSeverity.MEDIUM,
             locations=[
-                ErrorLocation(filename="HIG_Benchmark_2024.pdf"),
-                ErrorLocation(filename="HIG_LocalFile_2024_FAULTY.pdf"),
+                ErrorLocation(filename="hig_benchmark_study_2024.pdf"),
+                ErrorLocation(filename="hig_local_file_2024_faulty.pdf"),
             ],
             evidence=(
                 "Local File cost-plus 8% ⇒ implikált Berry-ráta: 1,08; "
@@ -821,22 +821,22 @@ class MockAgentService:
                 ),
                 evidence=[
                     EvidenceChunk(
-                        filename="HIG_LocalFile_2024_FAULTY.pdf",
-                        page=18,
+                        filename="hig_local_file_2024_faulty.pdf",
+                        page=11,
                         chunk_index=2,
                         char_start=12840,
                         char_end=12966,
                         source_kind="document",
-                        quote="A Társaság elsődleges transzferár-módszerként a Cost-Plus módszert alkalmazza 8%-os haszonkulccsal.",
+                        quote="A Társaság gyártási ügyletéhez a Költség -plusz módszer (CPM) alkalmazása indokolt",
                     ),
                     EvidenceChunk(
-                        filename="HIG_Benchmark_2024.pdf",
-                        page=14,
+                        filename="hig_benchmark_study_2024.pdf",
+                        page=8,
                         chunk_index=1,
                         char_start=9840,
                         char_end=9902,
                         source_kind="document",
-                        quote="a HIG Manufacturing Kft. 2024. évi tényleges Berry-rátája ... 1,19",
+                        quote="A HIG Manufacturing Kft. 2024. évi tényleges Berry -rátája",
                     ),
                 ],
             ),

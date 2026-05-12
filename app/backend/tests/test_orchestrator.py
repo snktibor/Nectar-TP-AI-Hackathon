@@ -19,7 +19,7 @@ from app.models.schemas import (
     RiskSeverity,
 )
 from app.services import agent_orchestrator
-from app.services.agent_orchestrator import AgentOrchestrator
+from app.services.agent_orchestrator import AgentOrchestrator, AuditConfigurationError
 from tests.conftest import FakeRagService
 
 
@@ -53,6 +53,7 @@ async def test_all_agents_succeed(monkeypatch, fake_rag: FakeRagService) -> None
     from datetime import datetime, timezone
 
     async def _success(self, session_id):
+        await asyncio.sleep(0)
         return AgentRunResult(
             agent_id=self.agent_id,
             doc_type_scope=self.doc_type,
@@ -100,6 +101,7 @@ async def test_one_agent_times_out(monkeypatch, fake_rag: FakeRagService) -> Non
     from datetime import datetime, timezone
 
     async def _success(self, session_id):
+        await asyncio.sleep(0)
         return AgentRunResult(
             agent_id=self.agent_id,
             doc_type_scope=self.doc_type,
@@ -163,8 +165,8 @@ async def test_all_agents_fail_yields_failed_audit(
 async def test_factory_returns_real_orchestrator_when_flag_on(
     monkeypatch, fake_rag: FakeRagService
 ) -> None:
-    monkeypatch.setenv("REDLINE_USE_REAL_AGENTS", "true")
-    monkeypatch.setenv("REDLINE_ANTHROPIC_API_KEY", "k")
+    monkeypatch.setenv("NECTAR_USE_REAL_AGENTS", "true")
+    monkeypatch.setenv("NECTAR_ANTHROPIC_API_KEY", "k")
 
     # Avoid importing the real RAG module (it depends on chromadb).
     monkeypatch.setattr(agent_orchestrator, "_resolve_rag_service", lambda: fake_rag)
@@ -181,7 +183,7 @@ async def test_factory_returns_real_orchestrator_when_flag_on(
 
 @pytest.mark.asyncio
 async def test_factory_returns_mock_when_flag_off(monkeypatch) -> None:
-    monkeypatch.setenv("REDLINE_USE_REAL_AGENTS", "false")
+    monkeypatch.setenv("NECTAR_USE_REAL_AGENTS", "false")
 
     from app.core.settings import get_settings
     from app.services.mock_agent_service import mock_agent_service
@@ -191,3 +193,18 @@ async def test_factory_returns_mock_when_flag_off(monkeypatch) -> None:
 
     svc = agent_orchestrator.get_audit_service()
     assert svc is mock_agent_service
+
+
+@pytest.mark.asyncio
+async def test_factory_rejects_real_agents_without_key(monkeypatch) -> None:
+    monkeypatch.setenv("NECTAR_USE_REAL_AGENTS", "true")
+    monkeypatch.setenv("NECTAR_ANTHROPIC_API_KEY", "")
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+
+    from app.core.settings import get_settings
+
+    get_settings.cache_clear()
+    agent_orchestrator._orchestrator = None
+
+    with pytest.raises(AuditConfigurationError, match="Real audit agents require"):
+        agent_orchestrator.get_audit_service()

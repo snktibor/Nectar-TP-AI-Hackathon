@@ -43,6 +43,7 @@ SentenceTransformerEmbeddingFunction = pytest.importorskip(
 
 from app.agents.master_file_agent import MasterFileAgent  # noqa: E402
 from app.core.settings import Settings  # noqa: E402
+from app.services.chroma_client import create_ephemeral_chroma_client  # noqa: E402
 from app.services.llm_client import LlmClient  # noqa: E402
 from app.services.rag_service import EMBED_MODEL, RagService  # noqa: E402
 from tests.conftest import ScriptedTurn, text_block, tool_use_block, usage  # noqa: E402
@@ -71,7 +72,7 @@ def _make_ephemeral_rag_service() -> RagService:
     instance attributes manually so all query methods work correctly.
     """
     svc: RagService = object.__new__(RagService)
-    svc._client = chromadb.EphemeralClient()  # type: ignore[attr-defined]
+    svc._client = create_ephemeral_chroma_client()  # type: ignore[attr-defined]
     svc._embed = SentenceTransformerEmbeddingFunction(  # type: ignore[attr-defined]
         model_name=EMBED_MODEL
     )
@@ -180,6 +181,10 @@ async def test_agent_round_trip_with_real_rag(
                             }
                         ],
                         "confidence": 0.8,
+                        "reasoning": (
+                            "The cited master-file chunk states the TP policy exists, "
+                            "but it does not provide the specific intercompany margin range."
+                        ),
                     },
                 )
             ],

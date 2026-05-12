@@ -1,7 +1,7 @@
 """FastAPI application entry point.
 
-Wires routers, CORS, structured logging, and — most importantly — installs
-exception handlers that force every error response through the standardized
+Wires routers, CORS, structured logging, rate limiting, and — most importantly —
+installs exception handlers that force every error response through the standardized
 envelope defined in `app.models.schemas.ApiResponse`.
 """
 
@@ -15,12 +15,14 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from app.api.v1.endpoints import audits, documents
+from app.api.v1.endpoints import audits, documents, legal_sources, rag, reports
 from app.core.logging import configure_logging, rebind_external_loggers
+from app.core.rate_limiter import limiter
 from app.core.settings import get_settings
-from app.api.v1.endpoints import audits, documents, rag, reports
 from app.models.schemas import ApiResponse, ErrorDetail, ResponseMeta
 
 logger = logging.getLogger(__name__)
@@ -49,6 +51,8 @@ def _envelope_error(
 
 
 def create_app() -> FastAPI:
+    settings = get_settings()
+
     app = FastAPI(
         title="Transfer Pricing Audit AI — API",
         version="1.0.0",
@@ -71,24 +75,30 @@ def create_app() -> FastAPI:
             "FastAPI startup complete — log file is being written by AutoFlushFileHandler"
         )
 
-    # CORS — permissive defaults for the PoC; tighten origins before production.
+    # CORS: explicit allowlist to avoid wildcard origin exposure.
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],
+        allow_origins=list(settings.cors_allowed_origins),
+        allow_origin_regex=settings.cors_allow_origin_regex,
         allow_credentials=False,
-        allow_methods=["*"],
-        allow_headers=["*"],
+        allow_methods=["GET", "POST", "OPTIONS"],
+        allow_headers=["Accept", "Content-Type", "Range"],
     )
+
+    # Rate limiting middleware — protects against request flooding DoS.
+    app.state.limiter = limiter
+    app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
     # ---- Routers -----------------------------------------------------------
     api_v1_prefix = "/api/v1"
     app.include_router(documents.router, prefix=api_v1_prefix)
+    app.include_router(legal_sources.router, prefix=api_v1_prefix)
     app.include_router(audits.router, prefix=api_v1_prefix)
     app.include_router(rag.router, prefix=api_v1_prefix)
     app.include_router(reports.router, prefix=api_v1_prefix)
 
     # ---- Health probe ------------------------------------------------------
-    @app.get("/health", tags=["system"], response_model=ApiResponse[dict[str, str]])
+    @app.get("/health", tags=["system"])
     async def health() -> ApiResponse[dict[str, str]]:
         return ApiResponse[dict[str, str]](success=True, data={"status": "ok"})
 
@@ -140,7 +150,7 @@ def create_app() -> FastAPI:
             code="INTERNAL_SERVER_ERROR",
             message="An unexpected error occurred.",
             http_status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            details={"exception": type(exc).__name__},
+            details=None,
         )
 
     return app
