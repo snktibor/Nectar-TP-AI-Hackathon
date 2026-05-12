@@ -21,3 +21,8 @@ description: SOLID, DRY, maintainability, and explainability guardrails for NECT
 - Duplicated severity logic in multiple layers.
 - Findings without source references.
 - Hidden fallback behavior that changes risk silently.
+
+## Design System Exception Rules
+- **Shadow usage (frontend):** Only `buttonPrimary` component uses shadows (`shadow-phantom-button` on normal state, `hover:shadow-phantom-lift` on hover). All other component shadows have been removed to enforce elevation via border and opacity instead.
+- **Rate limiting (backend):** Protect upload (`5/minute`), ingest (`3/minute`), and audit-start (`2/minute`) endpoints against request flooding.
+- **Session TTL (backend):** In-memory sessions expire after 24 hours. Cleanup runs opportunistically on document list/download operations.

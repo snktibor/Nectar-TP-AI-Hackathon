@@ -23,7 +23,7 @@ Transfer pricing documentation consistency auditor. Multi-agent AI system for Pw
 
 - Analyze transfer pricing document packages (Master File, Local File, contracts, invoices, benchmark).
 - Detect cross-document contradictions with source citations.
-- Check mandatory content completeness (32/2017 NGM rendelet).
+- Check mandatory content completeness against the active Hungarian TP decree baseline (catalog-pinned legal sources).
 - Validate benchmark range positioning (IQR).
 - Compute explainable NAV-oriented risk categories.
 - Every finding requires source references and severity classification.
@@ -33,8 +33,8 @@ Transfer pricing documentation consistency auditor. Multi-agent AI system for Pw
 - Backend: Python FastAPI + Pydantic v2 + ChromaDB
 - Frontend: React 18 + Vite + TypeScript (strict) + Tailwind CSS 3.4
 - Parsing: pypdf + python-docx; LlamaParse optional later
-- Embedding: ChromaDB default embedding in PoC; paraphrase-multilingual-MiniLM-L12-v2 target later
-- Agent pipeline: mock service in PoC; Claude-based agents target later
+- Embedding: paraphrase-multilingual-MiniLM-L12-v2 for uploaded-document and legal-knowledge retrieval
+- Agent pipeline: mock service as safe local default; Claude-backed agents are opt-in and require configured credentials
 
 ## Agent Roster
 
@@ -64,17 +64,24 @@ Use backend rulesets as the deterministic baseline:
 - `tp_method_classification.json` — planned TP method identification
 - `severity_scoring.json` — planned finding severity weights
 - `nav_risk_categories.json` — planned audit triggers and penalties
+- `official_sources.json` — pinned official legal-source catalog (metadata, hashes, aliases, section anchors)
 
 ## Current PoC Features
 
 - React 18 + Vite + Tailwind frontend with strict 5-document ingest guardrails and `phantomDesign` tokens.
 - FastAPI backend with standardized `{success, data, error, meta}` envelope.
-- Batch PDF/DOCX ingest, parsing, ruleset classification with filename overrides, chunking, and ChromaDB indexing.
+- Batch PDF/DOCX ingest, parsing, ruleset classification with filename overrides, chunking, and ChromaDB indexing through the shared no-telemetry local client factory.
+- Official legal-source catalog service (`official_sources.json`) with hash validation script (`python -m scripts.validate_sources`) and catalog-driven legal RAG indexing (`python -m scripts.index_rulesets`).
+- Audit start uses mock mode by default and fails fast with a sanitized configuration error if real-agent mode is enabled without credentials.
 - Document file retrieval supports inline browser viewing with byte-range responses for faster PDF rendering.
+- Mobile dashboard navigation uses a full-height left drawer with locked background scroll and local menu state.
 - Required ingest coverage validation for `master_file`, `local_file`, `contract`, `benchmark_study`, and `invoice` with explicit issue reporting plus targeted/bulk replacement for missing or duplicated required categories.
+- Processed document state hides upload guidance and exposes `Újrakezdés` beside the category status while keeping the document summary visible.
 - Frontend PDF evidence viewer prioritizes the target citation page first and applies quote highlighting as best-effort.
 - Active frontend audit lifecycle wired to `/api/v1/audits/start`, `/status/{id}`, and `/results/{id}` with polling.
-- Backend-driven report surface with findings, agent run details, and telemetry tabs.
+- Read-only legal-source endpoints exposed at `/api/v1/legal-sources`, `/api/v1/legal-sources/{source_id}`, and `/api/v1/legal-sources/{source_id}/file`.
+- Backend-driven report surface with findings, agent run details, telemetry tabs, and finding group badges beside severity.
+- `Riport` view generates a 20+ page enterprise PDF in the browser with `@react-pdf/renderer` and a centered confidential download CTA.
 
 ## Quality Gate
 

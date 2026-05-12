@@ -24,10 +24,11 @@ The frontend provides the document upload workflow and risk dashboard for review
 - Keep reusable design decisions centralized in `src/design-system/phantomDesign.ts`, `tailwind.config.js`, and `src/index.css`.
 - Do not scatter one-off color, spacing, shadow, radius, or animation values through components.
 - Use `src/components/ui/DashboardPrimitives.tsx` for repeated dashboard UI patterns such as section headers, status pills, metric cards, empty panels, and workflow timelines.
-- Keep shared document display helpers in `src/lib/documentDisplay.ts` and backend audit DTO/helpers in `src/lib/backendAudit.ts`.
+- Keep shared document display helpers in `src/lib/documentDisplay.ts`, backend audit DTO/helpers in `src/lib/backendAudit.ts`, evidence citation routing in `src/lib/citations.ts`, and document-finding relation logic in `src/lib/findingFilters.ts`.
 - Active render path is `src/App.tsx` → `src/components/DashboardShell.tsx` → `src/components/DocumentIngestor.tsx` + `src/components/AnalysisWorkspace.tsx`.
 - Sidebar menu in `DashboardShell` is intentionally local-state only and must not navigate until a routing contract is approved.
 - `DashboardShell` keeps `Analízis` and `Riport` as separate menu points with dedicated left-panel views.
+- Mobile `DashboardShell` navigation uses a full-height left drawer with background scroll locked while open.
 - Legacy components that are not on the active render path must not be treated as UI source of truth.
 
 ## Core Screens
@@ -43,7 +44,8 @@ The frontend provides the document upload workflow and risk dashboard for review
 - Require coverage of `master_file`, `local_file`, `contract`, `benchmark_study`, and `invoice` in the processed result set.
 - If coverage is incomplete, show failed files with reasons and list missing required categories.
 - Audit start readiness requires complete required coverage and accepted classification confidence for all required documents.
-- Provide done-state recovery action `Fájlok újrafeltöltése` that resets upload state and reopens the file picker.
+- In done state, hide the upload instruction block and `PDF / DOCX` badge; keep only processed summary and document result list.
+- Provide done-state recovery action `Újrakezdés` next to the category status that resets upload state and reopens the file picker.
 
 ### 2. Analysis Workspace
 - Right-side workspace starts empty until at least one document is successfully classified.
@@ -65,19 +67,28 @@ The frontend provides the document upload workflow and risk dashboard for review
 
 ### 5. Dashboard Shell
 - Left sidebar rail must protect long labels with truncation and `min-w-0` overflow-safe layout.
+- Mobile navigation is a full-height left drawer that leaves a small right-side backdrop visible, closes via X/backdrop/Escape/menu selection, and must lock page scrolling underneath.
 - Non-active menu items keep subtle colored layer styling and hover feedback.
 - `Analízis` and `Riport` are separate tabs and both preserve existing internal card styling.
-- Lower sidebar block currently contains the profile card only; do not reintroduce settings without an approved interaction contract.
+- The sidebar does not render a profile/settings footer block; do not reintroduce one without an approved interaction contract.
 
 ### 6. Document Evidence Viewer
 - Open uploaded document and legal citations inside `DocumentViewer` through `ResultsPanel`.
 - Prioritize rendering the target citation page before rendering broader PDF context.
+- Backend `EvidenceChunk.page` values are source-facing page labels. Convert them through `src/lib/citations.ts` before passing `CitationTarget.page`, which is a zero-based PDF viewer index.
+- Selected-document finding panels and document count badges must use `src/lib/findingFilters.ts`, matching explicit filenames, locations, and evidence chunks before falling back to `doc_type_scope`.
 - Correct-page navigation is the minimum required behavior; quote highlighting is best-effort and must not block page display.
 - Keep PDF loading fast by avoiding unnecessary all-page rendering for evidence citations.
 
 ### 7. Severity and Findings
 - Findings must carry severity labels and retain backend attribution details where available.
+- Finding cards show a finding-group badge beside severity: `Konzisztencia hibák`, `Benchmark kockázatok`, or `Hiányzó elemek`.
 - Severity color system from `severity_scoring.json`: critical=#D32F2F, high=#F57C00, medium=#FBC02D, low=#388E3C.
+
+### 8. Enterprise Report PDF
+- `Riport` view uses `ReportGeneratorModal` and `@react-pdf/renderer` to generate the enterprise PDF client-side from the loaded audit report.
+- The modal CTA is centered and shows `PDF letöltés` when available or `PDF letöltés nem elérhető` on generation failure.
+- The confidentiality line `Bizalmas - adózási és transzferár érzékeny információkat tartalmaz.` stays visible below the PDF action.
 
 ## UX Rules
 - Severity is visually dominant — color, icon, and label together.
@@ -92,9 +103,11 @@ The frontend provides the document upload workflow and risk dashboard for review
 - Use Inter-first/system sans typography with zero letter spacing and no viewport-width font scaling.
 - Cards and panels use 8px maximum radius unless the component is an intentional pill.
 - Hover states use subtle border/background/shadow changes; focus states must be keyboard-visible.
+- **Shadow usage restriction:** Only `buttonPrimary` component uses shadows (`shadow-phantom-button` normal state, `hover:shadow-phantom-lift` on hover). All other components use border and opacity changes for elevation. Do not add new shadow usages to other components.
 - Motion must be short and purposeful, and must respect `prefers-reduced-motion`.
 - Responsive behavior must be stable to 320px width without page-level horizontal overflow.
 - Protect long filenames, session IDs, source references, benchmark values, and finding text with truncation, `break-words`, `min-w-0`, or controlled horizontal scrolling.
+- Keep technical SEO baseline configured in `index.html` with `description`, `canonical`, OG/Twitter tags, and maintain `public/robots.txt`, `public/sitemap.xml`, and `public/manifest.webmanifest`.
 
 ## TypeScript Rules
 - `"strict": true` in tsconfig.

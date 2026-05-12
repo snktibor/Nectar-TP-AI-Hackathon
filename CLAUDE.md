@@ -20,8 +20,8 @@ Multi-agent AI system that analyzes multinational TP documentation packages (Mas
 | Backend | Python FastAPI (async) + Pydantic v2 |
 | Document parsing | pypdf + python-docx (LlamaParse optional later) |
 | Vector DB | ChromaDB (local file-based) |
-| Embedding | ChromaDB default embedding in PoC; HU+EN MiniLM target later |
-| LLM | Mock agent service in PoC; Claude Sonnet/Opus target later |
+| Embedding | paraphrase-multilingual-MiniLM-L12-v2 for uploaded-document and legal-knowledge retrieval |
+| LLM | Mock agent service as safe local default; Claude-backed agents are opt-in and require configured credentials |
 | Orchestration | Custom sequential Python service (no LangGraph/CrewAI) |
 
 ## Architecture
@@ -32,7 +32,7 @@ Multi-agent AI system that analyzes multinational TP documentation packages (Mas
 Agent Pipeline (sequential with shared memory):
 1. Structure Agent → entity/transaction/document map
 2. Consistency Agent → cross-document contradictions
-3. Completeness Agent → mandatory element checklist (32/2017 NGM)
+3. Completeness Agent → mandatory element checklist (catalog-pinned legal baseline)
 4. Benchmark Agent → IQR range validation
 5. Risk Scorer → aggregated NAV-oriented risk report
 ```
@@ -45,16 +45,22 @@ Implemented classification and planned scoring use JSON rulesets in `app/backend
 - `tp_method_classification.json` — planned CUP/RPM/CPM/TNMM/PSM classification
 - `severity_scoring.json` — planned critical/high/medium/low weighted scoring
 - `nav_risk_categories.json` — planned audit triggers, penalties, entity categories
+- `official_sources.json` — pinned official legal-source catalog (metadata, hashes, aliases, section anchors)
 
 ## Current PoC Features
 
 - Batch PDF/DOCX ingest through `POST /api/v1/documents/ingest`.
-- pypdf/python-docx parsing, ruleset classification, chunking, and ChromaDB indexing.
+- pypdf/python-docx parsing, ruleset classification, chunking, and ChromaDB indexing through the shared no-telemetry local client factory.
+- Official legal-source catalog service (`official_sources.json`) with hash validation script (`python -m scripts.validate_sources`) and catalog-driven legal RAG indexing (`python -m scripts.index_rulesets`).
+- Audit start uses mock mode by default and fails fast with a sanitized configuration error if real-agent mode is enabled without credentials.
 - React `DocumentIngestor` enforces a strict 5-document intake per run, validates required category coverage (`master_file`, `local_file`, `contract`, `benchmark_study`, `invoice`), and supports targeted/bulk replacement for missing or duplicated required categories.
+- Processed document state hides upload guidance and exposes `Újrakezdés` beside the category status while keeping the document summary visible.
+- Mobile dashboard navigation uses a full-height left drawer with locked background scroll and local menu state.
 - Document file retrieval supports inline browser viewing with byte-range responses for faster PDF rendering.
 - Frontend PDF evidence viewer prioritizes the target citation page first and applies quote highlighting as best-effort.
 - Frontend audit flow is actively wired to `/api/v1/audits/start`, `/status/{id}`, and `/results/{id}` with polling lifecycle handling.
-- `AnalysisWorkspace` renders backend-driven findings, per-agent runs, and telemetry tabs.
+- `AnalysisWorkspace` renders backend-driven findings, per-agent runs, and telemetry tabs; finding cards show severity plus domain group badges.
+- `Riport` view generates a 20+ page enterprise PDF in the browser with `@react-pdf/renderer` and a centered confidential download CTA.
 - `phantomDesign` frontend design system with Tailwind `phantom` tokens.
 
 ## Roles And Delegation
