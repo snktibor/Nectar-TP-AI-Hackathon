@@ -1,11 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
-import { PDFDownloadLink } from '@react-pdf/renderer'
+import { pdf } from '@react-pdf/renderer'
 import { Check, Download, FileText, Loader2, X } from 'lucide-react'
 import { phantomDesign } from '../../design-system/phantomDesign'
 import type { BackendAuditReport } from '../../lib/backendAudit'
-import ReportTemplate from './ReportTemplate'
-
-const API_BASE = import.meta.env.VITE_API_BASE_URL as string
+import { buildEnterpriseReportPayload } from '../../lib/enterpriseReport'
+import EnterpriseReportPdfDocument from './EnterpriseReportPdfDocument'
 
 interface ReportGeneratorModalProps {
   readonly open: boolean
@@ -19,11 +18,13 @@ interface BuildStep {
   readonly durationMs: number
 }
 
+type DownloadState = 'idle' | 'building' | 'error'
+
 const STEPS: ReadonlyArray<BuildStep> = [
-  { id: 'compose',  label: 'Vezetői összefoglaló összeállítása',        durationMs: 900 },
-  { id: 'risk',     label: 'Kockázati mutatók aggregálása',              durationMs: 800 },
-  { id: 'findings', label: 'Megállapítások és hivatkozások megjelenítése', durationMs: 1100 },
-  { id: 'finalize', label: 'PDF elrendezés véglegesítése',                durationMs: 700 },
+  { id: 'scope', label: 'Audit scope és finding adatok összeállítása', durationMs: 700 },
+  { id: 'matrix', label: 'Kockázati mátrixok és hőtérkép előállítása', durationMs: 900 },
+  { id: 'finance', label: 'Pénzügyi kitettség és remediáció számítása', durationMs: 1000 },
+  { id: 'layout', label: 'Enterprise riport elrendezés véglegesítése', durationMs: 850 },
 ]
 
 export default function ReportGeneratorModal({
@@ -32,95 +33,116 @@ export default function ReportGeneratorModal({
   onClose,
 }: ReportGeneratorModalProps): JSX.Element | null {
   const [completedCount, setCompletedCount] = useState(0)
-  const [directDownloadAvailable, setDirectDownloadAvailable] = useState(false)
+  const [downloadState, setDownloadState] = useState<DownloadState>('idle')
+  const [downloadError, setDownloadError] = useState<string | null>(null)
+  const payload = useMemo(() => buildEnterpriseReportPayload(report), [report])
 
-  useEffect(() => {
-    if (!open) return
-    let cancelled = false
-    void (async () => {
-      try {
-        const res = await fetch(`${API_BASE}/api/v1/reports/availability`)
-        if (!res.ok) return
-        const json = (await res.json()) as { data?: { available?: boolean } }
-        if (!cancelled && json.data?.available === true) {
-          setDirectDownloadAvailable(true)
-        }
-      } catch {
-        // Silent fallback to in-browser PDF rendering.
-      }
-    })()
-    return () => {
-      cancelled = true
-    }
-  }, [open])
-
-  // Reset and replay the staged loader every time the modal opens.
   useEffect(() => {
     if (!open) {
       setCompletedCount(0)
+      setDownloadState('idle')
+      setDownloadError(null)
       return
     }
+
     let cancelled = false
     let elapsed = 0
-    const timeouts: number[] = []
+    const timers: number[] = []
 
-    STEPS.forEach((step, idx) => {
+    setCompletedCount(0)
+    setDownloadState('idle')
+    setDownloadError(null)
+    STEPS.forEach((step, index) => {
       elapsed += step.durationMs
-      const handle = globalThis.setTimeout(() => {
+      const timerId = globalThis.setTimeout(() => {
         if (cancelled) return
-        setCompletedCount(idx + 1)
+        setCompletedCount(index + 1)
       }, elapsed)
-      timeouts.push(handle)
+      timers.push(timerId)
     })
 
     return () => {
       cancelled = true
-      timeouts.forEach((h) => globalThis.clearTimeout(h))
+      timers.forEach((timerId) => globalThis.clearTimeout(timerId))
     }
   }, [open])
 
-  const isReady = completedCount >= STEPS.length
+  const isStagedReady = completedCount >= STEPS.length
+  const canDownload = isStagedReady && downloadState === 'idle'
 
   const downloadFilename = useMemo(() => {
     const datePart = (report.generated_at || new Date().toISOString()).slice(0, 10)
     const sessionPart = report.session_id.slice(0, 8)
-    return `NectarTP_Report_${sessionPart}_${datePart}.pdf`
+    return `NectarTP_Enterprise_Report_${sessionPart}_${datePart}.pdf`
   }, [report.generated_at, report.session_id])
 
-  const documentElement = useMemo(
-    () => <ReportTemplate report={report} />,
-    [report],
-  )
+  async function handlePdfDownload(): Promise<void> {
+    if (!canDownload) return
+
+    setDownloadState('building')
+    setDownloadError(null)
+
+    try {
+      const reportBlob = await pdf(<EnterpriseReportPdfDocument payload={payload} />).toBlob()
+      if (reportBlob.size === 0) {
+        throw new Error('A generált PDF üres.')
+      }
+
+      const objectUrl = URL.createObjectURL(reportBlob)
+      const link = document.createElement('a')
+      link.href = objectUrl
+      link.download = downloadFilename
+      document.body.append(link)
+      link.click()
+      link.remove()
+      globalThis.setTimeout(() => URL.revokeObjectURL(objectUrl), 30_000)
+      setDownloadState('idle')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'A PDF generálása sikertelen.'
+      setDownloadState('error')
+      setDownloadError(message)
+    }
+  }
 
   if (!open) return null
 
+  let actionLabel = 'Riport előkészítése...'
+  let actionIcon: JSX.Element = <Loader2 className="force-spin h-4 w-4 animate-spin" />
+
+  if (isStagedReady) {
+    if (downloadState === 'building') {
+      actionLabel = 'PDF készítése...'
+      actionIcon = <Loader2 className="force-spin h-4 w-4 animate-spin" />
+    } else if (downloadState === 'error') {
+      actionLabel = 'PDF letöltés nem elérhető'
+      actionIcon = <Download className="h-4 w-4" />
+    } else {
+      actionLabel = 'PDF letöltés'
+      actionIcon = <Download className="h-4 w-4" />
+    }
+  }
+
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="report-modal-title"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-phantom-ink/50 px-4 py-6 backdrop-blur-sm"
-      onClick={onClose}
-    >
-      <div
-        className="w-full max-w-lg overflow-hidden rounded-phantom-card border border-phantom-line bg-phantom-surface shadow-phantom-lift"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
+    <div className="absolute inset-0 z-20 flex items-center justify-center px-3 py-4 sm:px-4 sm:py-6">
+      <button
+        type="button"
+        aria-label="Riport ablak bezárása"
+        className="absolute inset-0 z-0 bg-phantom-ink/50 backdrop-blur-sm"
+        onClick={onClose}
+      />
+
+      <div className="relative z-10 max-h-full w-full max-w-2xl overflow-hidden rounded-phantom-card border border-phantom-line bg-phantom-surface">
         <div className="flex items-start justify-between gap-3 border-b border-phantom-line bg-phantom-surface-muted px-6 py-4">
-          <div className="flex items-center gap-3">
+          <div className="flex min-w-0 items-center gap-3">
             <span className={phantomDesign.components.iconBadge}>
               <FileText className="h-5 w-5" />
             </span>
-            <div>
-              <h2
-                id="report-modal-title"
-                className="font-serif text-base font-semibold text-phantom-ink"
-              >
-                Megfelelőségi riport készítése
+            <div className="min-w-0">
+              <h2 id="report-modal-title" className="break-words text-base font-semibold text-phantom-ink">
+                Big4-szintű TP jelentés generálása
               </h2>
-              <p className="text-xs text-phantom-muted">
-                Munkamenet {report.session_id.slice(0, 8)} · A4 PDF dokumentum
+              <p className="break-all text-xs text-phantom-muted">
+                20+ oldalas enterprise riport · Session {report.session_id.slice(0, 8)}
               </p>
             </div>
           </div>
@@ -128,57 +150,51 @@ export default function ReportGeneratorModal({
             type="button"
             onClick={onClose}
             aria-label="Riport ablak bezárása"
-            title="Bezárás"
-            className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-phantom-control border border-phantom-line bg-phantom-surface text-phantom-muted transition-phantom duration-phantom-base hover:border-phantom-accent hover:text-phantom-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-phantom-control border border-phantom-line bg-phantom-surface text-phantom-muted transition-phantom duration-phantom-base hover:border-phantom-accent hover:text-phantom-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus"
           >
-            <X className="h-4 w-4" aria-hidden="true" />
+            <X className="h-4 w-4" />
           </button>
         </div>
 
-        {/* Body */}
         <div className="px-6 py-6">
           <ol className="space-y-3">
-            {STEPS.map((step, idx) => {
-              const isDone = idx < completedCount
-              const isActive = idx === completedCount && !isReady
+            {STEPS.map((step, index) => {
+              const isDone = index < completedCount
+              const isActive = index === completedCount && !isStagedReady
+              const isPending = !isDone && !isActive
+
+              let iconContainerClass = 'bg-phantom-surface text-phantom-muted ring-phantom-line'
+              if (isDone) {
+                iconContainerClass = 'bg-phantom-accent text-white ring-phantom-accent'
+              } else if (isActive || isPending) {
+                iconContainerClass = 'bg-phantom-surface text-phantom-accent ring-phantom-accent'
+              }
+
+              let stepIcon: JSX.Element = <Loader2 className="force-spin h-3.5 w-3.5 animate-spin" />
+              if (isDone) {
+                stepIcon = <Check className="h-3.5 w-3.5" strokeWidth={3} />
+              } else if (isActive || isPending) {
+                stepIcon = <Loader2 className="force-spin h-3.5 w-3.5 animate-spin" />
+              }
+
+              const stepLabelClass = isDone || isActive ? 'text-sm text-phantom-ink' : 'text-sm text-phantom-muted'
+
               return (
-                <li key={step.id} className="flex items-center gap-3">
+                <li key={step.id} className="flex min-w-0 items-center gap-3">
                   <span
                     className={[
                       'flex h-6 w-6 shrink-0 items-center justify-center rounded-full ring-1 transition-colors',
-                      isDone
-                        ? 'bg-phantom-accent text-white ring-phantom-accent'
-                        : isActive
-                        ? 'bg-phantom-surface text-phantom-accent ring-phantom-accent'
-                        : 'bg-phantom-surface text-phantom-muted ring-phantom-line',
+                      iconContainerClass,
                     ].join(' ')}
                   >
-                    {isDone ? (
-                      <Check className="h-3.5 w-3.5" strokeWidth={3} />
-                    ) : isActive ? (
-                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                    ) : (
-                      <span className="text-[10px] font-semibold">{idx + 1}</span>
-                    )}
+                    {stepIcon}
                   </span>
-                  <span
-                    className={[
-                      'text-sm transition-colors',
-                      isDone
-                        ? 'text-phantom-ink'
-                        : isActive
-                        ? 'font-medium text-phantom-ink'
-                        : 'text-phantom-muted',
-                    ].join(' ')}
-                  >
-                    {step.label}
-                  </span>
+                  <span className={[stepLabelClass, 'min-w-0 break-words'].join(' ')}>{step.label}</span>
                 </li>
               )
             })}
           </ol>
 
-          {/* Progress bar */}
           <div className="mt-6 h-1.5 w-full overflow-hidden rounded-full bg-phantom-surface-muted">
             <div
               className="h-full rounded-full bg-phantom-accent transition-all duration-500 ease-out"
@@ -187,62 +203,34 @@ export default function ReportGeneratorModal({
           </div>
         </div>
 
-        {/* Footer / CTA */}
         <div className="border-t border-phantom-line bg-phantom-surface px-6 py-5">
-          {isReady ? (
-            directDownloadAvailable ? (
-              <a
-                href={`${API_BASE}/api/v1/reports/download`}
-                download={downloadFilename}
-                className={[phantomDesign.components.buttonBase, phantomDesign.components.buttonPrimary, 'flex items-center justify-center gap-2'].join(' ')}
-              >
-                <Download className="h-4 w-4" />
-                PDF riport letöltése
-              </a>
-            ) : (
-            <PDFDownloadLink
-              document={documentElement}
-              fileName={downloadFilename}
-              className={[phantomDesign.components.buttonBase, phantomDesign.components.buttonPrimary, 'flex items-center justify-center gap-2'].join(' ')}
-            >
-              {({ loading, error }) => {
-                if (error) {
-                  return (
-                    <span className="text-sm font-medium text-white">
-                      A PDF generálása sikertelen — kérjük, próbálja újra.
-                    </span>
-                  )
-                }
-                if (loading) {
-                  return (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      Letöltés előkészítése…
-                    </>
-                  )
-                }
-                return (
-                  <>
-                    <Download className="h-4 w-4" />
-                    PDF riport letöltése
-                  </>
-                )
-              }}
-            </PDFDownloadLink>
-            )
-          ) : (
+          <div className="flex flex-col items-center justify-center gap-2.5 text-center">
             <button
               type="button"
-              disabled
-              className={[phantomDesign.components.buttonBase, 'flex cursor-not-allowed items-center justify-center gap-2 bg-phantom-surface-muted text-phantom-muted'].join(' ')}
+              disabled={!canDownload}
+              onClick={() => {
+                void handlePdfDownload()
+              }}
+              className={[
+                phantomDesign.components.buttonBase,
+                canDownload
+                  ? [
+                      phantomDesign.components.buttonPrimary,
+                      'inline-flex w-full max-w-xs items-center justify-center gap-2',
+                    ].join(' ')
+                  : 'inline-flex w-full max-w-xs cursor-not-allowed items-center justify-center gap-2 border border-phantom-line bg-phantom-surface-muted text-phantom-muted',
+              ].join(' ')}
             >
-              <Loader2 className="h-4 w-4 animate-spin" />
-              Riport készítése…
+              {actionIcon}
+              {actionLabel}
             </button>
-          )}
-          <p className="mt-3 text-center text-[11px] text-phantom-muted">
-            Bizalmas — adóügyileg érzékeny információkat tartalmaz.
-          </p>
+
+            {downloadError ? (
+              <p className="max-w-md text-center text-[11px] leading-4 text-phantom-danger-text">
+                {downloadError}
+              </p>
+            ) : null}
+          </div>
         </div>
       </div>
     </div>

@@ -13,13 +13,11 @@ import {
   type AgentId,
   type BackendAuditReport,
   type BackendAuditStatusResponse,
-  type BackendConsistencyError,
-  type BackendBenchmarkRisk,
-  type BackendMissingElement,
   type BackendRiskSeverity,
   type WorkspacePhase,
 } from '../lib/backendAudit'
 import type { CitationTarget } from '../types/viewer'
+import type { AnyFinding } from '../types/findings'
 import AgentStatusStrip from './AgentStatusStrip'
 import FindingCard from './FindingCard'
 import { EmptyPanel, MetricCard, StatusPill } from './ui/DashboardPrimitives'
@@ -28,12 +26,12 @@ type TabId = 'findings' | 'agent_runs' | 'telemetry'
 type StatusPillTone = 'neutral' | 'accent' | 'success' | 'warning' | 'danger' | 'info'
 
 const headerStatusToneClasses: Record<StatusPillTone, string> = {
-  neutral: 'bg-phantom-surface-muted text-phantom-muted',
-  accent: 'bg-phantom-accent-soft text-phantom-accent',
-  success: 'bg-phantom-success-soft text-phantom-success-text',
-  warning: 'bg-phantom-severity-medium-soft text-phantom-severity-medium-text',
-  danger: 'bg-phantom-danger-soft text-phantom-danger-text',
-  info: 'bg-phantom-surface-muted text-phantom-muted',
+  neutral: 'bg-phantom-surface-muted text-phantom-muted ring-phantom-line',
+  accent: 'bg-phantom-accent-soft text-phantom-accent ring-phantom-accent/20',
+  success: 'bg-phantom-success-soft text-phantom-success-text ring-phantom-success-border',
+  warning: 'bg-phantom-severity-medium-soft text-phantom-severity-medium-text ring-phantom-severity-medium-border',
+  danger: 'bg-phantom-danger-soft text-phantom-danger-text ring-phantom-danger-border',
+  info: 'bg-phantom-surface-muted text-phantom-muted ring-phantom-line',
 }
 
 function getSeverityFilterTone(severity: BackendRiskSeverity): string {
@@ -113,11 +111,6 @@ function ProgressView({
 // Findings tab helpers
 // ---------------------------------------------------------------------------
 
-type AnyFinding =
-  | { kind: 'consistency'; finding: BackendConsistencyError }
-  | { kind: 'benchmark'; finding: BackendBenchmarkRisk }
-  | { kind: 'missing'; finding: BackendMissingElement }
-
 function normalizeSeverityValue(
   severity: string,
 ): BackendRiskSeverity | null {
@@ -191,7 +184,7 @@ function FindingsView({
   return (
     <div className="space-y-3 animate-phantom-fade-in">
       {/* Summary banner */}
-      <section className="min-w-0 overflow-hidden rounded-phantom-card border border-phantom-line bg-phantom-surface p-4 animate-phantom-fade-in-up transition-phantom duration-phantom-base hover:shadow-phantom-soft">
+      <section className="min-w-0 overflow-hidden rounded-phantom-card border border-phantom-line bg-phantom-surface p-4 animate-phantom-fade-in-up transition-phantom duration-phantom-base hover:border-phantom-line-strong max-[359px]:p-3">
         <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
             <p className="text-xs font-semibold uppercase tracking-[0.06em] text-phantom-subtle">Vezetői összefoglaló</p>
@@ -200,7 +193,7 @@ function FindingsView({
 
           <span
             className={[
-              'inline-flex h-7 shrink-0 items-center rounded-full px-3 text-xs font-semibold uppercase whitespace-nowrap animate-phantom-bounce-in transition-transform duration-phantom-base hover:scale-105',
+              'inline-flex h-7 shrink-0 items-center rounded-full px-3 text-xs font-semibold uppercase whitespace-nowrap animate-phantom-bounce-in max-[359px]:h-6 max-[359px]:px-2 max-[359px]:text-[11px]',
               getSeverityTone(report.overall_risk),
             ].join(' ')}
           >
@@ -232,10 +225,10 @@ function FindingsView({
           type="button"
           onClick={() => setSeverityFilter(null)}
           className={[
-            'inline-flex h-7 w-full items-center justify-center whitespace-nowrap rounded-full border px-3 text-xs font-medium transition-phantom duration-phantom-base hover:-translate-y-px hover:shadow-phantom-soft active:translate-y-0 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus',
+            'inline-flex h-7 w-full items-center justify-center whitespace-nowrap rounded-full border px-3 text-xs font-medium transition-phantom duration-phantom-base hover:border-phantom-accent/30 hover:bg-phantom-accent-soft/50 hover:text-phantom-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus max-[359px]:h-6 max-[359px]:px-2 max-[359px]:text-[11px]',
             severityFilter === null
-              ? 'border-phantom-accent/30 bg-phantom-accent-soft text-phantom-accent scale-[1.02] shadow-phantom-soft'
-              : 'border-phantom-line bg-phantom-surface-muted text-phantom-muted hover:border-phantom-accent/30 hover:bg-phantom-accent-soft/60 hover:text-phantom-accent',
+              ? 'border-phantom-accent/30 bg-phantom-accent-soft text-phantom-accent'
+              : 'border-phantom-line bg-phantom-surface-muted text-phantom-muted',
           ].join(' ')}
         >
           Mind
@@ -246,9 +239,9 @@ function FindingsView({
             type="button"
             onClick={() => setSeverityFilter(severityFilter === s ? null : s)}
             className={[
-              'inline-flex h-7 w-full items-center justify-center whitespace-nowrap rounded-full border px-3 text-xs font-medium transition-phantom duration-phantom-base hover:-translate-y-px hover:shadow-phantom-soft active:translate-y-0 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus',
+              'inline-flex h-7 w-full items-center justify-center whitespace-nowrap rounded-full border px-3 text-xs font-medium transition-phantom duration-phantom-base hover:border-phantom-accent/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus max-[359px]:h-6 max-[359px]:px-2 max-[359px]:text-[11px]',
               severityFilter === s
-                ? `${getSeverityFilterTone(s)} border-phantom-line scale-[1.02] shadow-phantom-soft`
+                ? `${getSeverityFilterTone(s)} border-phantom-line`
                 : 'border-phantom-line bg-phantom-surface-muted text-phantom-muted',
             ].join(' ')}
           >
@@ -399,7 +392,7 @@ function AgentRunsView({ report }: Readonly<{ report: BackendAuditReport }>): JS
           <article
             key={run.agent_id}
             style={{ animationDelay: `${index * 70}ms` }}
-            className="min-w-0 overflow-hidden rounded-phantom-card border border-phantom-line bg-phantom-surface p-4 animate-phantom-fade-in-up transition-phantom duration-phantom-base hover:-translate-y-0.5 hover:shadow-phantom-soft hover:border-phantom-accent/40"
+            className="min-w-0 overflow-hidden rounded-phantom-card border border-phantom-line bg-phantom-surface p-4 animate-phantom-fade-in-up transition-phantom duration-phantom-base hover:border-phantom-accent/35 max-[359px]:p-3"
           >
             <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
               <div className="flex min-w-0 items-start gap-2.5">
@@ -498,7 +491,7 @@ function TelemetryView({ report }: Readonly<{ report: BackendAuditReport }>): JS
     { icon: Cpu, label: 'Bemenet (token)', value: formatTokenCount(totals.input) },
     { icon: Cpu, label: 'Kimenet (token)', value: formatTokenCount(totals.output) },
     { icon: DatabaseZap, label: 'Cache olvasás', value: formatTokenCount(totals.cacheRead) },
-    { icon: Wrench, label: 'Eszköz\nhívások', value: formatTokenCount(totals.toolCalls) },
+    { icon: Wrench, label: 'Eszközhívások', value: formatTokenCount(totals.toolCalls) },
   ]
 
   return (
@@ -608,6 +601,7 @@ export default function AnalysisWorkspace({
   const [activeTab, setActiveTab] = useState<TabId>('findings')
   const status = resolvePhasePill(phase)
   const canCloseReport = phase === 'failed'
+  const isBlockedPhase = phase === 'blocked'
 
   const tabs: { id: TabId; label: string }[] = [
     { id: 'findings', label: 'Megállapítások' },
@@ -619,24 +613,39 @@ export default function AnalysisWorkspace({
     <section className={phantomDesign.components.scrollPanel}>
       <div className={phantomDesign.components.panelHeaderBar}>
         <div className="flex w-full min-w-0 flex-wrap items-center justify-between gap-3">
-          <p className="min-w-0 truncate text-sm font-semibold text-phantom-ink">Analízis</p>
+          <div className="flex min-w-0 items-center gap-2">
+            <span
+              aria-hidden="true"
+              className={[
+                'h-6 w-1 shrink-0 rounded-full',
+                isBlockedPhase ? 'bg-phantom-severity-medium-border' : 'bg-phantom-accent/70',
+              ].join(' ')}
+            />
+            <p className="min-w-0 break-words text-sm font-semibold text-phantom-ink">Analízis</p>
+          </div>
           <div className="flex min-w-0 flex-wrap items-center gap-2">
             <span
               className={[
-                'inline-flex h-7 shrink-0 items-center rounded-full px-2.5 text-xs font-semibold leading-none whitespace-nowrap',
+                'relative inline-flex h-7 shrink-0 items-center overflow-hidden rounded-full px-2.5 text-xs font-semibold leading-none whitespace-nowrap ring-1 ring-inset',
                 headerStatusToneClasses[status.tone],
               ].join(' ')}
             >
-              {status.label}
+              {isBlockedPhase && (
+                <span
+                  aria-hidden="true"
+                  className="phantom-progress-stripes absolute inset-0 opacity-25"
+                />
+              )}
+              <span className="relative z-10">{status.label}</span>
             </span>
             {canCloseReport && (
               <button
                 type="button"
                 onClick={onCloseReport}
-                className="group/close inline-flex min-h-8 items-center justify-center gap-1 rounded-phantom-control border border-phantom-line bg-phantom-surface-muted px-2.5 py-1 text-xs font-semibold text-phantom-muted transition-phantom duration-phantom-base hover:-translate-y-px hover:border-phantom-accent hover:text-phantom-ink hover:shadow-phantom-soft active:translate-y-0 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus"
+                className="group/close inline-flex min-h-8 items-center justify-center gap-1 rounded-phantom-control border border-phantom-line bg-phantom-surface-muted px-2.5 py-1 text-xs font-semibold text-phantom-muted transition-phantom duration-phantom-base hover:border-phantom-accent hover:text-phantom-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus"
                 aria-label="Riport bezárása"
               >
-                <X className="h-3.5 w-3.5 transition-transform duration-phantom-base group-hover/close:rotate-90" />
+                <X className="h-3.5 w-3.5" />
                 <span className="hidden sm:inline">Bezárás</span>
               </button>
             )}

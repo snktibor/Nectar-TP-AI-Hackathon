@@ -1,18 +1,18 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Document, Page, pdfjs } from 'react-pdf'
 import 'react-pdf/dist/Page/TextLayer.css'
-import { X, Scale } from 'lucide-react'
+import { FileWarning, RefreshCw, X, Scale } from 'lucide-react'
 import { phantomDesign } from '../design-system/phantomDesign'
 import type { CitationTarget } from '../types/viewer'
 import type { PDFDocumentProxy } from 'pdfjs-dist'
 import { buildOutlinePageMap, matchLabelToOutlinePage, resolveLegalPdfUrl } from '../lib/legalDocs'
+import { toApiUrl } from '../lib/api'
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   'pdfjs-dist/build/pdf.worker.min.mjs',
   import.meta.url,
 ).toString()
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL as string
 const HIGHLIGHT_RETRY_COUNT = 5
 const HIGHLIGHT_RETRY_DELAY_MS = 80
 
@@ -319,7 +319,8 @@ function PdfViewer({
   onPageResolved,
 }: PdfViewerProps): JSX.Element {
   const [numPages, setNumPages] = useState(0)
-  const [loadError, setLoadError] = useState<string | null>(null)
+  const [hasLoadError, setHasLoadError] = useState(false)
+  const [loadAttempt, setLoadAttempt] = useState(0)
   const [containerWidth, setContainerWidth] = useState(0)
   const [renderedPages, setRenderedPages] = useState<Set<number>>(new Set())
   const [outlinePage0, setOutlinePage0] = useState<number | null>(null)
@@ -333,6 +334,11 @@ function PdfViewer({
   const resolvedPage0 = outlinePage0 ?? targetPage0
   const clampedPage0 = clampPageIndex(resolvedPage0, numPages)
   const targetPageRendered = renderedPages.has(clampedPage0)
+
+  useEffect(() => {
+    if (numPages === 0) return
+    onPageResolved?.(clampedPage0)
+  }, [numPages, clampedPage0, onPageResolved])
 
   // Measure container width for full-width PDF rendering
   useEffect(() => {
@@ -348,7 +354,8 @@ function PdfViewer({
   // Reset on citation change
   useEffect(() => {
     setNumPages(0)
-    setLoadError(null)
+    setHasLoadError(false)
+    setLoadAttempt(0)
     setRenderedPages(new Set())
     setOutlinePage0(null)
     outlineCancelRef.current = true
@@ -424,29 +431,58 @@ function PdfViewer({
     })
   }, [])
 
+  const handleRetry = useCallback(() => {
+    pdfProxyRef.current = null
+    setNumPages(0)
+    setHasLoadError(false)
+    setRenderedPages(new Set())
+    setOutlinePage0(null)
+    pageRefs.current.clear()
+    setLoadAttempt((currentAttempt) => currentAttempt + 1)
+  }, [])
+
   const pageWidth = containerWidth > 0 ? containerWidth - 8 : undefined
 
   return (
     <div ref={containerRef} className="h-full w-full overflow-y-auto overflow-x-hidden">
 
-      {loadError ? (
-        <div className="flex flex-col items-center gap-3 p-6 text-center">
-          <X className="h-8 w-8 text-phantom-accent" />
-          <p className="text-sm font-semibold text-phantom-ink">Betöltési hiba</p>
-          <p className="max-w-xs text-xs text-phantom-muted">{loadError}</p>
+      {hasLoadError ? (
+        <div className="flex h-full min-h-[18rem] items-center justify-center p-4 animate-phantom-fade-in">
+          <div className="w-full max-w-sm rounded-phantom-card border border-phantom-line bg-phantom-surface p-5 text-center">
+            <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-phantom-control bg-phantom-danger-soft text-phantom-danger-text ring-1 ring-phantom-danger-border">
+              <FileWarning className="h-5 w-5" aria-hidden="true" />
+            </div>
+            <p className="mt-4 text-sm font-semibold text-phantom-ink">A PDF nem tölthető be</p>
+            <p className="mt-2 text-sm leading-5 text-phantom-muted">
+              A hivatkozás megmaradt, de a dokumentumfájl most nem érhető el ebből a munkamenetből.
+            </p>
+            <p className="mt-1 text-xs leading-5 text-phantom-subtle">
+              A technikai útvonalat és azonosítókat biztonsági okból nem jelenítjük meg.
+            </p>
+            <button
+              type="button"
+              onClick={handleRetry}
+              className="mt-4 inline-flex h-9 items-center justify-center gap-2 rounded-phantom-control border border-phantom-line bg-phantom-surface-muted px-3 text-xs font-semibold text-phantom-ink transition-phantom hover:border-phantom-accent hover:bg-phantom-accent-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-focus"
+            >
+              <RefreshCw className="h-3.5 w-3.5" aria-hidden="true" />
+              <span>Újrapróbálás</span>
+            </button>
+          </div>
         </div>
       ) : (
         <Document
+          key={`${pdfUrl}-${loadAttempt}`}
           file={pdfUrl}
           onLoadSuccess={(pdf: PDFDocumentProxy) => {
             pdfProxyRef.current = pdf
             outlineCancelRef.current = false
+            setHasLoadError(false)
             setNumPages(pdf.numPages)
           }}
-          onLoadError={(err) => setLoadError(err.message)}
+          onLoadError={() => setHasLoadError(true)}
           loading={<LoadingSpinner label="PDF betöltése…" />}
           error={
-            <p className="p-4 text-sm text-phantom-muted">Nem sikerült betölteni a fájlt.</p>
+            <div className="p-4 text-sm text-phantom-muted">Nem sikerült betölteni a PDF fájlt.</div>
           }
           className="flex flex-col items-stretch gap-2 px-1 py-2"
         >
@@ -474,7 +510,7 @@ function PdfViewer({
                       style={{ width: pageWidth ?? 600, height: 800 }}
                       className="flex items-center justify-center bg-white"
                     >
-                      <div className="h-5 w-5 animate-spin rounded-full border-2 border-phantom-accent border-t-transparent" />
+                      <div className="force-spin h-5 w-5 animate-spin rounded-full border-2 border-phantom-accent border-t-transparent" />
                     </div>
                   }
                 />
@@ -497,6 +533,10 @@ function PdfViewer({
 export default function DocumentViewer({ citation, onClose }: DocumentViewerProps): JSX.Element {
   const [resolvedPage0, setResolvedPage0] = useState<number | null>(null)
 
+  useEffect(() => {
+    setResolvedPage0(null)
+  }, [citation.filename, citation.page, citation.label, citation.sourceKind])
+
   const isDocx = citation.filename.toLowerCase().endsWith('.docx')
   const isLegal = citation.sourceKind === 'legal'
   const legalPdfUrl = isLegal ? resolveLegalPdfUrl(citation.filename) : null
@@ -506,7 +546,7 @@ export default function DocumentViewer({ citation, onClose }: DocumentViewerProp
   if (!showTextPanel && isLegal && legalPdfUrl !== null) {
     pdfUrl = legalPdfUrl
   } else if (!showTextPanel && !isLegal) {
-    pdfUrl = `${API_BASE}/api/v1/documents/${encodeURIComponent(citation.sessionId)}/file/${encodeURIComponent(citation.filename)}`
+    pdfUrl = toApiUrl(`/api/v1/documents/${encodeURIComponent(citation.sessionId)}/file/${encodeURIComponent(citation.filename)}`)
   }
 
   const shouldRenderAllPages =
@@ -558,18 +598,20 @@ function ViewerHeader({
   onClose: () => void
   resolvedPage0?: number | null
 }>): JSX.Element {
+  const displayPage0 = resolvedPage0 ?? citation.page
+
   return (
     <div className="flex shrink-0 items-center justify-between gap-2 border-b border-phantom-line bg-phantom-surface px-4 py-3 animate-phantom-fade-in-down">
       <div className="min-w-0 flex-1">
         {citation.label ? (
           <>
             <p
-              className="truncate font-mono text-sm font-semibold text-phantom-accent"
+              className="break-all font-mono text-sm font-semibold text-phantom-accent"
               title={citation.label}
             >
               {citation.label}
             </p>
-            <p className="truncate text-xs text-phantom-subtle" title={citation.filename}>
+            <p className="break-all text-xs text-phantom-subtle" title={citation.filename}>
               {citation.filename}
               {' · '}
               {resolvedPage0 !== null && resolvedPage0 !== undefined
@@ -579,12 +621,12 @@ function ViewerHeader({
           </>
         ) : (
           <>
-            <p className="truncate text-sm font-semibold text-phantom-ink" title={citation.filename}>
+            <p className="break-all text-sm font-semibold text-phantom-ink" title={citation.filename}>
               {citation.filename}
             </p>
             <p className="text-xs text-phantom-subtle">
               {citation.sourceKind === 'legal' ? 'Jogi hivatkozás · ' : ''}
-              Cél: {citation.page + 1}. oldal
+              Cél: {displayPage0 + 1}. oldal
             </p>
           </>
         )}

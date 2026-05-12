@@ -1,4 +1,5 @@
 import type { BackendEvidenceChunk } from '../lib/backendAudit'
+import { formatEvidencePage } from '../lib/citations'
 
 interface EvidenceChipProps {
   readonly chunk: BackendEvidenceChunk
@@ -6,8 +7,15 @@ interface EvidenceChipProps {
   readonly onClick?: () => void
 }
 
+function displayFilename(filename: string): string {
+  const normalizedPath = filename.trim().replace(/\\/g, '/')
+  return normalizedPath.split('/').pop() ?? normalizedPath
+}
+
 export default function EvidenceChip({ chunk, isCrossDoc = false, onClick }: EvidenceChipProps): JSX.Element {
-  const label = `${chunk.filename} · p${chunk.page} · #${chunk.chunk_index}`
+  const pageLabel = formatEvidencePage(chunk.page)
+  const filename = displayFilename(chunk.filename)
+  const label = `${filename} · ${pageLabel} · #${chunk.chunk_index}`
   const tooltip = chunk.quote ?? label
 
   const colorClasses = isCrossDoc
@@ -15,21 +23,21 @@ export default function EvidenceChip({ chunk, isCrossDoc = false, onClick }: Evi
     : 'bg-phantom-surface-muted text-phantom-muted ring-phantom-line'
 
   const interactiveClasses = onClick
-    ? 'cursor-pointer transition-phantom duration-phantom-base hover:-translate-y-px hover:scale-105 hover:ring-phantom-accent hover:text-phantom-accent hover:shadow-phantom-soft active:translate-y-0 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-accent'
-    : 'transition-phantom duration-phantom-base hover:scale-[1.02]'
+    ? 'cursor-pointer transition-phantom duration-phantom-base hover:bg-phantom-accent-soft/65 hover:ring-phantom-accent hover:text-phantom-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phantom-accent'
+    : 'transition-phantom duration-phantom-base'
 
   const inner = (
     <>
-      <span className="max-w-[14ch] truncate">{chunk.filename}</span>
+      <span className="break-all">{filename}</span>
       <span className="shrink-0 opacity-60">·</span>
-      <span className="shrink-0">p{chunk.page}</span>
+      <span className="shrink-0">{pageLabel}</span>
       <span className="shrink-0 opacity-60">·</span>
       <span className="shrink-0">#{chunk.chunk_index}</span>
     </>
   )
 
   const baseClasses = [
-    'inline-flex max-w-[22ch] items-center gap-1 rounded-phantom-control px-2 py-0.5',
+    'inline-flex max-w-full flex-wrap items-center gap-1 rounded-phantom-control px-2 py-0.5 text-left',
     'text-[11px] font-medium ring-1 ring-inset',
     colorClasses,
     interactiveClasses,

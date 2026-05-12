@@ -91,7 +91,7 @@ export function StatusPill({ tone = 'neutral', children }: StatusPillProps): JSX
   return (
     <span
       className={[
-        'inline-flex h-7 shrink-0 items-center rounded-full px-2.5 text-xs font-semibold leading-none whitespace-nowrap ring-1 ring-inset transition-transform duration-phantom-base hover:scale-105',
+        'inline-flex h-7 shrink-0 items-center rounded-full px-2.5 text-xs font-semibold leading-none whitespace-nowrap ring-1 ring-inset max-[359px]:h-6 max-[359px]:px-2 max-[359px]:text-[11px]',
         toneClasses[tone],
       ].join(' ')}
     >
@@ -108,17 +108,20 @@ export function MetricCard({
   tone = 'neutral',
 }: MetricCardProps): JSX.Element {
   return (
-    <div className="group min-w-0 rounded-phantom-control border border-phantom-line bg-phantom-surface p-3 transition-phantom duration-phantom-base animate-phantom-fade-in-up hover:border-phantom-accent/30 hover:bg-phantom-accent-soft/20 sm:p-4">
+    <div className="group min-w-0 rounded-phantom-control border border-phantom-line bg-phantom-surface p-3 transition-phantom duration-phantom-base animate-phantom-fade-in-up hover:border-phantom-line-strong hover:bg-phantom-accent-soft/15 max-[359px]:p-2.5 sm:p-4">
       <div className="flex min-w-0 items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="break-words whitespace-pre-line text-xs font-semibold uppercase tracking-[0.08em] text-phantom-subtle">
+          <p
+            title={label}
+            className="break-words text-xs font-semibold uppercase leading-4 tracking-[0.08em] text-phantom-subtle"
+          >
             {label}
           </p>
-          <p className="mt-2 break-words text-xl font-semibold leading-7 text-phantom-ink transition-transform duration-phantom-base group-hover:scale-[1.02] sm:text-2xl sm:leading-8 origin-left">{value}</p>
+          <p className="mt-2 break-words text-xl font-semibold leading-7 text-phantom-ink max-[359px]:text-lg max-[359px]:leading-6 sm:text-2xl sm:leading-8">{value}</p>
         </div>
         <div
           className={[
-            'flex h-9 w-9 shrink-0 items-center justify-center rounded-phantom-control ring-1 ring-inset transition-transform duration-phantom-base group-hover:scale-110 group-hover:-rotate-3',
+            'flex h-9 w-9 shrink-0 items-center justify-center rounded-phantom-control ring-1 ring-inset max-[359px]:h-8 max-[359px]:w-8',
             metricIconClasses[tone],
           ].join(' ')}
         >
@@ -152,7 +155,12 @@ export function WorkflowTimeline({ steps }: { readonly steps: TimelineStep[] }):
   return (
     <div className="grid gap-2 sm:grid-cols-3">
       {steps.map((step, index) => {
-        const Icon = step.state === 'done' ? CheckCircle2 : step.state === 'active' ? LoaderCircle : Circle
+        let Icon: LucideIcon = Circle
+        if (step.state === 'done') {
+          Icon = CheckCircle2
+        } else if (step.state === 'active') {
+          Icon = LoaderCircle
+        }
         const iconClass = step.state === 'active' ? 'force-spin h-4 w-4 animate-spin' : 'h-4 w-4'
 
         return (
@@ -160,7 +168,7 @@ export function WorkflowTimeline({ steps }: { readonly steps: TimelineStep[] }):
             key={step.title}
             style={{ animationDelay: `${index * 80}ms` }}
             className={[
-              'rounded-phantom-card border p-3 transition-phantom duration-phantom-base animate-phantom-fade-in-up hover:-translate-y-0.5 hover:shadow-phantom-soft',
+              'rounded-phantom-card border p-3 transition-phantom duration-phantom-base animate-phantom-fade-in-up hover:border-phantom-line-strong max-[359px]:p-2.5',
               stepClasses[step.state],
             ].join(' ')}
           >
