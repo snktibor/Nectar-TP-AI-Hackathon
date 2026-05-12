@@ -1,0 +1,18 @@
+# Frontend local environment and secrets
+.env
+.env.local
+.env.*
+!.env.example
+secrets/
+
+# Node and build outputs
+node_modules/
+.npm/
+.vite/
+dist/
+build/
+*.tsbuildinfo
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*

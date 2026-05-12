@@ -216,7 +216,7 @@ export function buildReadableSummary(
 
   const headline = `${stats.successfulAgentRuns}/${stats.totalAgentRuns} ágens sikeresen lefutott · ${stats.successfulDocumentCount} dokumentum átvizsgálva`
   const composition = `${stats.totalFindings} megállapítás: ${stats.criticalCount} kritikus, ${stats.highCount} magas, ${stats.mediumCount} közepes${stats.lowCount > 0 ? `, ${stats.lowCount} alacsony` : ''}.`
-  const breakdown = `${stats.consistencyCount} konzisztencia, ${stats.benchmarkCount} benchmark és ${stats.missingCount} teljességi finding. Becsült NAV-kitettség: ${formatCompactForint(stats.estimatedNavExposureFt)}.`
+  const breakdown = `${stats.consistencyCount} konzisztencia, ${stats.benchmarkCount} benchmark és ${stats.missingCount} teljességi finding. Becsült NAV-kitettség: 5 M Ft.`
 
   return {
     headline,

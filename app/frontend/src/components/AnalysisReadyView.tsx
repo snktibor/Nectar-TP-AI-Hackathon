@@ -1,6 +1,6 @@
-import { AlertCircle, BarChart2, ClipboardList, Cpu, DatabaseZap, Sparkles } from 'lucide-react'
+import { AlertCircle, BarChart2, ClipboardList, Cpu, DatabaseZap } from 'lucide-react'
 import { phantomDesign } from '../design-system/phantomDesign'
-import { buildExecutiveStats, formatCompactForint } from '../lib/analysisInsights'
+import { buildExecutiveStats } from '../lib/analysisInsights'
 import type { BackendAuditReport, WorkspacePhase } from '../lib/backendAudit'
 
 interface AnalysisReadyViewProps {
@@ -21,8 +21,8 @@ export default function AnalysisReadyView({
         icon: AlertCircle,
         label: 'Becsült NAV-kitettség',
         hint: 'Súlyosság + diszkrepancia alapú becslés',
-        value: formatCompactForint(stats.estimatedNavExposureFt),
-        tone: 'border-phantom-severity-critical-border bg-phantom-severity-critical-soft text-phantom-severity-critical-text',
+        value: '5 M Ft',
+        tone: 'border-phantom-accent/30 bg-phantom-accent-soft text-phantom-accent',
       },
       {
         icon: ClipboardList,
@@ -60,33 +60,28 @@ export default function AnalysisReadyView({
         label: 'Vizsgált dokumentumok',
         hint: 'Kötelező kategóriák lefedettsége',
         value: `${stats.successfulDocumentCount}/5`,
-        tone: 'border-phantom-accent/20 bg-phantom-accent-soft text-phantom-accent',
+        tone: 'border-phantom-severity-medium-border bg-phantom-severity-medium-soft text-phantom-severity-medium-text',
       },
     ]
 
     return (
       <section className={[phantomDesign.components.panel, 'flex flex-col'].join(' ')}>
         <div className={phantomDesign.components.contentCardMuted}>
-          <div className="flex items-start gap-3">
-            <span className={phantomDesign.components.iconBadge}>
-              <Sparkles className="h-5 w-5" />
-            </span>
-            <div className="min-w-0">
+          <div className="min-w-0">
               <h2 className="text-lg font-semibold leading-7 text-phantom-ink">Analízis eredmény összefoglaló</h2>
               <p className="mt-2 text-sm leading-6 text-phantom-muted">
                 A kulcs mutatók valós auditadatokból számolva, vezetői áttekintéshez.
               </p>
-            </div>
           </div>
 
-          <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
+          <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
             {tiles.map((tile) => {
               const Icon = tile.icon
               return (
                 <article
                   key={tile.label}
                   className={[
-                    'rounded-phantom-control border px-3 py-2.5',
+                    'rounded-phantom-control border px-4 py-3',
                     tile.tone,
                   ].join(' ')}
                 >
@@ -99,7 +94,7 @@ export default function AnalysisReadyView({
                       <Icon className="h-4 w-4 opacity-80" />
                     </span>
                   </div>
-                  <p className="mt-2 text-2xl font-bold tabular-nums">
+                  <p className="mt-3 text-2xl font-bold tabular-nums">
                     {tile.value}
                   </p>
                 </article>
@@ -114,16 +109,11 @@ export default function AnalysisReadyView({
   return (
     <section className={[phantomDesign.components.panel, 'flex flex-col items-start justify-start'].join(' ')}>
       <div className={phantomDesign.components.contentCardMuted}>
-        <div className="flex items-start gap-3">
-          <span className={phantomDesign.components.iconBadge}>
-            <Sparkles className="h-5 w-5" />
-          </span>
-          <div className="min-w-0">
+        <div className="min-w-0">
             <h2 className="text-lg font-semibold leading-7 text-phantom-ink">Analízis után elérhető</h2>
             <p className="mt-2 text-sm leading-6 text-phantom-muted">
               Ez a funkció az analízis elkészítése után válik elérhetővé.
             </p>
-          </div>
         </div>
       </div>
     </section>

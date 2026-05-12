@@ -5,10 +5,13 @@ import type { PDFDocumentProxy } from 'pdfjs-dist'
 // `/rulesets/<filename>`.
 
 const LEGAL_PDF_MAP: Readonly<Record<string, string>> = {
-  'OECD_TPG_2022.pdf': '/rulesets/OECD_TPG_2022.pdf',
-  '32_2017_NGM.pdf': '/rulesets/32_2017_NGM.pdf',
-  '45_2025_NGM.pdf': '/rulesets/45_2025_NGM.pdf',
-  'HU_Act_LXXXI_1996.pdf': '/rulesets/HU_Act_LXXXI_1996.pdf',
+  'oecd_tpg_2022_en.pdf': '/rulesets/oecd_tpg_2022_en.pdf',
+  'hu_ngm_decree_45_2025.pdf': '/rulesets/hu_ngm_decree_45_2025.pdf',
+  'hu_act_lxxxi_1996_tao.pdf': '/rulesets/hu_act_lxxxi_1996_tao.pdf',
+  'hu_magyar_kozlony_2025_157.pdf': '/rulesets/hu_magyar_kozlony_2025_157.pdf',
+  'hu_nav_corporate_tax_info_booklet_41_2026.pdf': '/rulesets/hu_nav_corporate_tax_info_booklet_41_2026.pdf',
+  'hu_nav_transfer_pricing_data_service_guide.pdf': '/rulesets/hu_nav_transfer_pricing_data_service_guide.pdf',
+  'oecd_transfer_pricing_guidelines_2010_hu.pdf': '/rulesets/oecd_transfer_pricing_guidelines_2010_hu.pdf',
 }
 
 export function resolveLegalPdfUrl(filename: string): string | null {
@@ -94,6 +97,7 @@ const LEGAL_SECTION_PAGE_MAP: readonly SectionEntry[] = [
   // HIG mock: para_6.32-6.56 (DEMPE analysis paragraphs)
   ['OECD_TPG_2022.para_6.32-6.56', 199, '6.32'],
   ['OECD_TPG_2022.para_6.32', 199, '6.32'],
+  ['BEPS_Actions_8-10', 199, '6.32'],
   // Chapter catch-all
   ['OECD_TPG_2022.para_6', 183, 'Chapter VI'],
   ['OECD_TPG_2022.Ch_VI', 182, 'Chapter VI'],
@@ -161,6 +165,22 @@ const LEGAL_SECTION_PAGE_MAP: readonly SectionEntry[] = [
   ['HU_Act_LXXXI_1996.28', 27, '28. §'],
   ['HU_Act_LXXXI_1996.§18', 17, '18. §'],
   ['HU_Act_LXXXI_1996.18', 17, '18. §'],
+  // -------------------------------------------------------------------------
+  // Additional catalog-backed official sources
+  // -------------------------------------------------------------------------
+  ['HU_MAGYAR_KOZLONY_2025_157.ngm_45_header', 3, '45/2025. (XII. 23.) NGM'],
+  ['HU_MAGYAR_KOZLONY_2025_157.tp_scope', 4, '45/2025. NGM'],
+  ['NAV_TP_DATA_SERVICE_GUIDE_2024.tp_method', 23, '8.6.'],
+  ['NAV_TP_DATA_SERVICE_GUIDE_2024.tested_party', 25, '8.7.'],
+  ['NAV_TP_DATA_SERVICE_GUIDE_2024.transaction_labels', 8, '8.'],
+  ['NAV_TP_DATA_SERVICE_GUIDE_2024.exemptions', 5, '6.'],
+  ['NAV_TP_DATA_SERVICE_GUIDE_2024.obligation', 2, '1.'],
+  ['NAV_INFO_BOOKLET_41_TAO_2026.adjustment', 17, '7.'],
+  ['NAV_INFO_BOOKLET_41_TAO_2026.arm_length', 16, '7.'],
+  ['NAV_INFO_BOOKLET_41_TAO_2026.tax_rate', 26, '10.'],
+  ['OECD_TPG_2010_HU.CH_V', 9, 'V. fejezet'],
+  ['OECD_TPG_2010_HU.CH_II', 6, 'II. fejezet'],
+  ['OECD_TPG_2010_HU.CH_I', 5, 'I. fejezet'],
 ]
 
 // ---------------------------------------------------------------------------
@@ -171,15 +191,29 @@ const LEGAL_SECTION_PAGE_MAP: readonly SectionEntry[] = [
 // ---------------------------------------------------------------------------
 
 const LEGAL_REFERENCE_PREFIXES: ReadonlyArray<readonly [string, string]> = [
-  ['OECD_TPG_2022', 'OECD_TPG_2022.pdf'],
+  ['OECD_TPG_2022', 'oecd_tpg_2022_en.pdf'],
+  ['BEPS_Actions_8-10', 'oecd_tpg_2022_en.pdf'],
+  ['BEPS_Actions_8_10', 'oecd_tpg_2022_en.pdf'],
   ['NGM_32_2017', '32_2017_NGM.pdf'],
   ['32_2017_NGM', '32_2017_NGM.pdf'],
-  ['NGM_45_2025', '45_2025_NGM.pdf'],
-  ['45_2025_NGM_rendelet', '45_2025_NGM.pdf'],
-  ['45_2025_NGM', '45_2025_NGM.pdf'],
-  ['HU_Act_LXXXI_1996', 'HU_Act_LXXXI_1996.pdf'],
-  ['Tao_tv', 'HU_Act_LXXXI_1996.pdf'],
-  ['HU_Act_LXXXI', 'HU_Act_LXXXI_1996.pdf'],
+  ['HU_NGM_DECREE_45_2025', 'hu_ngm_decree_45_2025.pdf'],
+  ['NGM_45_2025', 'hu_ngm_decree_45_2025.pdf'],
+  ['45_2025_NGM_rendelet', 'hu_ngm_decree_45_2025.pdf'],
+  ['45_2025_NGM', 'hu_ngm_decree_45_2025.pdf'],
+  ['HU_TAO_ACT_1996_LXXXI', 'hu_act_lxxxi_1996_tao.pdf'],
+  ['HU_Act_LXXXI_1996', 'hu_act_lxxxi_1996_tao.pdf'],
+  ['Tao_tv', 'hu_act_lxxxi_1996_tao.pdf'],
+  ['HU_Act_LXXXI', 'hu_act_lxxxi_1996_tao.pdf'],
+  ['HU_MAGYAR_KOZLONY_2025_157', 'hu_magyar_kozlony_2025_157.pdf'],
+  ['HU_GAZETTE_2025_157', 'hu_magyar_kozlony_2025_157.pdf'],
+  ['MK_25_157', 'hu_magyar_kozlony_2025_157.pdf'],
+  ['HU_NAV_TP_DATA_SERVICE_GUIDE_2024', 'hu_nav_transfer_pricing_data_service_guide.pdf'],
+  ['NAV_TP_DATA_SERVICE_GUIDE_2024', 'hu_nav_transfer_pricing_data_service_guide.pdf'],
+  ['PM_tajekoztato_TPadatszolg', 'hu_nav_transfer_pricing_data_service_guide.pdf'],
+  ['HU_NAV_INFO_BOOKLET_41_TAO_2026', 'hu_nav_corporate_tax_info_booklet_41_2026.pdf'],
+  ['NAV_INFO_BOOKLET_41_TAO_2026', 'hu_nav_corporate_tax_info_booklet_41_2026.pdf'],
+  ['OECD_TPG_2010_HU', 'oecd_transfer_pricing_guidelines_2010_hu.pdf'],
+  ['OECD_TP_GUIDELINES_HU', 'oecd_transfer_pricing_guidelines_2010_hu.pdf'],
 ]
 
 function replaceEvery(value: string, search: string, replacement: string): string {
@@ -216,7 +250,7 @@ export interface LegalReferenceTarget {
 function _startsWithBoundary(s: string, prefix: string): boolean {
   if (!s.startsWith(prefix)) return false
   if (s.length === prefix.length) return true
-  const code = s.charCodeAt(prefix.length)
+  const code = s.codePointAt(prefix.length) ?? 0
   const isWordChar =
     (code >= 0x30 && code <= 0x39) || // 0-9
     (code >= 0x41 && code <= 0x5a) || // A-Z
@@ -263,9 +297,51 @@ interface NaturalSignature {
   readonly extractSection: (raw: string) => string | null
 }
 
+const ROMAN_BY_ARABIC: Readonly<Record<string, string>> = {
+  '1': 'I',
+  '2': 'II',
+  '3': 'III',
+  '4': 'IV',
+  '5': 'V',
+  '6': 'VI',
+  '7': 'VII',
+  '8': 'VIII',
+  '9': 'IX',
+}
+
+function normalizeChapterToken(value: string): string {
+  const trimmed = value.trim().toUpperCase()
+  return ROMAN_BY_ARABIC[trimmed] ?? trimmed
+}
+
+function normalizeRangeDash(value: string): string {
+  return value.replace(/[–—]/g, '-')
+}
+
+function extractOecdSection(raw: string): string | null {
+  const normalized = normalizeRangeDash(raw).replace(/\bparagraphs?\b/gi, 'para')
+  const para = /\bparas?\.?\s*([0-9.]+)(?:\s*-\s*([0-9.]+))?/i.exec(normalized)
+  if (para) return para[2] ? `para_${para[1]}-${para[2]}` : `para_${para[1]}`
+
+  const bareTpgPara = /\bOECD\b.*\bTPG\b\s*([0-9.]+)(?:\s*-\s*([0-9.]+))?/i.exec(normalized)
+  if (bareTpgPara) {
+    return bareTpgPara[2]
+      ? `para_${bareTpgPara[1]}-${bareTpgPara[2]}`
+      : `para_${bareTpgPara[1]}`
+  }
+
+  const chapter = /Ch(?:apter)?\.?\s*(\d+|[IVX]+)(?:\.([A-Z](?:\.\d+)?))?/i.exec(normalized)
+  if (chapter) {
+    const chapterToken = normalizeChapterToken(chapter[1])
+    return chapter[2] ? `Ch_${chapterToken}.${chapter[2]}` : `Ch_${chapterToken}`
+  }
+
+  return null
+}
+
 const NATURAL_LANGUAGE_SIGNATURES: readonly NaturalSignature[] = [
   {
-    canonicalFilename: '45_2025_NGM.pdf',
+    canonicalFilename: 'hu_ngm_decree_45_2025.pdf',
     canonicalPrefix: '45_2025_NGM',
     signatures: [
       /\b45[\s./_-]*2025\b/i,
@@ -286,7 +362,7 @@ const NATURAL_LANGUAGE_SIGNATURES: readonly NaturalSignature[] = [
     },
   },
   {
-    canonicalFilename: 'HU_Act_LXXXI_1996.pdf',
+    canonicalFilename: 'hu_act_lxxxi_1996_tao.pdf',
     canonicalPrefix: 'HU_Act_LXXXI_1996',
     signatures: [
       /1996\.?\s*évi\s*LXXXI/i,
@@ -300,18 +376,16 @@ const NATURAL_LANGUAGE_SIGNATURES: readonly NaturalSignature[] = [
     },
   },
   {
-    canonicalFilename: 'OECD_TPG_2022.pdf',
+    canonicalFilename: 'oecd_tpg_2022_en.pdf',
     canonicalPrefix: 'OECD_TPG_2022',
     signatures: [/\bOECD\b.*\bTPG\b/i, /\bOECD\b.*\bTransfer\s*Pric/i],
-    extractSection: (raw) => {
-      const ch = /Ch(?:apter)?\.?\s*([IVX]+)(?:\.([A-Z](?:\.\d+)?))?/i.exec(raw)
-      if (ch) {
-        return ch[2] ? `Ch_${ch[1]}.${ch[2]}` : `Ch_${ch[1]}`
-      }
-      const para = /\bpara(?:graph)?\.?\s*(\d+(?:\.\d+)?)/i.exec(raw)
-      if (para) return `para_${para[1]}`
-      return null
-    },
+    extractSection: extractOecdSection,
+  },
+  {
+    canonicalFilename: 'oecd_tpg_2022_en.pdf',
+    canonicalPrefix: 'BEPS_Actions_8-10',
+    signatures: [/\bBEPS\b.*\bActions?\b.*\b8\b.*\b10\b/i],
+    extractSection: () => null,
   },
 ]
 
@@ -454,12 +528,22 @@ export function matchLabelToOutlinePage(
   const hint = extractSectionSearchHint(label).toLowerCase().trim()
   if (!hint) return null
 
-  // 1. Exact match
+  return (
+    findExactOutlinePage(hint, map) ??
+    findPrefixOutlinePage(hint, map) ??
+    findContainedOutlinePage(hint, map) ??
+    findRomanChapterOutlinePage(hint, map)
+  )
+}
+
+function findExactOutlinePage(hint: string, map: Map<string, number>): number | null {
   for (const [title, page] of map) {
     if (title.toLowerCase().trim() === hint) return page
   }
+  return null
+}
 
-  // 2. Title starts with hint + word boundary
+function findPrefixOutlinePage(hint: string, map: Map<string, number>): number | null {
   for (const [title, page] of map) {
     const t = title.toLowerCase().trim()
     if (t.startsWith(hint)) {
@@ -467,23 +551,26 @@ export function matchLabelToOutlinePage(
       if (next === undefined || next === ' ' || next === '.' || next === ':') return page
     }
   }
+  return null
+}
 
-  // 3. Contains with word-boundary guards
-  const escaped = hint.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+function findContainedOutlinePage(hint: string, map: Map<string, number>): number | null {
+  const escaped = hint.replace(/[.*+?^${}()|[\]\\]/g, (char) => `\\${char}`)
   const re = new RegExp(`(?:^|[^a-z0-9])${escaped}(?:[^a-z0-9]|$)`, 'i')
   for (const [title, page] of map) {
     if (re.test(title)) return page
   }
+  return null
+}
 
-  // 4. Roman numeral chapter alternate forms ("Chapter VI" ↔ "VI.", "VI ")
+function findRomanChapterOutlinePage(hint: string, map: Map<string, number>): number | null {
   const ch = /^chapter\s+([ivx]+)$/i.exec(hint)
-  if (ch) {
-    const num = ch[1].toUpperCase()
-    for (const [title, page] of map) {
-      const t = title.trim()
-      if (t === num || t.startsWith(`${num}.`) || t.startsWith(`${num} `)) return page
-    }
-  }
+  if (!ch) return null
 
+  const num = ch[1].toUpperCase()
+  for (const [title, page] of map) {
+    const t = title.trim()
+    if (t === num || t.startsWith(`${num}.`) || t.startsWith(`${num} `)) return page
+  }
   return null
 }

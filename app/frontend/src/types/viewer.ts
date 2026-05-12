@@ -1,6 +1,7 @@
 export interface CitationTarget {
   readonly sessionId: string
   readonly filename: string
+  /** 0-based PDF page index consumed by react-pdf. */
   readonly page: number
   readonly charStart: number | null
   readonly charEnd: number | null

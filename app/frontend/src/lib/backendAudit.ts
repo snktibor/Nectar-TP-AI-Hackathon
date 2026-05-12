@@ -40,6 +40,7 @@ export interface BackendErrorDetail {
 
 export interface BackendEvidenceChunk {
   readonly filename: string
+  /** Source page label from backend evidence metadata; convert before PDF navigation. */
   readonly page: number
   readonly chunk_index: number
   readonly quote?: string | null
@@ -143,6 +144,87 @@ export interface BackendAuditReport {
   readonly overall_risk: BackendRiskSeverity
   readonly summary: string
   readonly agent_runs: BackendAgentRunResult[]
+}
+
+export interface BackendSeverityBreakdown {
+  readonly critical: number
+  readonly high: number
+  readonly medium: number
+  readonly low: number
+}
+
+export interface BackendSeverityTypeMatrixRow {
+  readonly severity: BackendRiskSeverity
+  readonly consistency: number
+  readonly benchmark: number
+  readonly completeness: number
+  readonly total: number
+}
+
+export interface BackendSeverityTransactionMatrixRow {
+  readonly transaction_type: string
+  readonly critical: number
+  readonly high: number
+  readonly medium: number
+  readonly low: number
+  readonly total: number
+  readonly dominant_issue: string
+}
+
+export interface BackendFinancialEstimateLineItem {
+  readonly item: string
+  readonly legal_basis: string | null
+  readonly amount_huf: number
+  readonly notes: string | null
+}
+
+export interface BackendFinancialEstimate {
+  readonly line_items: BackendFinancialEstimateLineItem[]
+  readonly estimated_tax_shortfall_huf: number
+  readonly default_penalty_huf: number
+  readonly bad_faith_penalty_huf: number
+  readonly delay_interest_huf: number
+  readonly documentation_fine_huf: number
+  readonly functional_adjustment_huf: number
+  readonly base_total_huf: number
+  readonly max_total_huf: number
+}
+
+export type BackendRemediationPhase = 'immediate_30' | 'short_90' | 'mid_180'
+
+export type BackendFindingSourceType = 'consistency' | 'benchmark' | 'completeness'
+
+export interface BackendRemediationAction {
+  readonly finding_id: string
+  readonly finding_ref: string
+  readonly severity: BackendRiskSeverity
+  readonly phase: BackendRemediationPhase
+  readonly title: string
+  readonly owner: string
+  readonly due_in_days: number
+  readonly recommendation: string
+  readonly source_type: BackendFindingSourceType
+}
+
+export interface BackendRemediationPlan {
+  readonly immediate_30: BackendRemediationAction[]
+  readonly short_90: BackendRemediationAction[]
+  readonly mid_180: BackendRemediationAction[]
+  readonly all_actions: BackendRemediationAction[]
+}
+
+export interface BackendEnterpriseReportPayload {
+  readonly audit_task_id: string
+  readonly session_id: string
+  readonly generated_at: string
+  readonly overall_risk: BackendRiskSeverity
+  readonly findings_total: number
+  readonly severity_breakdown: BackendSeverityBreakdown
+  readonly severity_type_matrix: BackendSeverityTypeMatrixRow[]
+  readonly severity_transaction_matrix: BackendSeverityTransactionMatrixRow[]
+  readonly financial_estimate: BackendFinancialEstimate
+  readonly remediation_plan: BackendRemediationPlan
+  readonly source_report: BackendAuditReport
 }
 
 // ---------------------------------------------------------------------------

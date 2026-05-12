@@ -1,0 +1,16 @@
+{
+  "name": "NECTAR TP",
+  "short_name": "NECTAR TP",
+  "description": "Transfer pricing documentation consistency auditor",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ff7b47",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon"
+    }
+  ]
+}

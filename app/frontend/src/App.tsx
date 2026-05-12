@@ -1,16 +1,19 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import AnalysisReadyView from './components/AnalysisReadyView'
 import AnalysisWorkspace from './components/AnalysisWorkspace'
 import DashboardShell, { type DashboardTab } from './components/DashboardShell'
 import DocumentIngestor from './components/DocumentIngestor'
 import FilteredFindingsPanel from './components/FilteredFindingsPanel'
 import ResultsPanel from './components/ResultsPanel'
+import SplashScreen from './components/SplashScreen'
 import ReportsTab from './components/report/ReportsTab'
 import { phantomDesign } from './design-system/phantomDesign'
 import {
   isClassificationConfidenceAccepted,
   isGeneratedReportFilename,
 } from './lib/documentDisplay'
+import { buildFindingsByFilename } from './lib/findingFilters'
+import { toApiUrl, toUserFacingApiError } from './lib/api'
 import type {
   BackendAuditReport,
   BackendAuditStartResponse,
@@ -21,7 +24,7 @@ import type {
 import type { CitationTarget } from './types/viewer'
 import type { ApiResponse, IngestedDocument } from './types/api'
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL
+const INTRO_DURATION_MS = 2000
 const SESSION_ID = crypto.randomUUID()
 
 type RequiredDocumentType =
@@ -69,45 +72,43 @@ function hasCompleteRequiredCoverage(documents: IngestedDocument[]): boolean {
   return coveredTypes.size === REQUIRED_AUDIT_TYPES.size
 }
 
-function buildFindingsByFilename(
-  report: BackendAuditReport | null,
-  documents: IngestedDocument[],
-): Record<string, number> {
-  const counts: Record<string, number> = {}
-  if (!report) return counts
+function normalizeFilename(filename: string): string {
+  const normalizedPath = filename.trim().replace(/\\/g, '/')
+  return (normalizedPath.split('/').pop() ?? normalizedPath).toLowerCase()
+}
 
-  const filenamesByScope = new Map<BackendDocTypeScope, string[]>()
-  for (const doc of documents) {
-    if (doc.status !== 'success') continue
-    const scope = doc.detected_type as BackendDocTypeScope
-    const arr = filenamesByScope.get(scope) ?? []
-    arr.push(doc.filename)
-    filenamesByScope.set(scope, arr)
-  }
+function canonicalDocumentFilename(
+  documents: readonly IngestedDocument[],
+  filename: string,
+): string {
+  const normalizedFilename = normalizeFilename(filename)
+  return documents.find((document) => normalizeFilename(document.filename) === normalizedFilename)?.filename ?? filename
+}
 
-  const bumpScope = (scope: BackendDocTypeScope | undefined): void => {
-    if (!scope) return
-    const filenames = filenamesByScope.get(scope)
-    if (!filenames) return
-    for (const filename of filenames) {
-      counts[filename] = (counts[filename] ?? 0) + 1
-    }
+function shouldRunBootIntro(): boolean {
+  const runtimeWindow = globalThis.window
+  if (!runtimeWindow) {
+    return true
   }
 
-  for (const err of report.consistency_errors) {
-    bumpScope(err.attribution?.doc_type_scope)
-  }
-  for (const risk of report.benchmark_risks) {
-    bumpScope(risk.attribution?.doc_type_scope)
-  }
-  for (const missing of report.missing_elements) {
-    counts[missing.expected_in] = (counts[missing.expected_in] ?? 0) + 1
+  const pathname = runtimeWindow.location.pathname.toLowerCase()
+  const isEntryPath = pathname === '/' || pathname === '/index.html'
+  if (!isEntryPath) {
+    return false
   }
 
-  return counts
+  const navEntries = globalThis.performance.getEntriesByType('navigation')
+  const firstNavigationEntry = navEntries[0]
+  const navEntryType = (firstNavigationEntry as unknown as { type?: unknown } | undefined)?.type
+  if (typeof navEntryType !== 'string') {
+    return true
+  }
+
+  return navEntryType === 'navigate' || navEntryType === 'reload'
 }
 
 export default function App(): JSX.Element {
+  const [showBootIntro, setShowBootIntro] = useState<boolean>(() => shouldRunBootIntro())
   const [ingestedDocuments, setIngestedDocuments] = useState<IngestedDocument[]>([])
   const [workspacePhase, setWorkspacePhase] = useState<WorkspacePhase>('empty')
   const [auditTaskId, setAuditTaskId] = useState<string | null>(null)
@@ -119,6 +120,9 @@ export default function App(): JSX.Element {
   const [activeTab, setActiveTab] = useState<DashboardTab>('documents')
   const [selectedDocId, setSelectedDocId] = useState<string | null>(null)
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const handleBootIntroComplete = useCallback(() => {
+    setShowBootIntro(false)
+  }, [])
 
   const hasReadyAuditCoverage = hasCompleteRequiredCoverage(ingestedDocuments)
   const findingsByFilename = useMemo(
@@ -148,7 +152,7 @@ export default function App(): JSX.Element {
 
   async function fetchAuditResults(taskId: string): Promise<void> {
     try {
-      const response = await fetch(`${API_BASE}/api/v1/audits/results/${taskId}`)
+      const response = await fetch(toApiUrl(`/api/v1/audits/results/${taskId}`))
       if (!response.ok) {
         throw new Error(`A riport lekérése sikertelen (HTTP ${response.status}).`)
       }
@@ -161,7 +165,7 @@ export default function App(): JSX.Element {
       setAuditReport(json.data)
       setWorkspacePhase('completed')
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Az audit riport lekérése sikertelen.'
+      const message = toUserFacingApiError(error, 'Az audit riport lekérése sikertelen.')
       setAuditError(message)
       setWorkspacePhase('failed')
     }
@@ -176,7 +180,7 @@ export default function App(): JSX.Element {
       if (auditTaskId === null) return
 
       try {
-        const response = await fetch(`${API_BASE}/api/v1/audits/status/${auditTaskId}`)
+        const response = await fetch(toApiUrl(`/api/v1/audits/status/${auditTaskId}`))
         if (!response.ok) {
           throw new Error(`A státusz lekérése sikertelen (HTTP ${response.status}).`)
         }
@@ -202,7 +206,7 @@ export default function App(): JSX.Element {
         }
       } catch (error) {
         clearPolling()
-        const message = error instanceof Error ? error.message : 'Az audit státusz lekérése sikertelen.'
+        const message = toUserFacingApiError(error, 'Az audit státusz lekérése sikertelen.')
         setAuditError(message)
         setWorkspacePhase('failed')
       }
@@ -230,7 +234,7 @@ export default function App(): JSX.Element {
     clearAuditState()
 
     try {
-      const response = await fetch(`${API_BASE}/api/v1/audits/start`, {
+      const response = await fetch(toApiUrl('/api/v1/audits/start'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ session_id: SESSION_ID }),
@@ -248,7 +252,7 @@ export default function App(): JSX.Element {
       setAuditTaskId(json.data.audit_task_id)
       setWorkspacePhase('polling')
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Az audit indítása sikertelen.'
+      const message = toUserFacingApiError(error, 'Az audit indítása sikertelen.')
       setAuditError(message)
       setWorkspacePhase('failed')
     }
@@ -303,11 +307,15 @@ export default function App(): JSX.Element {
   }
 
   function handleCitationClick(target: CitationTarget): void {
-    setActiveCitation(target)
     if (target.sourceKind === 'document') {
-      setSelectedDocId(target.filename)
+      const filename = canonicalDocumentFilename(ingestedDocuments, target.filename)
+      setActiveCitation({ ...target, filename })
+      setSelectedDocId(filename)
       setActiveTab('documents')
+      return
     }
+
+    setActiveCitation(target)
   }
 
   function handleTabChange(nextTab: DashboardTab): void {
@@ -355,9 +363,8 @@ export default function App(): JSX.Element {
     )
   })()
 
-  const leftPanelKey = `${activeTab}:${selectedDocId ?? 'none'}`
   const leftPanel = (
-    <div key={leftPanelKey} className="h-full animate-phantom-fade-in-up">
+    <div className="h-full">
       {leftPanelContent}
     </div>
   )
@@ -385,11 +392,8 @@ export default function App(): JSX.Element {
       />
     )
 
-  const rightPanelKey = showDocumentScopedFindings
-    ? `filtered:${selectedDocId}`
-    : `workspace:${activeTab}`
   const rightPanel = (
-    <div key={rightPanelKey} className="h-full animate-phantom-fade-in-up">
+    <div className="h-full">
       {rightPanelContent}
     </div>
   )
@@ -404,6 +408,9 @@ export default function App(): JSX.Element {
           rightPanel={rightPanel}
         />
       </main>
+      {showBootIntro ? (
+        <SplashScreen durationMs={INTRO_DURATION_MS} onComplete={handleBootIntroComplete} />
+      ) : null}
     </div>
   )
 }

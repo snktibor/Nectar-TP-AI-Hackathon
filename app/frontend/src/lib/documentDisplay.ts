@@ -3,38 +3,41 @@ export interface DocumentTypeDisplay {
   badgeClassName: string
 }
 
+const CONSISTENT_DOCUMENT_BADGE_CLASSNAME =
+  'bg-phantom-surface-muted text-phantom-muted ring-phantom-line'
+
 export const DOCUMENT_TYPE_DISPLAY: Record<string, DocumentTypeDisplay> = {
   master_file: {
     label: 'Fő Fájl',
-    badgeClassName: 'bg-phantom-accent-soft text-phantom-accent ring-phantom-accent/20',
+    badgeClassName: CONSISTENT_DOCUMENT_BADGE_CLASSNAME,
   },
   local_file: {
     label: 'Helyi Fájl',
-    badgeClassName: 'bg-phantom-success-soft text-phantom-success-text ring-phantom-success-border',
+    badgeClassName: CONSISTENT_DOCUMENT_BADGE_CLASSNAME,
   },
   benchmark_study: {
     label: 'Benchmark tanulmány',
-    badgeClassName: 'bg-phantom-severity-medium-soft text-phantom-severity-medium-text ring-phantom-severity-medium-border',
+    badgeClassName: CONSISTENT_DOCUMENT_BADGE_CLASSNAME,
   },
   contract: {
     label: 'Szerződés',
-    badgeClassName: 'bg-phantom-severity-high-soft text-phantom-severity-high-text ring-phantom-severity-high-border',
+    badgeClassName: CONSISTENT_DOCUMENT_BADGE_CLASSNAME,
   },
   invoice: {
     label: 'Számla',
-    badgeClassName: 'bg-phantom-surface-muted text-phantom-muted ring-phantom-line',
+    badgeClassName: CONSISTENT_DOCUMENT_BADGE_CLASSNAME,
   },
   financial_statement: {
     label: 'Pénzügyi dokumentum',
-    badgeClassName: 'bg-phantom-surface-muted text-phantom-muted ring-phantom-line',
+    badgeClassName: CONSISTENT_DOCUMENT_BADGE_CLASSNAME,
   },
   regulatory_document: {
     label: 'Szabályozási dokumentum',
-    badgeClassName: 'bg-phantom-danger-soft text-phantom-danger-text ring-phantom-danger-border',
+    badgeClassName: CONSISTENT_DOCUMENT_BADGE_CLASSNAME,
   },
   other: {
     label: 'Egyéb dokumentum',
-    badgeClassName: 'bg-phantom-surface-muted text-phantom-muted ring-phantom-line',
+    badgeClassName: CONSISTENT_DOCUMENT_BADGE_CLASSNAME,
   },
 }
 
@@ -48,7 +51,6 @@ const GENERATED_REPORT_FILENAME_PATTERNS = [
   /report[\W_]*tp/i,
   /megfelel.{0,16}jelent/is,
   /tp[\W_]*megfelel/i,
-  /redlinephantom/i,
   /nectar[\W_]*tp[\W_]*report/i,
 ]
 
