@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import AnalysisReadyView from './components/AnalysisReadyView'
 import AnalysisWorkspace from './components/AnalysisWorkspace'
+import BootLoadingScreen from './components/BootLoadingScreen'
 import DashboardShell, { type DashboardTab } from './components/DashboardShell'
 import DocumentIngestor from './components/DocumentIngestor'
 import FilteredFindingsPanel from './components/FilteredFindingsPanel'
 import ResultsPanel from './components/ResultsPanel'
-import SplashScreen from './components/SplashScreen'
 import ReportsTab from './components/report/ReportsTab'
 import { phantomDesign } from './design-system/phantomDesign'
 import {
@@ -24,7 +24,7 @@ import type {
 import type { CitationTarget } from './types/viewer'
 import type { ApiResponse, IngestedDocument } from './types/api'
 
-const INTRO_DURATION_MS = 2000
+const INTRO_DURATION_MS = 2500
 const SESSION_ID = crypto.randomUUID()
 
 type RequiredDocumentType =
@@ -409,7 +409,7 @@ export default function App(): JSX.Element {
         />
       </main>
       {showBootIntro ? (
-        <SplashScreen durationMs={INTRO_DURATION_MS} onComplete={handleBootIntroComplete} />
+        <BootLoadingScreen durationMs={INTRO_DURATION_MS} onComplete={handleBootIntroComplete} />
       ) : null}
     </div>
   )

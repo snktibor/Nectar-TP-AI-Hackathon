@@ -117,50 +117,6 @@
 		50% { opacity: 0.82; }
 	}
 
-	@keyframes nectar-splash-gunshot {
-		0% {
-			opacity: 0;
-			transform: translate3d(
-				calc(var(--splash-drift-x, 0px) * -0.25),
-				calc(var(--splash-drift-y, 0px) * -0.25),
-				0
-			) scale(0.72) rotate(calc(var(--splash-tilt, 0deg) * -0.45));
-		}
-		20% {
-			opacity: var(--splash-max-opacity, 0.9);
-			transform: translate3d(
-				calc(var(--splash-drift-x, 0px) * 0.06),
-				calc(var(--splash-drift-y, 0px) * 0.06),
-				0
-			) scale(1.04) rotate(calc(var(--splash-tilt, 0deg) * 0.22));
-		}
-		62% {
-			opacity: calc(var(--splash-max-opacity, 0.9) * 0.92);
-			transform: translate3d(
-				calc(var(--splash-drift-x, 0px) * 0.78),
-				calc(var(--splash-drift-y, 0px) * 0.78),
-				0
-			) scale(1) rotate(var(--splash-tilt, 0deg));
-		}
-		100% {
-			opacity: 0;
-			transform: translate3d(
-				calc(var(--splash-drift-x, 0px) * 1.15),
-				calc(var(--splash-drift-y, 0px) * 1.15),
-				0
-			) scale(0.88) rotate(calc(var(--splash-tilt, 0deg) * 1.35));
-		}
-	}
-
-	@keyframes nectar-splash-progress-fill {
-		0% {
-			transform: scaleX(0);
-		}
-		100% {
-			transform: scaleX(1);
-		}
-	}
-
 	.nectar-intro-overlay {
 		--nectar-intro-duration: 3000ms;
 		position: fixed;
@@ -184,20 +140,20 @@
 	}
 
 	.nectar-intro-floating-peach {
-		--float-x: 0px;
-		--float-y: 0px;
+		--spawn-x: 50%;
+		--spawn-y: 50%;
 		--float-delay: 0ms;
-		--float-duration: 1200ms;
+		--float-duration: 920ms;
 		--float-size: 28px;
 		--float-rotate: 0deg;
 		position: absolute;
-		left: 50%;
-		top: 50%;
+		left: var(--spawn-x);
+		top: var(--spawn-y);
 		width: var(--float-size);
 		height: var(--float-size);
 		opacity: 0;
-		transform: translate(-50%, -50%) scale(0.2) rotate(0deg);
-		animation: nectar-intro-peach-burst var(--float-duration) cubic-bezier(0.2, 0.86, 0.3, 1) var(--float-delay) forwards;
+		transform: translate(-50%, -50%) scale(0.76) rotate(var(--float-rotate));
+		animation: nectar-intro-peach-pop var(--float-duration) ease-in-out var(--float-delay) forwards;
 	}
 
 	.nectar-intro-center {
@@ -205,23 +161,17 @@
 		display: grid;
 		justify-items: center;
 		gap: 14px;
-		padding: 20px 16px;
+		padding: 20px;
 		text-align: center;
 		z-index: 2;
 	}
 
-	.nectar-intro-logo {
-		width: clamp(82px, 14vw, 116px);
-		height: clamp(82px, 14vw, 116px);
-		object-fit: contain;
-		animation:
-			nectar-intro-logo-pop 640ms cubic-bezier(0.2, 0.88, 0.24, 1.12) both,
-			nectar-intro-logo-float 1600ms ease-in-out infinite;
-	}
-
 	.nectar-intro-title-wrap {
 		display: grid;
-		gap: 6px;
+		gap: 12px;
+		width: max-content;
+		max-width: 90vw;
+		justify-items: stretch;
 		animation: nectar-intro-title-rise 660ms ease-out 120ms both;
 	}
 
@@ -229,9 +179,9 @@
 		margin: 0;
 		display: inline-flex;
 		align-items: baseline;
-		gap: 8px;
+		gap: 10px;
 		font-family: Roboto, 'Trebuchet MS', 'Segoe UI', sans-serif;
-		font-size: clamp(1.5rem, 4.2vw, 2.4rem);
+		font-size: clamp(1.85rem, 5.2vw, 3.05rem);
 		font-weight: 700;
 		line-height: 1;
 		letter-spacing: 0.02em;
@@ -246,20 +196,10 @@
 		color: #0f172a;
 	}
 
-	.nectar-intro-subtitle {
-		margin: 0;
-		font-family: Roboto, 'Segoe UI', sans-serif;
-		font-size: clamp(0.72rem, 1.9vw, 0.96rem);
-		font-weight: 500;
-		letter-spacing: 0.12em;
-		text-transform: uppercase;
-		color: rgb(51 65 85 / 0.82);
-	}
-
 	.nectar-intro-progress {
 		position: relative;
-		width: min(320px, 76vw);
-		height: 6px;
+		width: 100%;
+		height: clamp(8px, 0.62vw, 11px);
 		border-radius: 999px;
 		overflow: hidden;
 		background: #f3f4f6;
@@ -286,30 +226,6 @@
 		}
 	}
 
-	@keyframes nectar-intro-logo-pop {
-		0% {
-			opacity: 0;
-			transform: scale(0.64);
-		}
-		70% {
-			opacity: 1;
-			transform: scale(1.08);
-		}
-		100% {
-			opacity: 1;
-			transform: scale(1);
-		}
-	}
-
-	@keyframes nectar-intro-logo-float {
-		0%, 100% {
-			translate: 0 0;
-		}
-		50% {
-			translate: 0 -6px;
-		}
-	}
-
 	@keyframes nectar-intro-title-rise {
 		0% {
 			opacity: 0;
@@ -330,39 +246,60 @@
 		}
 	}
 
-	@keyframes nectar-intro-peach-burst {
+	@keyframes nectar-intro-peach-pop {
 		0% {
 			opacity: 0;
-			transform: translate(-50%, -50%) scale(0.2) rotate(0deg);
+			transform: translate(-50%, -50%) scale(0.76) rotate(var(--float-rotate));
 		}
-		14% {
-			opacity: 0.92;
+		20% {
+			opacity: 0.98;
+			transform: translate(-50%, -50%) scale(1) rotate(var(--float-rotate));
 		}
-		76% {
-			opacity: 0.95;
-			transform: translate(calc(-50% + var(--float-x)), calc(-50% + var(--float-y))) scale(1) rotate(var(--float-rotate));
+		78% {
+			opacity: 0.9;
+			transform: translate(-50%, -50%) scale(1) rotate(var(--float-rotate));
 		}
 		100% {
 			opacity: 0;
-			transform: translate(calc(-50% + var(--float-x)), calc(-50% + var(--float-y))) scale(0.74) rotate(calc(var(--float-rotate) + 14deg));
+			transform: translate(-50%, -50%) scale(0.86) rotate(var(--float-rotate));
+		}
+	}
+
+	@keyframes nectar-intro-peach-fade {
+		0% {
+			opacity: 0;
+		}
+		18% {
+			opacity: 0.72;
+		}
+		78% {
+			opacity: 0.72;
+		}
+		100% {
+			opacity: 0;
 		}
 	}
 
 	@media (prefers-reduced-motion: reduce) {
 		.nectar-intro-overlay,
-		.nectar-intro-floating-peach,
-		.nectar-intro-logo,
-		.nectar-intro-title-wrap,
-		.nectar-intro-progress-fill {
+		.nectar-intro-title-wrap {
 			animation: none !important;
 		}
 
 		.nectar-intro-floating-peach {
-			display: none;
+			opacity: 0;
+			transform: translate(-50%, -50%) scale(0.92) rotate(var(--float-rotate));
+			animation: nectar-intro-peach-fade var(--float-duration) ease-in-out var(--float-delay) forwards !important;
 		}
 
 		.nectar-intro-progress-fill {
-			transform: scaleX(1);
+			transform: scaleX(0);
+			animation-name: nectar-intro-progress !important;
+			animation-duration: var(--nectar-intro-duration) !important;
+			animation-timing-function: cubic-bezier(0.1, 0.76, 0.2, 1) !important;
+			animation-delay: 0ms !important;
+			animation-fill-mode: forwards !important;
+			animation-iteration-count: 1 !important;
 		}
 	}
 

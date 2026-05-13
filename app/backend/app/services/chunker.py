@@ -6,8 +6,17 @@ boundaries. Each chunk carries metadata for source traceability.
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
 from uuid import uuid4
+
+from app.services.knowledge_graph import (
+    KnowledgeTriple,
+    KnowledgeTripleExtractor,
+    RuleBasedKnowledgeTripleExtractor,
+)
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -22,11 +31,13 @@ class TextChunk:
     chunk_index: int
     char_start: int
     char_end: int
+    knowledge_triples: tuple[KnowledgeTriple, ...] = ()
 
 
 _DEFAULT_CHUNK_SIZE = 1000
 _DEFAULT_CHUNK_OVERLAP = 200
 _SEPARATORS = ["\n\n", "\n", ". ", " "]
+_DEFAULT_TRIPLE_EXTRACTOR = RuleBasedKnowledgeTripleExtractor()
 
 
 def _split_text(
@@ -39,28 +50,41 @@ def _split_text(
         return [text] if text.strip() else []
 
     for separator in _SEPARATORS:
-        parts = text.split(separator)
-        if len(parts) <= 1:
-            continue
+        chunks = _split_with_separator(text, separator, chunk_size, chunk_overlap)
+        if chunks is not None:
+            return chunks
 
-        chunks: list[str] = []
-        current = ""
+    return _split_fixed_width(text, chunk_size, chunk_overlap)
 
-        for part in parts:
-            candidate = f"{current}{separator}{part}" if current else part
-            if len(candidate) > chunk_size and current:
-                chunks.append(current.strip())
-                overlap_text = current[-chunk_overlap:] if len(current) > chunk_overlap else current
-                current = f"{overlap_text}{separator}{part}"
-            else:
-                current = candidate
 
-        if current.strip():
+def _split_with_separator(
+    text: str,
+    separator: str,
+    chunk_size: int,
+    chunk_overlap: int,
+) -> list[str] | None:
+    parts = text.split(separator)
+    if len(parts) <= 1:
+        return None
+
+    chunks: list[str] = []
+    current = ""
+    for part in parts:
+        candidate = f"{current}{separator}{part}" if current else part
+        if len(candidate) > chunk_size and current:
             chunks.append(current.strip())
+            overlap_text = current[-chunk_overlap:] if len(current) > chunk_overlap else current
+            current = f"{overlap_text}{separator}{part}"
+        else:
+            current = candidate
 
-        return chunks
+    if current.strip():
+        chunks.append(current.strip())
+    return chunks
 
-    chunks = []
+
+def _split_fixed_width(text: str, chunk_size: int, chunk_overlap: int) -> list[str]:
+    chunks: list[str] = []
     for i in range(0, len(text), chunk_size - chunk_overlap):
         chunk = text[i : i + chunk_size]
         if chunk.strip():
@@ -74,6 +98,7 @@ def chunk_document(
     doc_type: str,
     chunk_size: int = _DEFAULT_CHUNK_SIZE,
     chunk_overlap: int = _DEFAULT_CHUNK_OVERLAP,
+    triple_extractor: KnowledgeTripleExtractor | None = None,
 ) -> list[TextChunk]:
     """Split document pages into chunks with traceability metadata.
 
@@ -83,6 +108,7 @@ def chunk_document(
         doc_type: Classified document type.
         chunk_size: Target chunk size in characters.
         chunk_overlap: Overlap between consecutive chunks.
+        triple_extractor: Optional strategy for lightweight GraphRAG extraction.
 
     Returns:
         List of TextChunk objects ready for vector storage.
@@ -90,6 +116,7 @@ def chunk_document(
     all_chunks: list[TextChunk] = []
     global_index = 0
     running_offset = 0
+    extractor = triple_extractor or _DEFAULT_TRIPLE_EXTRACTOR
 
     for page_num, page_text in pages:
         if not page_text.strip():
@@ -113,6 +140,7 @@ def chunk_document(
                     chunk_index=global_index,
                     char_start=char_start,
                     char_end=char_end,
+                    knowledge_triples=_extract_triples(extractor, split, doc_type),
                 )
             )
             global_index += 1
@@ -123,3 +151,19 @@ def chunk_document(
         running_offset += len(page_text)
 
     return all_chunks
+
+
+def _extract_triples(
+    extractor: KnowledgeTripleExtractor,
+    text: str,
+    doc_type: str,
+) -> tuple[KnowledgeTriple, ...]:
+    try:
+        return extractor.extract(text, doc_type)
+    except Exception as exc:  # noqa: BLE001 - GraphRAG must not block ingest.
+        logger.warning(
+            "knowledge triple extraction skipped: doc_type=%s error=%s",
+            doc_type,
+            type(exc).__name__,
+        )
+        return ()

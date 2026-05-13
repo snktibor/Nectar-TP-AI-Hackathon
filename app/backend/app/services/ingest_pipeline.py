@@ -1,4 +1,4 @@
-"""Document ingest pipeline: parse → classify → chunk → vectorize.
+"""Document ingest pipeline: parse → classify → chunk → enrich → vectorize.
 
 Orchestrates the full ingestion flow for a batch of uploaded files.
 Each file is processed independently; failures in one file do not
@@ -7,6 +7,7 @@ block the others.
 
 from __future__ import annotations
 
+import asyncio
 import logging
 from uuid import UUID, uuid4
 
@@ -30,7 +31,8 @@ def ingest_single_file(
         1. Parse (extract text from PDF/DOCX)
         2. Classify (match keywords against ruleset)
         3. Chunk (split into overlapping segments)
-        4. Vectorize (store in ChromaDB with metadata)
+        4. Enrich (extract lightweight knowledge triples per chunk)
+        5. Vectorize (store in ChromaDB with metadata and graph links)
     """
     document_id = uuid4()
 
@@ -101,7 +103,7 @@ async def ingest_batch(
     results: list[IngestedDocument] = []
 
     for filename, content in files:
-        result = ingest_single_file(session_id, filename, content)
+        result = await asyncio.to_thread(ingest_single_file, session_id, filename, content)
         results.append(result)
 
     return results
