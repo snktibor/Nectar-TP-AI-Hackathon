@@ -29,4 +29,4 @@ Using this code for such purposes constitutes a severe violation of academic int
 
 ## 4. Permitted Use
 
-You are welcome to browse, read, and analyze the code to understand the concepts implemented and to assess the author's skills for professional or portfolio review purposes.
+You are welcome to browse, read, and analyze the code to understand the concepts implemented and to assess the authors' skills for professional or portfolio review purposes.
